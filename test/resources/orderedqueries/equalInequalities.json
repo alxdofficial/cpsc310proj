@@ -1,0 +1,39 @@
+{
+  "title": "equalInequalities",
+  "input": {
+    "WHERE": {
+      "AND": [
+        {
+          "GT": {
+            "sections_avg": 90
+          }
+        },
+        {
+          "LT": {
+            "sections_avg": 90
+          }
+        },
+        {
+          "EQ": {
+            "sections_avg": 90
+          }
+        },
+        {
+          "IS": {
+            "sections_dept": "adhe"
+          }
+        }
+      ]
+    },
+    "OPTIONS": {
+      "COLUMNS": [
+        "sections_dept",
+        "sections_id",
+        "sections_avg"
+      ],
+      "ORDER": "sections_avg"
+    }
+  },
+  "errorExpected": false,
+  "expected": []
+}
