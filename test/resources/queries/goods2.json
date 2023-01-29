@@ -1,0 +1,28 @@
+{
+  "title": "good, title = anml welf rsrch",
+  "input": {
+    "WHERE": {
+      "IS": {
+        "sections_title": "anml welf rsrch"
+      }
+    },
+    "OPTIONS": {
+      "COLUMNS": [
+        "sections_id",
+        "sections_instructor"
+      ],
+      "ORDER": "sections_id"
+    }
+  },
+  "errorExpected": false,
+  "expected": [
+    {
+      "sections_id": "551",
+      "sections_instructor": ""
+    },
+    {
+      "sections_id": "551",
+      "sections_instructor": ""
+    }
+  ]
+}
