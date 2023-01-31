@@ -1,6 +1,7 @@
+import Section from "./Section";
 
 
-class InsightQuery {
+export class InsightQuery {
 	private body: InsightFilter;
 	private options: InsightOption;
 	constructor(inputBody: InsightFilter, inputOptions: InsightOption) {
@@ -10,18 +11,15 @@ class InsightQuery {
 	}
 }
 
-class Section {
-// 	dummy class, will be replaced by partners actual code
-}
 enum MFields { avg="avg",pass="pass",fail="fail",audit="audit",year="year" }
 enum SFields { dept="dept",id="id",instructor="instructor",title="title",uuid="uuid"}
 
-interface InsightFilter {
+export interface InsightFilter {
 	doFilter(data: Section[]): Section[]
 }
 
-enum Logic {And, Or}
-class LogicComparison implements InsightFilter {
+export enum Logic {And, Or}
+export class LogicComparison implements InsightFilter {
 	public logic: Logic;
 	public filterList: InsightFilter[];
 	constructor(logic: Logic, filterList: InsightFilter[]) {
@@ -39,7 +37,7 @@ class LogicComparison implements InsightFilter {
 }
 
 enum InsightM {lt, gt, eq}
-class MComparison implements InsightFilter {
+export class MComparison implements InsightFilter {
 	public math: InsightM;
 	public mfield: MFields;
 	public value: number;
@@ -63,7 +61,7 @@ class MComparison implements InsightFilter {
 }
 
 enum WildcardPosition {none,front,end,both}
-class SComparison implements InsightFilter{
+export class SComparison implements InsightFilter{
 	public sfield: SFields;
 	public wildcardPosition: WildcardPosition;
 	public value: string;
@@ -88,7 +86,7 @@ class SComparison implements InsightFilter{
 	}
 }
 
-class Negation implements InsightFilter {
+export class Negation implements InsightFilter {
 	public filter: InsightFilter;
 	public doFilter(data: Section[]): Section[] {
 		return [];
@@ -98,5 +96,5 @@ class Negation implements InsightFilter {
 	}
 }
 
-class InsightOption {
+export class InsightOption {
 }
