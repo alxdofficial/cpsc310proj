@@ -11,6 +11,7 @@ import fs from "fs-extra";
 import JSZip from "jszip";
 import Section from "./Section";
 
+
 /**
  * This is the main programmatic entry point for the project.
  * Method documentation is in IInsightFacade
@@ -60,8 +61,11 @@ export default class InsightFacade implements IInsightFacade {
 						zip.forEach((relativePath, file) => {  // Iterate over the files in the currently unzipped folder.
 							if (relativePath.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
 								if (!file.dir) {							  	// If it's not the directory,
-									console.log(file.name);
-								}
+									console.log(file);
+								// 	fs.readJSON(relativePath)
+								// 		.then((obj)=> console.log("./resources/archives/relativePath))
+								// 		.catch((e)=> console.log(e));
+								 }
 
 							}
 						});
@@ -136,7 +140,7 @@ export default class InsightFacade implements IInsightFacade {
 				this.datasetIDs.splice(this.datasetIDs.indexOf(id), 1); 			// Delete the ID from the ID list, clears from memory
 
 				console.log("Removed: "  + id.toString());
-				fs.removeSync("./data/" + id.toString());								// Synchroniously remove the dataset with the id in the ./data folder, clears from disk
+				fs.removeSync("./data/" + id.toString());								// Synchronously remove the dataset with the id in the ./data folder, clears from disk
 
 				return Promise.resolve(id.toString()); 										// after success
 			}

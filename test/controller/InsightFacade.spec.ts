@@ -356,10 +356,8 @@ describe("InsightFacade", function () {
 			(input) => facade.performQuery(input),
 			"./test/resources/unorderedqueries",
 			{
-				assertOnResult: (actual, expected) => { // TODO figure out this error
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					expect(actual).to.have.deep.members(expected);					// Member equality without order
+				assertOnResult: async (actual, expected) => { // TODO figure out this error
+					expect(actual).to.have.members(await expected);					// Member equality without order
 				},
 				errorValidator: (error): error is PQErrorKind =>
 					error === "ResultTooLargeError" || error === "InsightError",
