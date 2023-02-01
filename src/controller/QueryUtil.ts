@@ -2,17 +2,19 @@ import Section from "./Section";
 
 
 export class InsightQuery {
+	private id: string;
 	private body: InsightFilter;
 	private options: InsightOption;
-	constructor(inputBody: InsightFilter, inputOptions: InsightOption) {
+	constructor(inputBody: InsightFilter, inputOptions: InsightOption, id: string) {
 		console.log("new instance of insight query");
 		this.body = inputBody;
 		this.options = inputOptions;
+		this.id = id;
 	}
 }
 
-enum MFields { avg="avg",pass="pass",fail="fail",audit="audit",year="year" }
-enum SFields { dept="dept",id="id",instructor="instructor",title="title",uuid="uuid"}
+export enum MFields { avg="avg",pass="pass",fail="fail",audit="audit",year="year" }
+export enum SFields { dept="dept",id="id",instructor="instructor",title="title",uuid="uuid"}
 
 export interface InsightFilter {
 	doFilter(data: Section[]): Section[]

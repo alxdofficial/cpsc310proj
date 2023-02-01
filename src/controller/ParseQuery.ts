@@ -1,8 +1,19 @@
-import {InsightFilter, InsightQuery, Logic, LogicComparison, MComparison, Negation, SComparison} from "./QueryUtil";
+import {
+	InsightFilter,
+	InsightQuery,
+	Logic,
+	LogicComparison,
+	MComparison,
+	MFields,
+	Negation,
+	SComparison, SFields
+} from "./QueryUtil";
 import {InsightError} from "./IInsightFacade";
+import {kMaxLength} from "buffer";
 
 export class QueryParser {
 	private readonly inputJson: any;
+	private id: string = ""; // this is just for the parser to keep track of so that it can instantiate the insightquery object with the right id
 	constructor(input: any) {
 		this.inputJson = input;
 	}
@@ -22,13 +33,17 @@ export class QueryParser {
 						// after all the switch statements execute, if filter is still null, then we reject promise. if we have filter, use it to create InsiightQuery object
 						let key = Object.keys(whereClause)[0];
 						filter = this.multiplexInput(key, whereClause[key]);
-						// incomplete
+						if (filter == null) {
+							reject(new InsightError("a valid filter could not be parsed"));
+						} else {
+							// incomplete
+						}
 					}
 				} else {
 					reject(new InsightError("input doesnt have key: WHERE"));
 				}
 				if (this.inputJson["OPTIONS"] !== undefined) {
-					console.log("good");
+					// console.log("options key exist");
 				} else {
 					reject(new InsightError("input doesnt have key: OPTIONS"));
 				}
@@ -42,20 +57,24 @@ export class QueryParser {
 		switch (key) {
 			case "AND":
 			case "OR":
-				return this.logicHelper(key, json[key]);
+				console.log(key);
+				console.log(json);
+				return this.logicHelper(key, json);
 			case "LT":
 			case "GT":
 			case "EQ":
-				break;
+				// console.log(key);
+				// console.log(json);
+				return this.MHelper(key,json);
 			case "IS":
-				break;
+				return this.SHelper(json);
 			case "NOT":
-				break;
+				return this.NHelper(json);
 			default:
 				// unrecognized key
+				console.log("unrecognized filter key: " + key);
 				return null;
 		}
-		return null;
 	}
 
 	// return a logicComparison or null if failed to parse
@@ -65,6 +84,11 @@ export class QueryParser {
 
 	// return a MComparison or null if failed to parse
 	private MHelper(math: string, json: any): MComparison | null {
+		// first check number of keys
+		if (Object.keys(json).length > 1) {
+			return null;
+		}
+		this.getIdandField(Object.keys(json)[0]);
 		return null;
 	}
 
@@ -75,6 +99,16 @@ export class QueryParser {
 
 	// return a Negation or null if failed to parse
 	private NHelper(json: any): Negation | null {
+		return null;
+	}
+
+	// helper that takes a string, gets the id portion, and also the field portion. returns null if either is invalid
+	private getIdandField(text: string): [string, MFields | SFields] | null {
+		let firstUS: number = text.indexOf("_");
+		let id = text.substring(0,firstUS);
+		let fieldString: string = text.substring(firstUS + 1);
+		console.log(id);
+		console.log(fieldString);
 		return null;
 	}
 
