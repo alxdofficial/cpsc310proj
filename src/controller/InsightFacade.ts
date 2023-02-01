@@ -46,6 +46,7 @@ export default class InsightFacade implements IInsightFacade {
 				fs.mkdir("./data").catch(() => { 							// Create the ./data directory that clearDisk() clears on each run, push dataset representations into this file
 					return Promise.reject(new InsightError("Creating ./data failed!"));
 				});
+				let sectionArr: Section[] = [];
 
 				const JSzip = new JSZip();
 				JSzip.loadAsync(content, {base64: true}) // is loaded even if its invalid
@@ -85,7 +86,6 @@ export default class InsightFacade implements IInsightFacade {
 					.catch((error) => {
 						return reject(new InsightError(error));
 					});
-
 
 			} catch (e) {
 				return reject(new InsightError());
@@ -129,15 +129,21 @@ export default class InsightFacade implements IInsightFacade {
 		if (!(this.datasetIDs.includes(id))) {												// Check that a valid data set was added with the key
 			return Promise.reject(new NotFoundError("ID Doesn't exist"));
 		}
-		for (const insightDset of this.datasets.keys()) {									// Otherwise, will reach this condition and resolve
-			if (insightDset.id === id) {
 
-				// TODO: delete InsightDataset from the hashmap representation
-				this.datasetIDs.splice(this.datasetIDs.indexOf(id), 1); 			// Delete the ID from the ID list
+		for (const insightDataset of this.datasets.keys()) {								// Otherwise, will reach this condition and resolve
+			if (insightDataset.id === id) { // !!! this will not work YET b/c we have not implemented the map in addDataset. However, this should be the intended behaviour
+				this.datasets.delete(insightDataset);										// Delete the <K,V> pair from the map with this key, clears from memory
+				this.datasetIDs.splice(this.datasetIDs.indexOf(id), 1); 			// Delete the ID from the ID list, clears from memory
+
+				console.log("Removed: "  + id.toString());
+				fs.removeSync("./data/" + id.toString());								// Sync to block return until it actually removes, clears from disk
+
 				// TODO: delete the dataset from the ./data folder using ID as key
-				return Promise.resolve(id.toString()); // after success
+
+				return Promise.resolve(id.toString()); 										// after success
 			}
 		}
+
 		return Promise.reject(new InsightError("Some other error occurred")); 				// If not invalid, does exist but isn't in loop, throw this error
 	}
 

@@ -246,6 +246,13 @@ describe("InsightFacade", function () {
 				return expect(result).to.eventually.be.rejectedWith(InsightError);
 			});
 		});
+		describe("removeDataset with valid key and set", function () { // Tests for a nonexistent ID which is invalid, in a non-empty dataset
+			it("should PASS with the removed ID", function () {
+				const result = facade.addDataset("existentKey", sectionsLite, InsightDatasetKind.Sections)
+					.then(() => facade.removeDataset("existentKey"));
+				return expect(result).to.eventually.equal("existentKey");
+			});
+		});
 
 
 		describe("removeDataset two datasets, fails first", function () {
