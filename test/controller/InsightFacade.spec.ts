@@ -192,6 +192,13 @@ describe("InsightFacade", function () {
 			});
 		});
 
+		describe("addData with a valid file type, expect sectionLite", function () {
+			it("should fail with InsightError, invalid first filetype but valid name", function () {
+				const result = facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections);
+				return expect(result).to.eventually.have.members(["valid"]).lengthOf(1);
+			});
+		});
+
 
 		describe("list datasets with no datasets added", function () {
 			it("should pass with an empty array", function () {
