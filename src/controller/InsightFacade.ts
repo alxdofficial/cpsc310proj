@@ -62,9 +62,7 @@ export default class InsightFacade implements IInsightFacade {
 							if (relativePath.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
 								if (!file.dir) {							  	// If it's not the directory,
 									console.log(file);
-								// 	fs.readJSON(relativePath)
-								// 		.then((obj)=> console.log("./resources/archives/relativePath))
-								// 		.catch((e)=> console.log(e));
+									// file.async("blob");
 								 }
 
 							}
