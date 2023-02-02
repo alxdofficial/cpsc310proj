@@ -13,8 +13,8 @@ export class InsightQuery {
 	}
 }
 
-export enum MFields { avg="avg",pass="pass",fail="fail",audit="audit",year="year" }
-export enum SFields { dept="dept",id="id",instructor="instructor",title="title",uuid="uuid"}
+export enum MFields { avg,pass,fail,audit,year }
+export enum SFields { dept,id,instructor,title,uuid}
 
 export interface InsightFilter {
 	doFilter(data: Section[]): Section[]
@@ -38,7 +38,7 @@ export class LogicComparison implements InsightFilter {
 	}
 }
 
-enum InsightM {lt, gt, eq}
+export enum InsightM {lt, gt, eq}
 export class MComparison implements InsightFilter {
 	public math: InsightM;
 	public mfield: MFields;
@@ -62,7 +62,7 @@ export class MComparison implements InsightFilter {
 	}
 }
 
-enum WildcardPosition {none,front,end,both}
+export enum WildcardPosition {none,front,end,both}
 export class SComparison implements InsightFilter{
 	public sfield: SFields;
 	public wildcardPosition: WildcardPosition;

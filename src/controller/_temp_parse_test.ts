@@ -40,8 +40,8 @@ let json2 = {
 
 let json3 = {
 	WHERE: {
-		GT: {
-			se234234_avg: 97
+		EQ: {
+			se234234_fail: 97
 		}
 	},
 	OPTIONS: {
@@ -52,5 +52,21 @@ let json3 = {
 		ORDER: "sections_avg"
 	}
 };
-const newParser: QueryParser = new QueryParser(json3);
+let json4 = {
+	WHERE: {
+		NOT: {
+			GT: {
+				se234234_avg: 13456
+			}
+		}
+	},
+	OPTIONS: {
+		COLUMNS: [
+			"sections_dept",
+			"sections_avg"
+		],
+		ORDER: "sections_avg"
+	}
+};
+const newParser: QueryParser = new QueryParser(json4);
 newParser.getQuery();
