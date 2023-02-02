@@ -53,17 +53,14 @@ export default class InsightFacade implements IInsightFacade {
 					.then((zip) => {
 							// TODO: read the zip file, iterate over the objects and instantiate section objects for each section in content
 							// TODO: make sure loadAsync will go to catch, currently it loads the file anyway even if its invalid
-
-							// console.log(zip.files);
 							// loadAsync returns the updated Zip object. Promise fails if loaded data is not valid zip\
 
 						zip.forEach((relativePath, file) => {  // Iterate over the files in the currently unzipped folder.
 							if (relativePath.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
 								if (!file.dir) {							  	// If it's not the directory,
-									// console.log(file);
 									file.async("blob")
-										.then ((blob)=>(blob.text().then((t)=> console.log(t))));
-								 }
+										.then((blob) => (blob.text().then((t) => console.log(t))));
+								}
 
 							}
 						});
@@ -136,7 +133,7 @@ export default class InsightFacade implements IInsightFacade {
 				this.datasets.delete(insightDataset);										// Delete the <K,V> pair from the map with this key, clears from memory
 				this.datasetIDs.splice(this.datasetIDs.indexOf(id), 1); 			// Delete the ID from the ID list, clears from memory
 
-				console.log("Removed: "  + id.toString());
+				console.log("Removed: " + id.toString());
 				fs.removeSync("./data/" + id.toString());								// Synchronously remove the dataset with the id in the ./data folder, clears from disk
 
 				return Promise.resolve(id.toString()); 										// after success
