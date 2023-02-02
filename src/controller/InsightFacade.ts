@@ -43,7 +43,6 @@ export default class InsightFacade implements IInsightFacade {
 
 		return new Promise((resolve, reject) => {
 			try {
-
 				fs.mkdir("./data").catch(() => { 							// Create the ./data directory that clearDisk() clears on each run, push dataset representations into this file
 					return Promise.reject(new InsightError("Creating ./data failed!"));
 				});
@@ -61,13 +60,13 @@ export default class InsightFacade implements IInsightFacade {
 						zip.forEach((relativePath, file) => {  // Iterate over the files in the currently unzipped folder.
 							if (relativePath.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
 								if (!file.dir) {							  	// If it's not the directory,
-									console.log(file);
-									// file.async("blob");
+									// console.log(file);
+									file.async("blob")
+										.then ((blob)=>(blob.text().then((t)=> console.log(t))));
 								 }
 
 							}
 						});
-
 							// const newDataSet: InsightDataset = {
 							//
 							// 	id: id,
