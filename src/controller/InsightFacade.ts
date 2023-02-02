@@ -8,7 +8,7 @@ import {
 } from "./IInsightFacade";
 
 import fs from "fs-extra";
-import JSZip from "jszip";
+import JSZip, {JSZipObject} from "jszip";
 import Section from "./Section";
 
 
@@ -49,21 +49,14 @@ export default class InsightFacade implements IInsightFacade {
 				let sectionArr: Section[] = [];
 
 				const JSzip = new JSZip();
-				JSzip.loadAsync(content, {base64: true}) // is loaded even if its invalid
-					.then((zip) => {
+				JSzip.loadAsync(content, {base64: true, checkCRC32: true}) // is loaded even if its invalid
+					.then(async (zip) => {
 							// TODO: read the zip file, iterate over the objects and instantiate section objects for each section in content
 							// TODO: make sure loadAsync will go to catch, currently it loads the file anyway even if its invalid
-							// loadAsync returns the updated Zip object. Promise fails if loaded data is not valid zip\
+						console.log("1");
+						this.iterateFolders(zip);
+						console.log("7");
 
-						zip.forEach((relativePath, file) => {  // Iterate over the files in the currently unzipped folder.
-							if (relativePath.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
-								if (!file.dir) {							  	// If it's not the directory,
-									file.async("blob")
-										.then((blob) => (blob.text().then((t) => console.log(t))));
-								}
-
-							}
-						});
 							// const newDataSet: InsightDataset = {
 							//
 							// 	id: id,
@@ -73,17 +66,17 @@ export default class InsightFacade implements IInsightFacade {
 							// 	// numRows: TODO: find the rank of the .json file
 							// };
 
-						this.datasetIDs.push(id); 								// on successful add, add the datasetID
 							// TODO: Push the InsightDataset tuple and it's section arrays into datasets Map<K,V>
 
 							// TODO: Push the representation of the dataset as a JSON file into the data folder, with ID as the title
-
-						return resolve(this.datasetIDs); 						// resolve with an array of strings which are the added IDs
 					}
 					)
 					.catch((error) => {
+						console.log("catching error thrown from iterate");
 						return reject(new InsightError(error));
 					});
+				this.datasetIDs.push(id); 								// on successful add, add the datasetID
+				return resolve(this.datasetIDs); 						// resolve with an array of strings which are the added IDs
 
 			} catch (e) {
 				return reject(new InsightError());
@@ -117,6 +110,52 @@ export default class InsightFacade implements IInsightFacade {
 			}
 		}
 		return false;
+	}
+
+	public parseJSON(t: string) {
+		console.log("3");
+		const result = JSON.parse(t).result;
+		for (const key of result) {
+			if (key.nonexist === undefined) {
+				console.log("key doesnt exist");
+				throw new InsightError("Attempted to access nonexistent key");
+			}
+
+		}
+	}
+
+	public iterateFolders(zip: JSZip) {
+		try {
+			zip.forEach(async (relativePath, file) => {  // Iterate over the files in the currently unzipped folder.
+				console.log(relativePath.substring(0, 7) + file.name + file.dir);
+				if (relativePath.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
+					if (!file.dir) {							  	// If it's not the directory,
+						console.log("2");
+						await this.readFile(file);					// Wait for the file read to complete
+						console.log("5");
+					}
+				}
+			});
+			console.log("6");
+		} catch (e) {
+			console.log("throwing the caught error from iterate");
+			throw new InsightError();
+		}
+
+	}
+
+	public async readFile(file: JSZipObject) {
+		file.async("blob")
+			.then((blob) => blob.text()
+				.then((t) => this.parseJSON(t))
+				.catch(() => {
+					console.log("throwing insight error from readFile");
+					throw new InsightError();
+				}))
+			.catch(() => {
+				throw new InsightError("Error occurred while reading file");
+			});
+		console.log("4");
 	}
 
 	public removeDataset(id: string): Promise<string> {
