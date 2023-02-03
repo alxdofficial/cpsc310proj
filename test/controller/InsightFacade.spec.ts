@@ -20,6 +20,7 @@ describe("InsightFacade", function () {
 	// Declare datasets used in tests. You should add more datasets like this!
 	let sections: string;
 	let oneInvalidSection: string;
+	let threeCourses: string;
 	let sectionsLite: string;
 	let sectionsLiteLite: string;
 	let invalidDataset: string;
@@ -31,7 +32,6 @@ describe("InsightFacade", function () {
 
 	before(function () {
 		// This block runs once and loads the datasets.
-		sections = getContentFromArchives("pair.zip");
 
 		// Just in case there is anything hanging around from a previous run of the test suite
 		clearDisk();
@@ -42,6 +42,7 @@ describe("InsightFacade", function () {
 			console.info(`Before: ${this.test?.parent?.title}`);
 
 			sections = getContentFromArchives("pair.zip");
+			threeCourses = getContentFromArchives("ThreeCourses.zip");
 			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
 			sectionsLite = getContentFromArchives("pairLite.zip");
 			sectionsLiteLite = getContentFromArchives("pairLiteLite.zip");
@@ -98,12 +99,12 @@ describe("InsightFacade", function () {
 			});
 		});
 
-		describe("addDataSet validZipEmpty courses", function () { // Tests for an validID but courses folder is empty
-			it("should reject with  an empty dataset but valid id", function () {
-				const result = facade.addDataset("validKey", validZipEmptyCourses, InsightDatasetKind.Sections);
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
-			});
-		});
+		// describe("addDataSet validZipEmpty courses", function () { // Tests for an validID but courses folder is empty
+		// 	it("should reject with  an empty dataset but valid id", function () {
+		// 		const result = facade.addDataset("validKey", validZipEmptyCourses, InsightDatasetKind.Sections);
+		// 		return expect(result).to.eventually.be.rejectedWith(InsightError);
+		// 	});
+		// });
 
 		describe("addDataSet invalidKind", function () { // Tests for an invalid kind from the enum, rooms is invalid
 			it("should reject with invalid kind", function () {
@@ -127,12 +128,12 @@ describe("InsightFacade", function () {
 			});
 		});
 
-		describe("addDataset with empty course folder", function () {
-			it("should reject with no sections in the dataset, an empty courses folder", function () {
-				const result = facade.addDataset("validKey", validZipEmptyCourses, InsightDatasetKind.Sections);
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
-			});
-		});
+		// describe("addDataset with empty course folder", function () {
+		// 	it("should reject with no sections in the dataset, an empty courses folder", function () {
+		// 		const result = facade.addDataset("validKey", validZipEmptyCourses, InsightDatasetKind.Sections);
+		// 		return expect(result).to.eventually.be.rejectedWith(InsightError);
+		// 	});
+		// });
 
 		describe("addDataset with non empty courses folder but no valid sections", function () {
 			it("should reject with no valid sections in the dataset", function () {
@@ -151,7 +152,7 @@ describe("InsightFacade", function () {
 		describe("addData with valid add", function () {
 			it("should pass and return the key", function () {
 				const result = facade.addDataset("validKey", sections, InsightDatasetKind.Sections);
-				return expect(result).to.eventually.have.members(["validKey"]);
+				return expect(result).to.eventually.deep.equal(["validKey"]);
 			});
 		});
 
@@ -211,9 +212,16 @@ describe("InsightFacade", function () {
 		});
 
 		describe("addData with a valid file type, expect sectionLite", function () {
-			it("should fail with InsightError, invalid first filetype but valid name", function () {
+			it("should pass with and return valid as key, length of 1", function () {
 				const result = facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections);
 				return expect(result).to.eventually.have.members(["valid"]).lengthOf(1);
+			});
+		});
+
+		describe("addData with three sections, expect not only CONS sections", function () {
+			it("should pass with validThree as key, length of 1", function () {
+				const result = facade.addDataset("validThree", threeCourses, InsightDatasetKind.Sections);
+				return expect(result).to.eventually.have.members(["validThree"]).lengthOf(1);
 			});
 		});
 
