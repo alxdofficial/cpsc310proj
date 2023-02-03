@@ -26,6 +26,9 @@ export default class InsightFacade implements IInsightFacade {
 	// interp. an InsightDataset associated with the sections within it.
 
 
+	// interp. a flag that tells the iterate function whether the JSON file has been read
+
+
 	constructor() {
 		console.log("InsightFacadeImpl::init()");
 		this.datasetIDs = [];													// Initialize an empty array of strings that will contain the currently added Dataset IDs
@@ -46,7 +49,6 @@ export default class InsightFacade implements IInsightFacade {
 				fs.mkdir("./data").catch(() => { 							// Create the ./data directory that clearDisk() clears on each run, push dataset representations into this file
 					return Promise.reject(new InsightError("Creating ./data failed!"));
 				});
-				let sectionArr: Section[] = [];
 
 				const JSzip = new JSZip();
 				JSzip.loadAsync(content, {base64: true, checkCRC32: true}) // is loaded even if its invalid
@@ -54,29 +56,21 @@ export default class InsightFacade implements IInsightFacade {
 							// TODO: read the zip file, iterate over the objects and instantiate section objects for each section in content
 							// TODO: make sure loadAsync will go to catch, currently it loads the file anyway even if its invalid
 						console.log("1");
-						this.iterateFolders(zip);
-						console.log("7");
+						await this.iterateFolders(zip, id, kind);
+						console.log("5");
 
-							// const newDataSet: InsightDataset = {
-							//
-							// 	id: id,
-							//
-							// 	kind: kind,
-							//
-							// 	// numRows: TODO: find the rank of the .json file
-							// };
-
-							// TODO: Push the InsightDataset tuple and it's section arrays into datasets Map<K,V>
 
 							// TODO: Push the representation of the dataset as a JSON file into the data folder, with ID as the title
+
+						console.log("6");
+						this.datasetIDs.push(id); 								// on successful add, add the datasetID
+						return resolve(this.datasetIDs); 						// resolve with an array of strings which are the added IDs
 					}
 					)
 					.catch((error) => {
-						console.log("catching error thrown from iterate");
+						console.log("catching error thrown from iterate and rejecting");
 						return reject(new InsightError(error));
 					});
-				this.datasetIDs.push(id); 								// on successful add, add the datasetID
-				return resolve(this.datasetIDs); 						// resolve with an array of strings which are the added IDs
 
 			} catch (e) {
 				return reject(new InsightError());
@@ -88,6 +82,9 @@ export default class InsightFacade implements IInsightFacade {
 
 	}
 
+	// REQUIRES: a string that represents the dataset ID
+	// MODIFIES: N/A
+	// EFFECTS: checks the ID string if it is valid or not
 	public invalidID(id: string): boolean {
 		try {
 			if (id.includes("_")) {  														// If it has an underscore, return false
@@ -103,6 +100,9 @@ export default class InsightFacade implements IInsightFacade {
 		return false;																		// Otherwise, return true
 	}
 
+	// REQUIRES: a string that represents the dataset ID
+	// MODIFIES: N/A
+	// EFFECTS: checks the current list of dataset IDs for the given, return true if exists, return false otherwise.
 	public duplicateID(id: string): boolean {
 		for (const item of this.datasetIDs) {												// Iterate over the list of dataset ids, if contains current then return true, other wise return false
 			if (item === id) {
@@ -112,31 +112,98 @@ export default class InsightFacade implements IInsightFacade {
 		return false;
 	}
 
-	public parseJSON(t: string) {
+	// REQUIRES: a JSON stringified string
+	// MODIFIES: N/A
+	// EFFECTS: parses the string as a JSON object, creates a section object with the fields.
+	public parseJSON(t: string, idKey: string, kind: InsightDatasetKind) {
+		let sectionArr: Section[] = []; // Push all the sections into an array, then push the array into the hashmap
+		let validSectionCount: number = 0;			// Count the number of valid sections, only need at least one valid section to be a valid dataset, otherwise fail
 		console.log("3");
-		const result = JSON.parse(t).result;
-		for (const key of result) {
-			if (key.nonexist === undefined) {
-				console.log("key doesnt exist");
-				throw new InsightError("Attempted to access nonexistent key");
-			}
+		const result = JSON.parse(t).result; 		 // Result is the array of the JSON objects
 
+		for (const jsonObject of result) {			 // Each JSON object is one whole section in result, check if key is undefined
+			if (this.fieldIsUndefined(jsonObject)) {  // Check all the fields of the current JSON object, if any required field is missing skip this object
+				console.log("key doesn't exist");
+				continue;
+			}
+			let toAdd: Section = new Section(jsonObject.id, jsonObject.Course,
+				jsonObject.Title, jsonObject.Professor, jsonObject.Subject,
+				jsonObject.Year, jsonObject.Avg, jsonObject.Pass, jsonObject.Fail, jsonObject.Audit);   // Create a new section
+
+			sectionArr.push(toAdd); // Create a section object in one iteration, push it to the array
+
+			validSectionCount++; // Increment the count of valid sections, "numRows is the number of valid sections in a dataset" @480
+
+		}
+
+		const newDataSet: InsightDataset = {
+			id: idKey,
+			kind: kind,
+			numRows: validSectionCount
+		};
+
+		this.datasets.set(newDataSet,sectionArr); // Add the insightdataset and section array to the in memory representation of the data
+
+		if (validSectionCount === 0) {
+			throw new InsightError("No valid sections!");
 		}
 	}
 
-	public iterateFolders(zip: JSZip) {
+	// REQUIRES: a JSON object
+	// MODIFIES: N/A
+	// EFFECTS: reads all the fields and checks if the required fields are undefined.
+	//          undefined, signal to skip the iteration
+	public fieldIsUndefined(jsonObject: any): boolean {
+		if (jsonObject.id === undefined) {
+			return true;
+		} else if (jsonObject.Course === undefined) {
+			return true;
+		} else if (jsonObject.Title === undefined) {
+			return true;
+		} else if (jsonObject.Professor === undefined) {
+			return true;
+		} else if (jsonObject.Subject === undefined) {
+			return true;
+		} else if (jsonObject.Year === undefined) {
+			return true;
+		} else if (jsonObject.Avg === undefined) {
+			return true;
+		} else if (jsonObject.Pass === undefined) {
+			return true;
+		} else if (jsonObject.Fail === undefined) {
+			return true;
+		} else if (jsonObject.Audit === undefined) {
+			return true;
+		}
+		return false;
+	}
+
+	public iterateFolders(zip: JSZip, idKey: string, kind: InsightDatasetKind) {
 		try {
-			zip.forEach(async (relativePath, file) => {  // Iterate over the files in the currently unzipped folder.
-				console.log(relativePath.substring(0, 7) + file.name + file.dir);
-				if (relativePath.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
-					if (!file.dir) {							  	// If it's not the directory,
+			for (let i in zip.files) { // i is a JSON object within the array of files returned by zip.files
+				if (zip.files[i].name.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
+					if (!zip.files[i].dir) {							  	// If it's not the directory,
 						console.log("2");
-						await this.readFile(file);					// Wait for the file read to complete
-						console.log("5");
+						return this.readFile(zip.files[i], idKey, kind).catch(() => {
+							throw new InsightError();
+						});
 					}
 				}
-			});
+			}
+
 			console.log("6");
+
+			// zip.forEach(async (relativePath, file) => {  // Iterate over the files in the currently unzipped folder.
+			// // 	console.log(relativePath.substring(0, 7) + file.name + file.dir);
+			// // 	if (relativePath.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
+			// // 		if (!file.dir) {							  	// If it's not the directory,
+			// // 			console.log("2");
+			// // 			this.readFile(file);					// !!! firing off multiple async calls instead of waiting
+			// // 			console.log("5");
+			// // 		}
+			// // 	}
+			// // });
+			// // console.log("6");
 		} catch (e) {
 			console.log("throwing the caught error from iterate");
 			throw new InsightError();
@@ -144,18 +211,21 @@ export default class InsightFacade implements IInsightFacade {
 
 	}
 
-	public async readFile(file: JSZipObject) {
-		file.async("blob")
-			.then((blob) => blob.text()
-				.then((t) => this.parseJSON(t))
-				.catch(() => {
-					console.log("throwing insight error from readFile");
-					throw new InsightError();
-				}))
-			.catch(() => {
-				throw new InsightError("Error occurred while reading file");
-			});
+	public async readFile(file: JSZipObject, idKey: string, kind: InsightDatasetKind) {
+		try {
+			console.log("2.5");
+			let result = await file.async("blob");
+			console.log("read blob");
+			let text = await result.text();
+			console.log("read into text");
+			let read = await this.parseJSON(text, idKey, kind);
+			console.log("parsed JSON");
+
+		} catch (e) {
+			throw new InsightError();
+		}
 		console.log("4");
+
 	}
 
 	public removeDataset(id: string): Promise<string> {
