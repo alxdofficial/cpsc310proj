@@ -57,7 +57,7 @@ export default class InsightFacade implements IInsightFacade {
 					.then(async (zip) => {
 							// TODO: make sure loadAsync will go to catch, currently it loads the file anyway even if its invalid
 						console.log("1");
-						await this.iterateFolders(zip, id, kind);
+						await this.iterateFolders(zip, id, kind);	// Iterate over the JSON files
 						console.log("5");
 
 							// TODO: Push the representation of the dataset as a JSON file into the data folder, with ID as the title
@@ -112,14 +112,73 @@ export default class InsightFacade implements IInsightFacade {
 		return false;
 	}
 
+	public iterateFolders(zip: JSZip, idKey: string, kind: InsightDatasetKind) {
+		try {
+			for (let i in zip.files) { 										// i is a JSON object within the array of files returned by zip.files
+				console.log("2");
+				console.log(zip.files[i].name.substring(0, 7));
+				if (zip.files[i].name.substring(0, 7) === "courses") { 		// Check that the courses are in a courses folder
+					if (!zip.files[i].dir) {							  	// If it's not the directory folder (if its not the courses folder)
+						console.log("2.1");
+
+						return this.parseJSON(idKey, kind, zip).catch(() => { // Read the current file
+							throw new InsightError();
+						});
+					}
+				}
+			}
+			console.log("6");
+		} catch (e) {
+			console.log("throwing the caught error from iterate");
+			throw new InsightError();
+		}
+
+	}
+
+	// public async readFile(file: JSZipObject, idKey: string, kind: InsightDatasetKind) {
+	// 	console.log("2.5");
+	// 	let result = await file.async("blob");
+	// 	console.log("read blob");
+	// 	let text = await result.text();
+	// 	console.log("read into text");
+	// 	console.log("caling parse");
+	// 	this.parseJSON(text, idKey, kind);
+	// 	console.log("parsed JSON");
+	//
+	// 	console.log("4");
+	//
+	// }
+
 	// REQUIRES: a JSON stringified string
 	// MODIFIES: N/A
 	// EFFECTS: parses the string as a JSON object, creates a section object with the fields.
-	public parseJSON(t: string, idKey: string, kind: InsightDatasetKind) {
+	public async parseJSON(idKey: string, kind: InsightDatasetKind, file: JSZip) {
+		// TODO fix the reading of only the first file caused by the return on line 124. return is there because the fn has to return a promise. otherwise it won't await
+		let stringArr: string[] = [];
+
+		for(const i in file.files) {
+			file.files[i].async("blob").then(async (str) => stringArr.push(await str.text()))
+				.catch(()=>{
+					throw new InsightError();
+				});
+		}
+		for (const str of stringArr) {
+			console.log(str);
+		}
+		// console.log("2.5");
+		// let resultt = await file.async("blob");
+		// console.log("read blob");
+		// let text = await resultt.text();
+		// console.log("read into text");
+
+		console.log("4");
 		let sectionArr: Section[] = []; 				// Push all the sections into an array, then push the array into the hashmap
 		let validSectionCount: number = 0;				// Count the number of valid sections, only need at least one valid section to be a valid dataset, otherwise fail
 		console.log("3");
-		const result = JSON.parse(t).result; 		 	// Result is the array of the JSON objects
+		const result = JSON.parse(stringArr[0]).result; 		 	// Result is the array of the JSON objects
+		console.log("3.1");
+		 console.log(result);
+
 
 		for (const jsonObject of result) {			 	// Each JSON object is one whole section in result, check if key is undefined
 			if (this.fieldIsUndefined(jsonObject)) {  	// Check all the fields of the current JSON object, if any required field is missing skip this object
@@ -135,7 +194,7 @@ export default class InsightFacade implements IInsightFacade {
 
 		}
 
-		// for (const section of sectionArr){
+		// for (const section of sectionArr){ // !!! temp to see section output
 		// 	console.log(section);
 		// }
 
@@ -145,11 +204,12 @@ export default class InsightFacade implements IInsightFacade {
 			numRows: validSectionCount
 		};
 
-		this.datasets.set(newDataSet,sectionArr); 		// Add the insightdataset and section array to the in memory representation of the data
-
 		if (validSectionCount === 0) {
+			console.log("3.3");
 			throw new InsightError("No valid sections!");
 		}
+		this.datasets.set(newDataSet, sectionArr); 		// Add the insightdataset and section array to the in memory representation of the data
+
 	}
 
 
@@ -182,42 +242,6 @@ export default class InsightFacade implements IInsightFacade {
 		return false;
 	}
 
-	public iterateFolders(zip: JSZip, idKey: string, kind: InsightDatasetKind) {
-		try {
-			for (let i in zip.files) { // i is a JSON object within the array of files returned by zip.files
-				if (zip.files[i].name.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
-					if (!zip.files[i].dir) {							  	// If it's not the directory,
-						console.log("2");
-						return this.readFile(zip.files[i], idKey, kind).catch(() => {
-							throw new InsightError();
-						});
-					}
-				}
-			}
-			console.log("6");
-		} catch (e) {
-			console.log("throwing the caught error from iterate");
-			throw new InsightError();
-		}
-
-	}
-
-	public async readFile(file: JSZipObject, idKey: string, kind: InsightDatasetKind) {
-		try {
-			console.log("2.5");
-			let result = await file.async("blob");
-			console.log("read blob");
-			let text = await result.text();
-			console.log("read into text");
-			this.parseJSON(text, idKey, kind);
-			console.log("parsed JSON");
-
-		} catch (e) {
-			throw new InsightError();
-		}
-		console.log("4");
-
-	}
 
 	public removeDataset(id: string): Promise<string> {
 		if (this.invalidID(id)) {															// Check that the id is valid

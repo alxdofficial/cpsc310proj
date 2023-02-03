@@ -2,7 +2,8 @@ import {
 	IInsightFacade,
 	InsightDatasetKind,
 	InsightError,
-	InsightResult, NotFoundError,
+	InsightResult,
+	NotFoundError,
 	ResultTooLargeError
 } from "../../src/controller/IInsightFacade";
 import InsightFacade from "../../src/controller/InsightFacade";
@@ -19,6 +20,7 @@ describe("InsightFacade", function () {
 
 	// Declare datasets used in tests. You should add more datasets like this!
 	let sections: string;
+	let threeCourse: string;
 	let oneInvalidSection: string;
 	let sectionsLite: string;
 	let sectionsLiteLite: string;
@@ -45,6 +47,7 @@ describe("InsightFacade", function () {
 			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
 			sectionsLite = getContentFromArchives("pairLite.zip");
 			sectionsLiteLite = getContentFromArchives("pairLiteLite.zip");
+			threeCourse = getContentFromArchives("ThreeCourses.zip");
 			invalidDataset = getContentFromArchives("invalid-dataset.xlsx");
 			validZipInvalidCourse = getContentFromArchives("validZipInvalidCourse.zip");
 			validZipEmptyCourses = getContentFromArchives("validZipEmptyCourses.zip");
@@ -127,6 +130,13 @@ describe("InsightFacade", function () {
 			});
 		});
 
+		describe("addDataSet three courses in file", function () { // Tests a key with an underscore, should fail with InsightError as mentioned in the interface spec
+			it("should reject with duplicate keys", function () {
+				const result = facade.addDataset("validKey", threeCourse, InsightDatasetKind.Sections);
+				return expect(result).to.eventually.deep.equal(["validKey"]);
+			});
+		});
+
 		describe("addDataset with empty course folder", function () {
 			it("should reject with no sections in the dataset, an empty courses folder", function () {
 				const result = facade.addDataset("validKey", validZipEmptyCourses, InsightDatasetKind.Sections);
@@ -194,6 +204,15 @@ describe("InsightFacade", function () {
 				return expect(result).to.eventually.deep.equal(["valid"]);
 			});
 		});
+
+		describe("two successful adds in sequence", function () {
+			it("should pass and return the id of the TWO adds, only one section each section array", function () {
+				const result = facade.addDataset("valid", oneInvalidSection, InsightDatasetKind.Sections)
+					.then(()=> facade.addDataset("validTwo", oneInvalidSection, InsightDatasetKind.Sections));
+				return expect(result).to.eventually.deep.equal(["valid", "validTwo"]);
+			});
+		});
+
 		describe("addData with a valid add followed by an invalid file type add", function () {
 			it("should fail with InsightError, valid add first then invalid file type add", function () {
 				const result = facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections)
