@@ -24,4 +24,8 @@ export default class Section {
 		this.audit = audit;
 
 	}
+
+	public getID(): string{
+		return this.uuid;
+	}
 }

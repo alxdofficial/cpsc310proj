@@ -19,6 +19,7 @@ describe("InsightFacade", function () {
 
 	// Declare datasets used in tests. You should add more datasets like this!
 	let sections: string;
+	let oneInvalidSection: string;
 	let sectionsLite: string;
 	let sectionsLiteLite: string;
 	let invalidDataset: string;
@@ -41,6 +42,7 @@ describe("InsightFacade", function () {
 			console.info(`Before: ${this.test?.parent?.title}`);
 
 			sections = getContentFromArchives("pair.zip");
+			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
 			sectionsLite = getContentFromArchives("pairLite.zip");
 			sectionsLiteLite = getContentFromArchives("pairLiteLite.zip");
 			invalidDataset = getContentFromArchives("invalid-dataset.xlsx");
@@ -186,6 +188,12 @@ describe("InsightFacade", function () {
 			});
 		});
 
+		describe("add with one valid section in course, and one invalid", function () {
+			it("should pass and return the id of the added set, only one section in the array", function () {
+				const result = facade.addDataset("valid", oneInvalidSection, InsightDatasetKind.Sections);
+				return expect(result).to.eventually.deep.equal(["valid"]);
+			});
+		});
 		describe("addData with a valid add followed by an invalid file type add", function () {
 			it("should fail with InsightError, valid add first then invalid file type add", function () {
 				const result = facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections)
