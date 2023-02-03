@@ -222,7 +222,7 @@ export default class InsightFacade implements IInsightFacade {
 			throw new InsightError();
 		}
 
-	}
+	} // commit
 
 	// public async readFile(file: JSZipObject, idKey: string, kind: InsightDatasetKind) {
 	// 	try {
