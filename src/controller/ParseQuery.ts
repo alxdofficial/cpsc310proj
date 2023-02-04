@@ -1,7 +1,7 @@
 import {
 	InsightFilter,
 	InsightM,
-	InsightQuery,
+	InsightQuery, Logic,
 	LogicComparison,
 	MComparison,
 	MFields,
@@ -58,8 +58,9 @@ export class QueryParser {
 	private multiplexInput(key: string, json: any): InsightFilter | null {
 		switch (key) {
 			case "AND":
+				return this.logicHelper(Logic.And, json);
 			case "OR":
-				return this.logicHelper(key, json);
+				return this.logicHelper(Logic.Or, json);
 			case "LT":
 				return this.MHelper(InsightM.lt, json);
 			case "GT":
@@ -78,8 +79,29 @@ export class QueryParser {
 	}
 
 	// return a logicComparison or null if failed to parse
-	private logicHelper(logic: string, json: []): LogicComparison | null {
-		return null;
+	private logicHelper(logic: Logic, filters: any[]): LogicComparison | null {
+		// first check length of input array >= 1
+		if (filters.length < 1) {
+			return null;
+		}
+		let arrayFilters: InsightFilter[] = [];
+		// for each clause in input json, call helper to parse it into InsightFilters, add to arrau
+		let i = 0;
+		while (i < filters.length) {
+			let filter = filters[i];
+			let filterObject: InsightFilter | null = this.multiplexInput(Object.keys(filter)[0],
+				filter[Object.keys(filter)[0]]);
+			// if any clause failed to parse, fail.
+			if (filterObject == null) {
+				console.log("one clause in logic comparison failed to parse");
+				return null;
+			} else {
+				arrayFilters.push(filterObject);
+			}
+			i++;
+		}
+		// create Logic comp object
+		return new LogicComparison(logic,arrayFilters);
 	}
 
 	// return a MComparison or null if failed to parse

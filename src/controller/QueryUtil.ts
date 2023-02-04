@@ -17,7 +17,8 @@ export enum MFields { avg,pass,fail,audit,year }
 export enum SFields { dept,id,instructor,title,uuid}
 
 export interface InsightFilter {
-	doFilter(data: Section[]): Section[]
+	doFilter(section: Section): boolean
+	// this method takes 1 section as input, labels that section true/false for whether to include it in query.
 }
 
 export enum Logic {And, Or}
@@ -28,13 +29,13 @@ export class LogicComparison implements InsightFilter {
 		this.logic = logic;
 		this.filterList = filterList;
 	}
-	 public doFilter(data: Section[]): Section[] {
+	 public doFilter(data: Section): boolean {
 		if (this.logic === Logic.And) {
-			return [];
+			return false;
 		} else if (this.logic === Logic.Or) {
-			return [];
+			return false;
 		}
-		return [];
+		return false;
 	}
 }
 
@@ -50,15 +51,15 @@ export class MComparison implements InsightFilter {
 		this.value = value;
 	}
 
-	public doFilter(data: Section[]): Section[] {
+	public doFilter(data: Section): boolean {
 		if (this.math === InsightM.lt) {
-			return [];
+			return false;
 		} else if (this.math === InsightM.gt) {
-			return [];
+			return false;
 		} else if (this.math === InsightM.eq) {
-			return [];
+			return false;
 		}
-		return [];
+		return false;
 	}
 }
 
@@ -73,7 +74,7 @@ export class SComparison implements InsightFilter{
 		this.value = value;
 	}
 
-	public doFilter(data: Section[]): Section[] {
+	public doFilter(data: Section): boolean {
 		switch (this.wildcardPosition) {
 			case WildcardPosition.none:
 				break;
@@ -84,14 +85,14 @@ export class SComparison implements InsightFilter{
 			case WildcardPosition.both:
 				break;
 		}
-		return [];
+		return false;
 	}
 }
 
 export class Negation implements InsightFilter {
 	public filter: InsightFilter;
-	public doFilter(data: Section[]): Section[] {
-		return [];
+	public doFilter(data: Section): boolean {
+		return false;
 	}
 	constructor(filter: InsightFilter) {
 		this.filter = filter;

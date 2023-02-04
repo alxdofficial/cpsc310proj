@@ -68,5 +68,5 @@ let json4 = {
 		ORDER: "sections_avg"
 	}
 };
-const newParser: QueryParser = new QueryParser(json4);
+const newParser: QueryParser = new QueryParser(json2);
 newParser.getQuery();
