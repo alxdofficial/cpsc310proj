@@ -1,0 +1,19 @@
+{
+  "title": "bad, dataset not addde",
+  "input": {
+    "WHERE": {
+      "GT": {
+        "123_avg": 97
+      }
+    },
+    "OPTIONS": {
+      "COLUMNS": [
+        "123_dept",
+        "123_avg"
+      ],
+      "ORDER": "123_avg"
+    }
+  },
+  "errorExpected": true,
+  "expected": "InsightError"
+}
