@@ -26,27 +26,32 @@ export default class InsightFacade implements IInsightFacade {
 	// interp. an InsightDataset associated with the sections within it.
 
 
-	// interp. a flag that tells the iterate function whether the JSON file has been read
+	private readonly sectionArr: Section[];			// Push all the sections into an array, then push the array into the hashmap
+	private rowCount: number;
+	private sectionCount: number;
+
+	// The count of valid sections in this dataset, 0 then throw insight error, otherwise pass
 
 
 	constructor() {
 		console.log("InsightFacadeImpl::init()");
 		this.datasetIDs = [];													// Initialize an empty array of strings that will contain the currently added Dataset IDs
 		this.datasets = new Map();
+		this.sectionArr = [];
+		this.rowCount = 0;
+		this.sectionCount = 0;
 	}
 
 	public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		if (this.invalidID(id)) {												// Check that the id is valid
 			return Promise.reject(new InsightError("Invalid ID!"));
 		}
-
 		if (this.duplicateID(id)) {												// Check that there isn't a dataset already added with the same ID
 			return Promise.reject(new InsightError("Duplicate ID!"));
 		}
 		if (kind === InsightDatasetKind.Rooms) {
 			return Promise.reject(new InsightError("Rooms is not valid for this checkpoint!"));
 		}
-
 
 		return new Promise((resolve, reject) => {
 			try {
@@ -59,30 +64,40 @@ export default class InsightFacade implements IInsightFacade {
 				JSzip.loadAsync(content, {base64: true, checkCRC32: true}) // is loaded even if its invalid
 					.then(async (zip) => {
 							// TODO: make sure loadAsync will go to catch, currently it loads the file anyway even if its invalid
-						console.log("1");
-						await this.iterateFolders(zip, id, kind);
-						console.log("6.5");
+						// console.log("1");
+						await this.iterateFolders(zip);
+						// console.log("6.5");
+						if (this.rowCount === 0) {
+							// console.log("no valid sections!");
+							throw new InsightError("No valid sections!");
+						}
+						const newDataSet: InsightDataset = {
+							id: id,
+							kind: kind,
+							numRows: this.rowCount
+						};
 
-							// TODO: Push the representation of the dataset as a JSON file into the data folder, with ID as the title
+						this.datasets.set(newDataSet, this.sectionArr); 		// Add the insightdataset and section array to the in memory representation of the data
 
-						console.log("6.7");
+						// console.log("6.7");
 						this.datasetIDs.push(id); 								// on successful add, add the datasetID
+						// for (const section of this.sectionArr) {
+						// 	console.log(section);
+						// }
+						this.sectionCount++; // !!! temp
+						// console.log("section count " + this.rowCount);
+						this.rowCount = 0;										// Reset rowCount for anymore future ads
 						return resolve(this.datasetIDs); 						// resolve with an array of strings which are the added IDs
 					}
 					)
 					.catch((error) => {
-						console.log("catching error thrown from iterate and rejecting");
+						// console.log("catching error thrown from iterate and rejecting");
 						return reject(new InsightError(error));
 					});
-
 			} catch (e) {
 				return reject(new InsightError());
 			}
 		});
-
-		// return Promise.reject("Not implemented.");
-
-
 	}
 
 	// REQUIRES: a string that represents the dataset ID
@@ -118,10 +133,9 @@ export default class InsightFacade implements IInsightFacade {
 	// REQUIRES: a JSON stringified string
 	// MODIFIES: N/A
 	// EFFECTS: parses the string as a JSON object, creates a section object with the fields.
-	public parseJSON(t: string, idKey: string, kind: InsightDatasetKind) {
-		let sectionArr: Section[] = []; 				// Push all the sections into an array, then push the array into the hashmap
-		let validSectionCount: number = 0;				// Count the number of valid sections, only need at least one valid section to be a valid dataset, otherwise fail
-		console.log("3");
+	public parseJSON(t: string) {
+		let localSectionArr: Section[] = [];
+		// console.log("3");
 		const result = JSON.parse(t).result; 		 	// Result is the array of the JSON objects
 
 		for (const jsonObject of result) {			 	// Each JSON object is one whole section in result, check if key is undefined
@@ -132,27 +146,14 @@ export default class InsightFacade implements IInsightFacade {
 				jsonObject.Title, jsonObject.Professor, jsonObject.Subject,
 				jsonObject.Year, jsonObject.Avg, jsonObject.Pass, jsonObject.Fail, jsonObject.Audit);   // Create a new section
 
-			sectionArr.push(toAdd); 					// Create a section object in one iteration, push it to the array
+			localSectionArr.push(toAdd); 					// Create a section object in one iteration, push it to the array
 
-			validSectionCount++; 						// Increment the count of valid sections, "numRows is the number of valid sections in a dataset" @480
+			this.rowCount++;								// Increment the count of valid sections, "numRows is the number of valid sections in a dataset" @480
 
 		}
 
-		for (const section of sectionArr){
-			console.log(section);
-		}
+		this.sectionArr.push(...localSectionArr);
 
-		const newDataSet: InsightDataset = {
-			id: idKey,
-			kind: kind,
-			numRows: validSectionCount
-		};
-		console.log("valid section count is " + validSectionCount);
-		if (validSectionCount === 0) {
-			throw new InsightError("No valid sections!");
-		}
-
-		this.datasets.set(newDataSet, sectionArr); 		// Add the insightdataset and section array to the in memory representation of the data
 
 	}
 
@@ -186,61 +187,45 @@ export default class InsightFacade implements IInsightFacade {
 		return false;
 	}
 
-	// TODO: iterate over the files in sequence
-	public async iterateFolders(zip: JSZip, idKey: string, kind: InsightDatasetKind) {
+	// REQUIRES: a JSZip object, ID of the set and kind
+	// MODIFIES: N/A
+	// EFFECTS: Queues all the file reads and pushes into a promise array,
+	//			executes promise.all and awaits for the promise from .all to fulfil
+	public async iterateFolders(zip: JSZip) {
 		let promises = [];
 		try {
 			for (let i in zip.files) { // i is a JSON object within the array of files returned by zip.files
-				console.log("1.9");
-				if (zip.files[i].dir && zip.files[i].name.substring(0, 7) !== "courses") { // This means with any folder that isnt courses it will throw.
-					console.log("throwing no courses folder");
-					// throw new InsightError("No courses folder!");
-					continue;
-				}
+				// console.log("1.9");
 				if (zip.files[i].name.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
 					if (!zip.files[i].dir) {							  	// If it's not the directory,
-						console.log("2");
+						// console.log("2");
 
 						promises.push(zip.files[i].async("blob")
 							.then((blobStr) => {
 								return blobStr.text();
 							})
-							.then((stringedBlob) => this.parseJSON(stringedBlob, idKey, kind))
+							.then((stringedBlob) => this.parseJSON(stringedBlob))
 							.catch(() => {
 								throw new InsightError();
 							}));
 					}
 				}
 			}
-			console.log("6");
+			// console.log("6");
 			return await Promise.all(promises) // Wait for all the promises in the promise list to fulfill
 				.catch(() => {
 					throw new InsightError("error occurred while waited for queued promises to fulfil");
 				});
 		} catch (e) {
-			console.log("throwing the caught error from iterate");
+			// console.log("throwing the caught error from iterate");
 			throw new InsightError();
 		}
 
-	} // commit
+	}
 
-	// public async readFile(file: JSZipObject, idKey: string, kind: InsightDatasetKind) {
-	// 	try {
-	// 		console.log("2.5");
-	// 		let result = await file.async("blob");
-	// 		console.log("read blob");
-	// 		let text = await result.text();
-	// 		console.log("read into text");
-	// 		return this.parseJSON(text, idKey, kind);
-	// 		console.log("parsed JSON");
-	//
-	// 	} catch (e) {
-	// 		throw new InsightError();
-	// 	}
-	// 	console.log("4");
-	//
-	// }
-
+	// REQUIRES: an ID
+	// MODIFIES: N/A
+	// EFFECTS: Removes the JSON representation of sections in a dataset from the data folder
 	public removeDataset(id: string): Promise<string> {
 		if (this.invalidID(id)) {															// Check that the id is valid
 			return Promise.reject(new InsightError("Invalid ID!"));
