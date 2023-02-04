@@ -26,72 +26,58 @@ export default class InsightFacade implements IInsightFacade {
 	// interp. an InsightDataset associated with the sections within it.
 
 
-	private readonly sectionArr: Section[];			// Push all the sections into an array, then push the array into the hashmap
-	private rowCount: number;
-	private sectionCount: number;
-
-	// The count of valid sections in this dataset, 0 then throw insight error, otherwise pass
+	private sectionArr: Section[];														// Push all the sections into an array, then push the array into the hashmap
+	private rowCount: number;															// The count of valid sections in this dataset, 0 then throw insight error, otherwise pass
 
 
 	constructor() {
 		console.log("InsightFacadeImpl::init()");
-		this.datasetIDs = [];													// Initialize an empty array of strings that will contain the currently added Dataset IDs
+		this.datasetIDs = [];															// Initialize an empty array of strings that will contain the currently added Dataset IDs
 		this.datasets = new Map();
 		this.sectionArr = [];
 		this.rowCount = 0;
-		this.sectionCount = 0;
 	}
 
 	public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
-		if (this.invalidID(id)) {												// Check that the id is valid
+		if (this.invalidID(id)) {														// Check that the id is valid
 			return Promise.reject(new InsightError("Invalid ID!"));
 		}
-		if (this.duplicateID(id)) {												// Check that there isn't a dataset already added with the same ID
+		if (this.duplicateID(id)) {														// Check that there isn't a dataset already added with the same ID
 			return Promise.reject(new InsightError("Duplicate ID!"));
 		}
 		if (kind === InsightDatasetKind.Rooms) {
 			return Promise.reject(new InsightError("Rooms is not valid for this checkpoint!"));
 		}
-
 		return new Promise((resolve, reject) => {
 			try {
-
-				fs.mkdir("./data").catch(() => { 							// Create the ./data directory that clearDisk() clears on each run, push dataset representations into this file
+				fs.mkdir("./data").catch(() => { 									// Create the ./data directory that clearDisk() clears on each run, push dataset representations into this file
 					return Promise.reject(new InsightError("Creating ./data failed!"));
 				});
-
 				const JSzip = new JSZip();
-				JSzip.loadAsync(content, {base64: true, checkCRC32: true}) // is loaded even if its invalid
+				JSzip.loadAsync(content, {base64: true, checkCRC32: true}) 		// is loaded even if its invalid
 					.then(async (zip) => {
-							// TODO: make sure loadAsync will go to catch, currently it loads the file anyway even if its invalid
-						// console.log("1");
-						await this.iterateFolders(zip);
-						// console.log("6.5");
+						await this.iterateFolders(zip);									// Iterate over the files, modifiy the class variables
 						if (this.rowCount === 0) {
-							// console.log("no valid sections!");
 							throw new InsightError("No valid sections!");
 						}
-						const newDataSet: InsightDataset = {
+						const newDataSet: InsightDataset = {							// Create the dataset tuple
 							id: id,
 							kind: kind,
 							numRows: this.rowCount
 						};
 
-						this.datasets.set(newDataSet, this.sectionArr); 		// Add the insightdataset and section array to the in memory representation of the data
+						this.datasets.set(newDataSet, this.sectionArr); 				// Add the insightdataset and section array to the in memory representation of the data
+						this.datasetIDs.push(id); 										// on successful add, add the datasetID
 
-						// console.log("6.7");
-						this.datasetIDs.push(id); 								// on successful add, add the datasetID
-						// for (const section of this.sectionArr) {
-						// 	console.log(section);
-						// }
-						this.sectionCount++; // !!! temp
-						// console.log("section count " + this.rowCount);
-						this.rowCount = 0;										// Reset rowCount for anymore future ads
-						return resolve(this.datasetIDs); 						// resolve with an array of strings which are the added IDs
+						const jsonString = JSON.stringify(this.sectionArr);				// Read the section array into a JSON object
+						await fs.appendFile("./data/" + id + ".json", jsonString); 	// Add the file
+
+						this.rowCount = 0;												// CLEANUP: reset row count for future add calls
+						this.sectionArr = []; 											// CLEANUP: empty the array for sections for future calls
+						return resolve(this.datasetIDs); 								// resolve with an array of strings which are the added IDs
 					}
 					)
 					.catch((error) => {
-						// console.log("catching error thrown from iterate and rejecting");
 						return reject(new InsightError(error));
 					});
 			} catch (e) {

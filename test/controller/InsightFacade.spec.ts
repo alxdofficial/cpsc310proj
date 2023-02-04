@@ -1,5 +1,6 @@
 import {
-	IInsightFacade, InsightDataset,
+	IInsightFacade,
+	InsightDataset,
 	InsightDatasetKind,
 	InsightError,
 	InsightResult,
@@ -102,12 +103,6 @@ describe("InsightFacade", function () {
 			});
 		});
 
-		// describe("addDataSet validZipEmpty courses", function () { // Tests for an validID but courses folder is empty
-		// 	it("should reject with  an empty dataset but valid id", function () {
-		// 		const result = facade.addDataset("validKey", validZipEmptyCourses, InsightDatasetKind.Sections);
-		// 		return expect(result).to.eventually.be.rejectedWith(InsightError);
-		// 	});
-		// });
 
 		describe("addDataSet invalidKind", function () { // Tests for an invalid kind from the enum, rooms is invalid
 			it("should reject with invalid kind", function () {
@@ -172,6 +167,22 @@ describe("InsightFacade", function () {
 			it("should PASS with the valid added key passed", function () {
 				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections);
 				return expect(result).to.eventually.deep.equal(["validKey"]);
+			});
+		});
+
+		describe("addData with two VALID adds, pairLiteLite has only one course with two sections inside", function () {
+			it("should PASS with both valid keys added", function () {
+				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
+					.then(()=> facade.addDataset("validKeyTwo", sectionsLiteLite, InsightDatasetKind.Sections));
+				return expect(result).to.eventually.deep.equal(["validKey", "validKeyTwo"]);
+			});
+		});
+
+		describe("addData with two VALID adds, pairLiteLite and three courses", function () {
+			it("should PASS with both valid keys added", function () {
+				const result = facade.addDataset("validKeyThree", threeCourses, InsightDatasetKind.Sections)
+					.then(()=> facade.addDataset("validKeyFour", sectionsLiteLite, InsightDatasetKind.Sections));
+				return expect(result).to.eventually.deep.equal(["validKeyThree", "validKeyFour"]);
 			});
 		});
 
