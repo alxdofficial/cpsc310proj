@@ -1,8 +1,10 @@
 import {
 	IInsightFacade,
+	InsightDataset,
 	InsightDatasetKind,
 	InsightError,
-	InsightResult, NotFoundError,
+	InsightResult,
+	NotFoundError,
 	ResultTooLargeError
 } from "../../src/controller/IInsightFacade";
 import InsightFacade from "../../src/controller/InsightFacade";
@@ -19,7 +21,11 @@ describe("InsightFacade", function () {
 
 	// Declare datasets used in tests. You should add more datasets like this!
 	let sections: string;
+	let oneInvalidSection: string;
+	let threeCourses: string;
+	let noCoursesFolder: string;
 	let sectionsLite: string;
+	let sectionsLiteLite: string;
 	let invalidDataset: string;
 	let validZipInvalidCourse: string;
 	let validZipNoValidSection: string;
@@ -29,7 +35,6 @@ describe("InsightFacade", function () {
 
 	before(function () {
 		// This block runs once and loads the datasets.
-		sections = getContentFromArchives("pair.zip");
 
 		// Just in case there is anything hanging around from a previous run of the test suite
 		clearDisk();
@@ -40,7 +45,11 @@ describe("InsightFacade", function () {
 			console.info(`Before: ${this.test?.parent?.title}`);
 
 			sections = getContentFromArchives("pair.zip");
+			threeCourses = getContentFromArchives("ThreeCourses.zip");
+			noCoursesFolder = getContentFromArchives("noCoursesFolderButSectionInside.zip");
+			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
 			sectionsLite = getContentFromArchives("pairLite.zip");
+			sectionsLiteLite = getContentFromArchives("pairLiteLite.zip");
 			invalidDataset = getContentFromArchives("invalid-dataset.xlsx");
 			validZipInvalidCourse = getContentFromArchives("validZipInvalidCourse.zip");
 			validZipEmptyCourses = getContentFromArchives("validZipEmptyCourses.zip");
@@ -94,12 +103,6 @@ describe("InsightFacade", function () {
 			});
 		});
 
-		describe("addDataSet validZipEmpty courses", function () { // Tests for an validID but courses folder is empty
-			it("should reject with  an empty dataset but valid id", function () {
-				const result = facade.addDataset("validKey", validZipEmptyCourses, InsightDatasetKind.Sections);
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
-			});
-		});
 
 		describe("addDataSet invalidKind", function () { // Tests for an invalid kind from the enum, rooms is invalid
 			it("should reject with invalid kind", function () {
@@ -123,9 +126,9 @@ describe("InsightFacade", function () {
 			});
 		});
 
-		describe("addDataset with empty course folder", function () {
-			it("should reject with no sections in the dataset, an empty courses folder", function () {
-				const result = facade.addDataset("validKey", validZipEmptyCourses, InsightDatasetKind.Sections);
+		describe("addDataset with no courses folder, but sections inside", function () {
+			it("should reject with no courses folder, but has sections inside", function () {
+				const result = facade.addDataset("validKey", noCoursesFolder, InsightDatasetKind.Sections);
 				return expect(result).to.eventually.be.rejectedWith(InsightError);
 			});
 		});
@@ -147,7 +150,7 @@ describe("InsightFacade", function () {
 		describe("addData with valid add", function () {
 			it("should pass and return the key", function () {
 				const result = facade.addDataset("validKey", sections, InsightDatasetKind.Sections);
-				return expect(result).to.eventually.have.members(["validKey"]);
+				return expect(result).to.eventually.deep.equal(["validKey"]);
 			});
 		});
 
@@ -159,6 +162,30 @@ describe("InsightFacade", function () {
 				return expect(result).to.eventually.be.rejectedWith(InsightError);
 			});
 		});
+
+		describe("addData with a VALID add, pairLiteLite has only one course with two sections inside", function () {
+			it("should PASS with the valid added key passed", function () {
+				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections);
+				return expect(result).to.eventually.deep.equal(["validKey"]);
+			});
+		});
+
+		describe("addData with two VALID adds, pairLiteLite has only one course with two sections inside", function () {
+			it("should PASS with both valid keys added", function () {
+				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
+					.then(()=> facade.addDataset("validKeyTwo", sectionsLiteLite, InsightDatasetKind.Sections));
+				return expect(result).to.eventually.deep.equal(["validKey", "validKeyTwo"]);
+			});
+		});
+
+		describe("addData with two VALID adds, pairLiteLite and three courses", function () {
+			it("should PASS with both valid keys added", function () {
+				const result = facade.addDataset("validKeyThree", threeCourses, InsightDatasetKind.Sections)
+					.then(()=> facade.addDataset("validKeyFour", sectionsLiteLite, InsightDatasetKind.Sections));
+				return expect(result).to.eventually.deep.equal(["validKeyThree", "validKeyFour"]);
+			});
+		});
+
 
 		describe("addData with an invalid add and one valid add", function () {
 			it("should fail with InsightError, invalid ID add with valid after", function () {
@@ -176,6 +203,12 @@ describe("InsightFacade", function () {
 			});
 		});
 
+		describe("add with one valid section in course, and one invalid", function () {
+			it("should pass and return the id of the added set, only one section in the array", function () {
+				const result = facade.addDataset("valid", oneInvalidSection, InsightDatasetKind.Sections);
+				return expect(result).to.eventually.deep.equal(["valid"]);
+			});
+		});
 		describe("addData with a valid add followed by an invalid file type add", function () {
 			it("should fail with InsightError, valid add first then invalid file type add", function () {
 				const result = facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections)
@@ -192,11 +225,52 @@ describe("InsightFacade", function () {
 			});
 		});
 
+		describe("addData with a valid file type, expect sectionLite", function () {
+			it("should pass with and return valid as key, length of 1", function () {
+				const result = facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections);
+				return expect(result).to.eventually.have.members(["valid"]).lengthOf(1);
+			});
+		});
+
+		describe("addData with three sections, expect not only CONS sections", function () {
+			it("should pass with validThree as key, length of 1", function () {
+				const result = facade.addDataset("validThree", threeCourses, InsightDatasetKind.Sections);
+				return expect(result).to.eventually.have.members(["validThree"]).lengthOf(1);
+			});
+		});
+
 
 		describe("list datasets with no datasets added", function () {
 			it("should pass with an empty array", function () {
 				const result = facade.listDatasets();
 				return expect(result).to.eventually.deep.equal([]);
+			});
+		});
+
+		describe("list datasets with two datasets added", function () {
+			it("should pass with an array with both dsets", async function () {
+				let resultIDOne;
+				let resultIDTwo;
+				let resultArr: string[] = [];
+				 const result = await facade.addDataset("valid", threeCourses, InsightDatasetKind.Sections)
+					.then(() => facade.addDataset("validTwo", threeCourses, InsightDatasetKind.Sections))
+					.then(() => facade.listDatasets());
+				const newDataSetOne: InsightDataset = {
+					id: "valid",
+					kind: InsightDatasetKind.Sections,
+					numRows: 283
+				};
+				const newDataSetTwo: InsightDataset = {
+					id: "validTwo",
+					kind: InsightDatasetKind.Sections,
+					numRows: 283
+				};
+				resultIDOne = result[0].id;
+				resultIDTwo = result[1].id;
+				resultArr.push(resultIDOne);
+				resultArr.push(resultIDTwo);
+
+				return expect(resultArr).to.have.members([newDataSetOne.id, newDataSetTwo.id]);
 			});
 		});
 
@@ -237,6 +311,13 @@ describe("InsightFacade", function () {
 				const result = facade.addDataset("existentKey", sectionsLite, InsightDatasetKind.Sections)
 					.then(() => facade.removeDataset("in_valid_key"));
 				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+		});
+		describe("removeDataset with valid key and set", function () { // Tests for a nonexistent ID which is invalid, in a non-empty dataset
+			it("should PASS with the removed ID", function () {
+				const result = facade.addDataset("existentKey", sectionsLite, InsightDatasetKind.Sections)
+					.then(() => facade.removeDataset("existentKey"));
+				return expect(result).to.eventually.equal("existentKey");
 			});
 		});
 
@@ -342,10 +423,8 @@ describe("InsightFacade", function () {
 			(input) => facade.performQuery(input),
 			"./test/resources/unorderedqueries",
 			{
-				assertOnResult: (actual, expected) => { // TODO figure out this error
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					expect(actual).to.have.deep.members(expected);					// Member equality without order
+				assertOnResult: async (actual, expected) => { // TODO figure out this error
+					expect(actual).to.have.members(await expected);					// Member equality without order
 				},
 				errorValidator: (error): error is PQErrorKind =>
 					error === "ResultTooLargeError" || error === "InsightError",
