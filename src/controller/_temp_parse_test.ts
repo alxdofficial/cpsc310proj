@@ -1,4 +1,5 @@
 import {QueryParser} from "./ParseQuery";
+import {InsightQuery} from "./InsightQuery";
 
 let json = {
 	WHERE: {
@@ -69,4 +70,6 @@ let json4 = {
 	}
 };
 const newParser: QueryParser = new QueryParser(json2);
-newParser.getQuery();
+newParser.getQuery().then(function (returnedQuery: InsightQuery) {
+	console.log(returnedQuery);
+});

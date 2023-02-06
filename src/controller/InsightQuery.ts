@@ -100,4 +100,10 @@ export class Negation implements InsightFilter {
 }
 
 export class InsightOption {
+	public columns: Array<MFields | SFields>;
+	public order: MFields | SFields | null = null;
+	constructor(columns: Array<MFields | SFields>, order: MFields | SFields | null) {
+		this.columns = columns;
+		this.order = order;
+	}
 }
