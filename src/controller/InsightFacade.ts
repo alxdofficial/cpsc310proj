@@ -86,6 +86,13 @@ export default class InsightFacade implements IInsightFacade {
 		});
 	}
 
+	// REQUIRES: N/A
+	// MODIFIES: N/A
+	// EFFECTS: returns the map of all the insightdatasets as keys and all section objects in an array
+	public getAllDatasets(): Map<InsightDataset, Section[]> {
+		return this.datasets;
+	}
+
 	// REQUIRES: a string that represents the dataset ID
 	// MODIFIES: N/A
 	// EFFECTS: checks the ID string if it is valid or not
