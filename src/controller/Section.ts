@@ -1,3 +1,5 @@
+import InsightFacade from "./InsightFacade";
+
 export default class Section {
 	private readonly uuid: string;
 	private readonly id: string;
