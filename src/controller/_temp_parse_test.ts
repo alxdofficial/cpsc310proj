@@ -1,5 +1,6 @@
-import {QueryParser} from "./ParseQuery";
-import {InsightQuery} from "./InsightQuery";
+import InsightFacade from "./InsightFacade";
+import {clearDisk, getContentFromArchives} from "../../test/TestUtil";
+import {InsightDatasetKind} from "./IInsightFacade";
 
 let json = {
 	WHERE: {
@@ -69,7 +70,13 @@ let json4 = {
 		ORDER: "sections_avg"
 	}
 };
-const newParser: QueryParser = new QueryParser(json2);
-newParser.getQuery().then(function (returnedQuery: InsightQuery) {
-	console.log(returnedQuery);
-});
+
+const facade: InsightFacade = new InsightFacade();
+// getContentFromArchives("pair.zip");
+console.log(facade.addDataset("sections",getContentFromArchives("PairLiteLite.zip"),InsightDatasetKind.Sections));
+// const newParser: QueryParser = new QueryParser(json2);
+// newParser.getQuery().then(function (returnedQuery: InsightQuery) {
+// 	console.log(returnedQuery);
+// });
+//
+// clearDisk();

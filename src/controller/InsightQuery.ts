@@ -1,4 +1,5 @@
 import Section from "./Section";
+import {QueryUtils} from "./QueryUtils";
 
 
 export class InsightQuery {
@@ -11,6 +12,9 @@ export class InsightQuery {
 		this.options = inputOptions;
 		this.id = id;
 	}
+	// public doQuery(): Section[] {
+	// 	// sectionsInDataset: Section[] = []
+	// }
 }
 
 export enum MFields { avg,pass,fail,audit,year }
@@ -29,40 +33,60 @@ export class LogicComparison implements InsightFilter {
 		this.logic = logic;
 		this.filterList = filterList;
 	}
-	 public doFilter(data: Section): boolean {
+	 public doFilter(section: Section): boolean {
 		if (this.logic === Logic.And) {
-			return false;
+			let pred: boolean = true;
+			// eslint-disable-next-line @typescript-eslint/prefer-for-of
+			for (let i = 0;i < this.filterList.length;i++) {
+				pred = pred && this.filterList[i].doFilter(section);
+			}
+			return pred;
 		} else if (this.logic === Logic.Or) {
-			return false;
+			let pred: boolean = true;
+			// eslint-disable-next-line @typescript-eslint/prefer-for-of
+			for (let i = 0;i < this.filterList.length;i++) {
+				pred = pred || this.filterList[i].doFilter(section);
+			}
+			return pred;
 		}
 		return false;
 	}
 }
-
 export enum InsightM {lt, gt, eq}
 export class MComparison implements InsightFilter {
 	public math: InsightM;
 	public mfield: MFields;
 	public value: number;
-
 	constructor(math: InsightM,mfield: MFields, value: number) {
 		this.math = math;
 		this.mfield = mfield;
 		this.value = value;
 	}
-
-	public doFilter(data: Section): boolean {
+	public doFilter(section: Section): boolean {
 		if (this.math === InsightM.lt) {
-			return false;
+			return this.getSectionMData(section, this.mfield) < this.value;
 		} else if (this.math === InsightM.gt) {
-			return false;
+			return this.getSectionMData(section, this.mfield) > this.value;;
 		} else if (this.math === InsightM.eq) {
-			return false;
+			return this.getSectionMData(section, this.mfield) === this.value;
 		}
 		return false;
 	}
+	public getSectionMData(section: Section, field: MFields): number {
+		switch (field) {
+			case MFields.avg:
+				return section.avg;
+			case MFields.pass:
+				return section.pass;
+			case MFields.fail:
+				return section.fail;
+			case MFields.audit:
+				return section.audit;
+			case MFields.year:
+				return section.year;
+		}
+	}
 }
-
 export enum WildcardPosition {none,front,end,both}
 export class SComparison implements InsightFilter{
 	public sfield: SFields;
@@ -73,26 +97,40 @@ export class SComparison implements InsightFilter{
 		this.wildcardPosition = wildcardPosition;
 		this.value = value;
 	}
-
-	public doFilter(data: Section): boolean {
+	public doFilter(section: Section): boolean {
+		let fieldStr: string = this.getSectionSData(section,this.sfield);
 		switch (this.wildcardPosition) {
 			case WildcardPosition.none:
-				break;
+				return fieldStr === this.value;
 			case WildcardPosition.front:
-				break;
+				return fieldStr.endsWith(this.value);
 			case WildcardPosition.end:
-				break;
+				return fieldStr.startsWith(this.value);
 			case WildcardPosition.both:
-				break;
+				return fieldStr.includes(this.value);
 		}
 		return false;
+	}
+	public getSectionSData(section: Section, field: SFields): string {
+		switch (field) {
+			case SFields.dept:
+				return section.dept;
+			case SFields.id:
+				return section.id;
+			case SFields.instructor:
+				return section.instructor;
+			case SFields.title:
+				return section.title;
+			case SFields.uuid:
+				return section.getID();
+		}
 	}
 }
 
 export class Negation implements InsightFilter {
 	public filter: InsightFilter;
-	public doFilter(data: Section): boolean {
-		return false;
+	public doFilter(section: Section): boolean {
+		return !this.filter.doFilter(section);
 	}
 	constructor(filter: InsightFilter) {
 		this.filter = filter;

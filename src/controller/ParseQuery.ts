@@ -5,6 +5,7 @@ import {
 } from "./InsightQuery";
 import {InsightError} from "./IInsightFacade";
 import {QueryUtils} from "./QueryUtils";
+import {copy} from "fs-extra";
 
 export class QueryParser {
 	private readonly inputJson: any;
@@ -39,8 +40,9 @@ export class QueryParser {
 				}
 				// check that options key exists
 				if (this.inputJson["OPTIONS"] !== undefined) {
-					let optionClause = this.inputJson["OPTOINS"];
-					option =  this.utils.parseOptions(optionClause);
+					let optionClause = this.inputJson["OPTIONS"];
+					console.log(optionClause);
+					option = this.utils.parseOptions(optionClause);
 					if (option == null) {
 						return reject(new InsightError("options could not be parsed"));
 					}

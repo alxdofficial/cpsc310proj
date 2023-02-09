@@ -1,13 +1,18 @@
 import {
 	InsightFilter,
-	InsightM, InsightOption,
+	InsightM,
+	InsightOption,
 	Logic,
 	LogicComparison,
 	MComparison,
 	MFields,
 	Negation,
-	SComparison, SFields, WildcardPosition
+	SComparison,
+	SFields,
+	WildcardPosition
+// eslint-disable-next-line import/namespace
 } from "./InsightQuery";
+import Section from "./Section";
 
 // provides a bunch of helper functions and stores the id of the dataset the query is reffered to
 export class QueryUtils {
@@ -117,6 +122,7 @@ export class QueryUtils {
 	}
 	// helper that takes a string, gets the id portion, sets the id field of this object if it hasnt been set yet or the gotten id is equal to the current id, and also the field portion. returns null if either is invalid
 	private MgetIdandField(text: string): [string, MFields] | null {
+		// console.log(text);
 		let firstUS: number = text.indexOf("_");
 		let id = text.substring(0,firstUS);
 		if (this.id === "" || this.id === id) {
@@ -138,11 +144,12 @@ export class QueryUtils {
 			case "year":
 				return [id, MFields.year];
 			default:
-				console.log("either id or field couldnt be parsed or is incorrect type");
+				// console.log("M either id or field couldnt be parsed or is incorrect type");
 				return null;
 		}
 	}
 	private SgetIdandField(text: string): [string, SFields] | null {
+		// console.log(text);
 		let firstUS: number = text.indexOf("_");
 		let id = text.substring(0,firstUS);
 		if (this.id === "" || this.id === id) {
@@ -164,7 +171,7 @@ export class QueryUtils {
 			case "uuid":
 				return [id, SFields.uuid];
 			default:
-				console.log("either id or field couldnt be parsed or is incorrect type");
+				// console.log("S either id or field couldnt be parsed or is incorrect type");
 				return null;
 		}
 	}
@@ -252,4 +259,5 @@ export class QueryUtils {
 		// create the option object and return it
 		return new InsightOption(arrayColumns,order);
 	}
+
 }
