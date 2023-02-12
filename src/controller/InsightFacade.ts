@@ -10,6 +10,8 @@ import {
 import fs from "fs-extra";
 import JSZip, {JSZipObject} from "jszip";
 import Section from "./Section";
+import {QueryParser} from "./ParseQuery";
+import {InsightQuery} from "./InsightQuery";
 
 
 /**
@@ -244,7 +246,15 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public performQuery(query: unknown): Promise<InsightResult[]> {
-		return Promise.reject("Not implemented.");
+		return new Promise<InsightResult[]>((resolve,reject) => {
+			const newParser: QueryParser = new QueryParser(query,this);
+			newParser.getQuery().then(function (returnedQuery: InsightQuery) {
+				console.log("query returned result: ");
+				return resolve(returnedQuery.doQuery());
+			}).catch((err: InsightError | NotFoundError) => {
+				return reject(err);
+			});
+		});
 	}
 
 	public listDatasets(): Promise<InsightDataset[]> {		// Settling this promise: This promise only fufills, either an empty array or array of current datasets

@@ -1,4 +1,6 @@
 import Section from "./Section";
+import InsightFacade from "./InsightFacade";
+import {InsightDataset, InsightError, InsightResult, ResultTooLargeError} from "./IInsightFacade";
 import {QueryUtils} from "./QueryUtils";
 
 
@@ -6,19 +8,68 @@ export class InsightQuery {
 	private id: string;
 	private body: InsightFilter;
 	private options: InsightOption;
-	constructor(inputBody: InsightFilter, inputOptions: InsightOption, id: string) {
+	private facade: InsightFacade;
+	constructor(inputBody: InsightFilter, inputOptions: InsightOption, id: string, facade: InsightFacade) {
 		console.log("new instance of insight query");
 		this.body = inputBody;
 		this.options = inputOptions;
 		this.id = id;
+		this.facade = facade;
 	}
-	// public doQuery(): Section[] {
-	// 	// sectionsInDataset: Section[] = []
-	// }
+	public doQuery(): Promise<InsightResult[]> {
+		return new Promise((resolve, reject) => {
+			// first check our dataset exists, and throw error if not
+			let allSections: Map<InsightDataset, Section[]> = this.facade.getAllDatasets();
+			let sections: Section[] | undefined = [];
+			for (let key of allSections.keys()) {
+				if (key.id === this.id) {
+					sections = allSections.get(key);
+					break;
+				}
+			}
+			if (sections === undefined) {
+				return reject(new InsightError("dataset of this query's referenced id is not found"));
+			}
+			// do query found dataset
+			let outputSections: Section[] = [];
+			for (let section of sections) {
+				let addpred: boolean = this.body.doFilter(section);
+				if (addpred) {
+					outputSections.push(section);
+				}
+			}
+			// check if too many results
+			if (outputSections.length > 5000) {
+				return reject(new ResultTooLargeError());
+			}
+			// console.log(this.makeOutput(outputSections));
+			return resolve(this.makeOutput(outputSections));
+		});
+	}
+	public makeOutput(sections: Section[]): InsightResult[] {
+		// sort the sections if neccasary
+		let orderedSections = sections;
+		if (this.options.order != null) {
+			let orderCol: MFields | SFields = this.options.order;
+			sections.sort( (a,b) => {
+				return QueryUtils.getSectionData(a,orderCol) < QueryUtils.getSectionData(b,orderCol) ? -1 : 1;
+			});
+		}
+		// create insight result objects and return
+		let output: InsightResult[] = [];
+		for (let section of orderedSections) {
+			let result: InsightResult = {};
+			for (let columnn of this.options.columns) {
+				result[columnn] = QueryUtils.getSectionData(section,columnn);
+			}
+			output.push(result);
+		}
+		return output;
+	}
 }
 
-export enum MFields { avg,pass,fail,audit,year }
-export enum SFields { dept,id,instructor,title,uuid}
+export enum MFields { avg="avg",pass="pass",fail="fail",audit="audit",year="year" }
+export enum SFields { dept="dept",id="id",instructor="instructor",title="title",uuid="uuid"}
 
 export interface InsightFilter {
 	doFilter(section: Section): boolean
@@ -64,28 +115,14 @@ export class MComparison implements InsightFilter {
 	}
 	public doFilter(section: Section): boolean {
 		if (this.math === InsightM.lt) {
-			return this.getSectionMData(section, this.mfield) < this.value;
+			return QueryUtils.getSectionData(section, this.mfield) < this.value;
 		} else if (this.math === InsightM.gt) {
-			return this.getSectionMData(section, this.mfield) > this.value;;
+			return QueryUtils.getSectionData(section, this.mfield) > this.value;
 		} else if (this.math === InsightM.eq) {
-			return this.getSectionMData(section, this.mfield) === this.value;
-		}
-		return false;
-	}
-	public getSectionMData(section: Section, field: MFields): number {
-		switch (field) {
-			case MFields.avg:
-				return section.avg;
-			case MFields.pass:
-				return section.pass;
-			case MFields.fail:
-				return section.fail;
-			case MFields.audit:
-				return section.audit;
-			case MFields.year:
-				return section.year;
+			return QueryUtils.getSectionData(section, this.mfield) === this.value;
 		}
 	}
+
 }
 export enum WildcardPosition {none,front,end,both}
 export class SComparison implements InsightFilter{
@@ -98,7 +135,11 @@ export class SComparison implements InsightFilter{
 		this.value = value;
 	}
 	public doFilter(section: Section): boolean {
-		let fieldStr: string = this.getSectionSData(section,this.sfield);
+		let fieldStr = QueryUtils.getSectionData(section,this.sfield);
+		if (typeof fieldStr !== "string") {
+			// this should never execute
+			throw new InsightError("do filter of scomparison got a m data from getSectionData");
+		}
 		switch (this.wildcardPosition) {
 			case WildcardPosition.none:
 				return fieldStr === this.value;
@@ -110,20 +151,6 @@ export class SComparison implements InsightFilter{
 				return fieldStr.includes(this.value);
 		}
 		return false;
-	}
-	public getSectionSData(section: Section, field: SFields): string {
-		switch (field) {
-			case SFields.dept:
-				return section.dept;
-			case SFields.id:
-				return section.id;
-			case SFields.instructor:
-				return section.instructor;
-			case SFields.title:
-				return section.title;
-			case SFields.uuid:
-				return section.getID();
-		}
 	}
 }
 
