@@ -10,7 +10,6 @@ import {
 	SComparison,
 	SFields,
 	WildcardPosition
-// eslint-disable-next-line import/namespace
 } from "./InsightQuery";
 
 // provides a bunch of helper functions and stores the id of the dataset the query is reffered to

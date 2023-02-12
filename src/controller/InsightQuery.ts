@@ -87,16 +87,14 @@ export class LogicComparison implements InsightFilter {
 	 public doFilter(section: Section): boolean {
 		if (this.logic === Logic.And) {
 			let pred: boolean = true;
-			// eslint-disable-next-line @typescript-eslint/prefer-for-of
-			for (let i = 0;i < this.filterList.length;i++) {
-				pred = pred && this.filterList[i].doFilter(section);
+			for (let filter of this.filterList) {
+				pred = pred && filter.doFilter(section);
 			}
 			return pred;
 		} else if (this.logic === Logic.Or) {
 			let pred: boolean = true;
-			// eslint-disable-next-line @typescript-eslint/prefer-for-of
-			for (let i = 0;i < this.filterList.length;i++) {
-				pred = pred || this.filterList[i].doFilter(section);
+			for (let filter of this.filterList) {
+				pred = pred || filter.doFilter(section);
 			}
 			return pred;
 		}
@@ -121,6 +119,7 @@ export class MComparison implements InsightFilter {
 		} else if (this.math === InsightM.eq) {
 			return QueryUtils.getSectionData(section, this.mfield) === this.value;
 		}
+		return false;
 	}
 
 }
