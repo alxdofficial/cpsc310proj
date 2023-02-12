@@ -222,11 +222,10 @@ export class ParseUtils {
 		}
 		// get each column
 		let optionColumns: Array<MFields | SFields> = [];
-		// eslint-disable-next-line @typescript-eslint/prefer-for-of
-		for (let i = 0;i < jsonColumns.length;i++) {
-			let idColumn: [string, MFields] | [string, SFields] | null = this.SgetIdandField(jsonColumns[i]);
+		for (let jsonColumn of jsonColumns) {
+			let idColumn: [string, MFields] | [string, SFields] | null = this.SgetIdandField(jsonColumn);
 			if (idColumn == null) {
-				idColumn = this.MgetIdandField(jsonColumns[i]);
+				idColumn = this.MgetIdandField(jsonColumn);
 			}
 			if (idColumn == null) {
 				console.log("one of the columns could not be parsed");
