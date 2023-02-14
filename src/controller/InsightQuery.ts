@@ -20,7 +20,7 @@ export class InsightQuery {
 		return new Promise((resolve, reject) => {
 			// first check our dataset exists, and throw error if not
 			let allSections: Map<InsightDataset, Section[]> = this.facade.getAllDatasets();
-			let sections: Section[] | undefined = [];
+			let sections: Section[] | undefined;
 			for (let key of allSections.keys()) {
 				if (key.id === this.id) {
 					sections = allSections.get(key);
