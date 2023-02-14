@@ -52,7 +52,7 @@ export class InsightQuery {
 		if (this.options.order != null) {
 			let orderCol: MFields | SFields = this.options.order;
 			sections.sort( (a,b) => {
-				return QueryUtils.getSectionData(a,orderCol) < QueryUtils.getSectionData(b,orderCol) ? -1 : 1;
+				return QueryUtils.getSectionData(a, orderCol) < QueryUtils.getSectionData(b,orderCol) ? -1 : 1;
 			});
 		}
 		// create insight result objects and return
@@ -60,7 +60,11 @@ export class InsightQuery {
 		for (let section of orderedSections) {
 			let result: InsightResult = {};
 			for (let columnn of this.options.columns) {
-				result[this.id + "_" + columnn] = QueryUtils.getSectionData(section,columnn);
+				if (QueryUtils.MorSField(columnn) === "m") {
+					result[this.id + "_" + columnn] = Number(QueryUtils.getSectionData(section,columnn));
+				} else if (QueryUtils.MorSField(columnn) === "s") {
+					result[this.id + "_" + columnn] = String(QueryUtils.getSectionData(section,columnn));
+				}
 			}
 			output.push(result);
 		}

@@ -2,7 +2,7 @@ import Section from "./Section";
 import {MFields, SFields} from "./InsightQuery";
 
 export class QueryUtils {
-	public static getSectionData(section: Section, field: MFields | SFields): number | string{
+	public static getSectionData(section: Section, field: MFields | SFields): number | string {
 		switch (field) {
 			case MFields.avg:
 				return section.avg;
@@ -24,6 +24,30 @@ export class QueryUtils {
 				return section.title;
 			case SFields.uuid:
 				return section.getID();
+		}
+	}
+	public static MorSField(field: MFields | SFields): string {
+		switch (field) {
+			case MFields.avg:
+				return "m";
+			case MFields.pass:
+				return "m";
+			case MFields.fail:
+				return "m";
+			case MFields.audit:
+				return "m";
+			case MFields.year:
+				return "m";
+			case SFields.dept:
+				return "s";
+			case SFields.id:
+				return "s";
+			case SFields.instructor:
+				return "s";
+			case SFields.title:
+				return "s";
+			case SFields.uuid:
+				return "s";
 		}
 	}
 }

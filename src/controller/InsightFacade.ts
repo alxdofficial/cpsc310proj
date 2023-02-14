@@ -249,7 +249,8 @@ export default class InsightFacade implements IInsightFacade {
 		return new Promise<InsightResult[]>((resolve,reject) => {
 			const newParser: QueryParser = new QueryParser(query,this);
 			newParser.getQuery().then(function (returnedQuery: InsightQuery) {
-				console.log("query returned result: ");
+				console.log(returnedQuery.body);
+				console.log(returnedQuery.options);
 				return resolve(returnedQuery.doQuery());
 			}).catch((err: InsightError | NotFoundError) => {
 				return reject(err);

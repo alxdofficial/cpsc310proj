@@ -17,3 +17,6 @@ data/
 .DS_Store
 .env
 *.log
+/test/resources/orderedqueries/
+/test/resources/orderedqueriesinactive/
+/test/resources/unorderedqueries/

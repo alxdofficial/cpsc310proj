@@ -2,10 +2,11 @@ import InsightFacade from "./InsightFacade";
 import {clearDisk, getContentFromArchives} from "../../test/TestUtil";
 import {InsightDatasetKind} from "./IInsightFacade";
 
+
 let json = {
 	WHERE: {
 		GT: {
-			sections_avg: 97
+			sections_avg: 60
 		}
 	},
 	OPTIONS: {
@@ -21,12 +22,12 @@ let json2 = {
 		AND: [
 			{
 				IS: {
-					sections_dept: "math"
+					sections_dept: "cpsc"
 				}
 			},
 			{
-				LT: {
-					sections_avg: 50
+				GT: {
+					sections_avg: 70
 				}
 			}
 		]
@@ -71,12 +72,15 @@ let json4 = {
 	}
 };
 
+clearDisk();
 const facade: InsightFacade = new InsightFacade();
-// getContentFromArchives("pair.zip");
-console.log(facade.addDataset("sections",getContentFromArchives("PairLiteLite.zip"),InsightDatasetKind.Sections));
-// const newParser: QueryParser = new QueryParser(json2);
-// newParser.getQuery().then(function (returnedQuery: InsightQuery) {
-// 	console.log(returnedQuery);
-// });
-//
-// clearDisk();
+facade.addDataset("sections",getContentFromArchives("pairLite.zip"),InsightDatasetKind.Sections).then(
+).then(function () {
+	return facade.performQuery(json2);
+}).then(function (output) {
+	console.log(output);
+}).then(function () {
+	clearDisk();
+});
+
+
