@@ -6,8 +6,8 @@ import {QueryUtils} from "./QueryUtils";
 
 export class InsightQuery {
 	private id: string;
-	private body: InsightFilter;
-	private options: InsightOption;
+	public body: InsightFilter;
+	public options: InsightOption;
 	private facade: InsightFacade;
 	constructor(inputBody: InsightFilter, inputOptions: InsightOption, id: string, facade: InsightFacade) {
 		console.log("new instance of insight query");
@@ -60,7 +60,7 @@ export class InsightQuery {
 		for (let section of orderedSections) {
 			let result: InsightResult = {};
 			for (let columnn of this.options.columns) {
-				result[columnn] = QueryUtils.getSectionData(section,columnn);
+				result[this.id + "_" + columnn] = QueryUtils.getSectionData(section,columnn);
 			}
 			output.push(result);
 		}

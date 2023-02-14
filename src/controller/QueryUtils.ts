@@ -2,7 +2,7 @@ import Section from "./Section";
 import {MFields, SFields} from "./InsightQuery";
 
 export class QueryUtils {
-	public static getSectionData(section: Section, field: MFields | SFields) {
+	public static getSectionData(section: Section, field: MFields | SFields): number | string{
 		switch (field) {
 			case MFields.avg:
 				return section.avg;
