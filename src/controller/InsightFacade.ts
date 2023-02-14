@@ -249,8 +249,7 @@ export default class InsightFacade implements IInsightFacade {
 		return new Promise<InsightResult[]>((resolve,reject) => {
 			const newParser: QueryParser = new QueryParser(query,this);
 			newParser.getQuery().then(function (returnedQuery: InsightQuery) {
-				console.log(returnedQuery.body);
-				console.log(returnedQuery.options);
+				// we set up two promises to race as limit to query time. current time limit: 1 second
 				return resolve(returnedQuery.doQuery());
 			}).catch((err: InsightError | NotFoundError) => {
 				return reject(err);

@@ -18,6 +18,10 @@ export class InsightQuery {
 	}
 	public doQuery(): Promise<InsightResult[]> {
 		return new Promise((resolve, reject) => {
+			// we create a 2 second time limit
+			setTimeout(() => {
+				return reject(new InsightError("query timed out"));
+			}, 2000);
 			// first check our dataset exists, and throw error if not
 			let allSections: Map<InsightDataset, Section[]> = this.facade.getAllDatasets();
 			let sections: Section[] | undefined;
