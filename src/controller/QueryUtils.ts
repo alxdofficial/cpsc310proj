@@ -1,5 +1,6 @@
 import Section from "./Section";
 import {MFields, SFields} from "./InsightQuery";
+import {InsightError} from "./IInsightFacade";
 
 export class QueryUtils {
 	public static getSectionData(section: Section, field: MFields | SFields): number | string {
@@ -50,5 +51,18 @@ export class QueryUtils {
 				return "s";
 		}
 	}
+	// public static checkQueryReturnType(result: any): string {
+	// 	if (result instanceof InsightError) {
+	// 		return "InsightError";
+	// 	} else if (Array.isArray(result)) {
+	// 		if (result.length > 0) {
+	// 			return  "InsightResult[]";
+	// 		} else {
+	// 			return "[]";
+	// 		}
+	// 	}
+	// 	return "undefined";
+	// }
+
 }
 

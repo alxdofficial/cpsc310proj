@@ -16,12 +16,16 @@ export class InsightQuery {
 		this.id = id;
 		this.facade = facade;
 	}
-	public doQuery(): Promise<InsightResult[]> {
-		return new Promise((resolve, reject) => {
-			// we create a 2 second time limit
-			setTimeout(() => {
-				return reject(new InsightError("query timed out"));
-			}, 2000);
+	public async doQuery(): Promise<any> {
+		// create a timeout process with 2 second limit. this will race against query promise
+		const timeoutPromise = new Promise((timeoutResolve, timeoutReject) => {
+			setTimeout(()=> {
+				console.log("timed out");
+				return timeoutReject(new InsightError("query timed out"));
+			}, 1000);
+		});
+		// the query promise
+		const queryPromise = new Promise((resolve, reject) => {
 			// first check our dataset exists, and throw error if not
 			let allSections: Map<InsightDataset, Section[]> = this.facade.getAllDatasets();
 			let sections: Section[] | undefined;
@@ -46,9 +50,11 @@ export class InsightQuery {
 			if (outputSections.length > 5000) {
 				return reject(new ResultTooLargeError());
 			}
+			console.log("query completed");
 			// console.log(this.makeOutput(outputSections));
 			return resolve(this.makeOutput(outputSections));
 		});
+		return await Promise.race([timeoutPromise,queryPromise]);
 	}
 	public makeOutput(sections: Section[]): InsightResult[] {
 		// sort the sections if neccasary
