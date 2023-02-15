@@ -235,7 +235,7 @@ export default class InsightFacade implements IInsightFacade {
 				this.datasets.delete(insightDataset);										// Delete the <K,V> pair from the map with this key, clears from memory
 				this.datasetIDs.splice(this.datasetIDs.indexOf(id), 1); 			// Delete the ID from the ID list, clears from memory
 
-				console.log("Removed: " + id.toString());
+				// console.log("Removed: " + id.toString());
 				fs.removeSync("./data/" + id.toString());								// Synchronously remove the dataset with the id in the ./data folder, clears from disk
 
 				return Promise.resolve(id.toString()); 										// after success
