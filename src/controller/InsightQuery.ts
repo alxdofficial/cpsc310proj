@@ -6,8 +6,8 @@ import {QueryUtils} from "./QueryUtils";
 
 export class InsightQuery {
 	private id: string;
-	private body: InsightFilter;
-	private options: InsightOption;
+	public body: InsightFilter;
+	public options: InsightOption;
 	private facade: InsightFacade;
 	constructor(inputBody: InsightFilter, inputOptions: InsightOption, id: string, facade: InsightFacade) {
 		console.log("new instance of insight query");
@@ -16,11 +16,12 @@ export class InsightQuery {
 		this.id = id;
 		this.facade = facade;
 	}
-	public doQuery(): Promise<InsightResult[]> {
+	public async doQuery(): Promise<InsightResult[]> {
+		// the query promise
 		return new Promise((resolve, reject) => {
 			// first check our dataset exists, and throw error if not
 			let allSections: Map<InsightDataset, Section[]> = this.facade.getAllDatasets();
-			let sections: Section[] | undefined = [];
+			let sections: Section[] | undefined;
 			for (let key of allSections.keys()) {
 				if (key.id === this.id) {
 					sections = allSections.get(key);
@@ -42,7 +43,6 @@ export class InsightQuery {
 			if (outputSections.length > 5000) {
 				return reject(new ResultTooLargeError());
 			}
-			// console.log(this.makeOutput(outputSections));
 			return resolve(this.makeOutput(outputSections));
 		});
 	}
@@ -52,7 +52,7 @@ export class InsightQuery {
 		if (this.options.order != null) {
 			let orderCol: MFields | SFields = this.options.order;
 			sections.sort( (a,b) => {
-				return QueryUtils.getSectionData(a,orderCol) < QueryUtils.getSectionData(b,orderCol) ? -1 : 1;
+				return QueryUtils.getSectionData(a, orderCol) < QueryUtils.getSectionData(b,orderCol) ? -1 : 1;
 			});
 		}
 		// create insight result objects and return
@@ -60,7 +60,11 @@ export class InsightQuery {
 		for (let section of orderedSections) {
 			let result: InsightResult = {};
 			for (let columnn of this.options.columns) {
-				result[columnn] = QueryUtils.getSectionData(section,columnn);
+				if (QueryUtils.MorSField(columnn) === "m") {
+					result[this.id + "_" + columnn] = Number(QueryUtils.getSectionData(section,columnn));
+				} else if (QueryUtils.MorSField(columnn) === "s") {
+					result[this.id + "_" + columnn] = String(QueryUtils.getSectionData(section,columnn));
+				}
 			}
 			output.push(result);
 		}

@@ -4,7 +4,7 @@ import {
 	InsightDatasetKind,
 	InsightError,
 	InsightResult,
-	NotFoundError
+	NotFoundError, ResultTooLargeError
 } from "./IInsightFacade";
 
 import fs from "fs-extra";
@@ -12,6 +12,7 @@ import JSZip, {JSZipObject} from "jszip";
 import Section from "./Section";
 import {QueryParser} from "./ParseQuery";
 import {InsightQuery} from "./InsightQuery";
+import {QueryUtils} from "./QueryUtils";
 
 
 /**
@@ -33,7 +34,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
 	constructor() {
-		console.log("InsightFacadeImpl::init()");
+		// console.log("InsightFacadeImpl::init()");
 		this.datasetIDs = [];															// Initialize an empty array of strings that will contain the currently added Dataset IDs
 		this.datasets = new Map();
 		this.sectionArr = [];
@@ -235,7 +236,7 @@ export default class InsightFacade implements IInsightFacade {
 				this.datasets.delete(insightDataset);										// Delete the <K,V> pair from the map with this key, clears from memory
 				this.datasetIDs.splice(this.datasetIDs.indexOf(id), 1); 			// Delete the ID from the ID list, clears from memory
 
-				console.log("Removed: " + id.toString());
+				// console.log("Removed: " + id.toString());
 				fs.removeSync("./data/" + id.toString());								// Synchronously remove the dataset with the id in the ./data folder, clears from disk
 
 				return Promise.resolve(id.toString()); 										// after success
@@ -249,8 +250,11 @@ export default class InsightFacade implements IInsightFacade {
 		return new Promise<InsightResult[]>((resolve,reject) => {
 			const newParser: QueryParser = new QueryParser(query,this);
 			newParser.getQuery().then(function (returnedQuery: InsightQuery) {
-				console.log("query returned result: ");
-				return resolve(returnedQuery.doQuery());
+				return returnedQuery.doQuery().then((result) => {
+					return resolve(result);
+				}).catch((err) => {
+					return reject(err);
+				});
 			}).catch((err: InsightError | NotFoundError) => {
 				return reject(err);
 			});

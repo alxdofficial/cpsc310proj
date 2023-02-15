@@ -1,8 +1,9 @@
 import Section from "./Section";
 import {MFields, SFields} from "./InsightQuery";
+import {InsightError} from "./IInsightFacade";
 
 export class QueryUtils {
-	public static getSectionData(section: Section, field: MFields | SFields) {
+	public static getSectionData(section: Section, field: MFields | SFields): number | string {
 		switch (field) {
 			case MFields.avg:
 				return section.avg;
@@ -26,5 +27,42 @@ export class QueryUtils {
 				return section.getID();
 		}
 	}
+	public static MorSField(field: MFields | SFields): string {
+		switch (field) {
+			case MFields.avg:
+				return "m";
+			case MFields.pass:
+				return "m";
+			case MFields.fail:
+				return "m";
+			case MFields.audit:
+				return "m";
+			case MFields.year:
+				return "m";
+			case SFields.dept:
+				return "s";
+			case SFields.id:
+				return "s";
+			case SFields.instructor:
+				return "s";
+			case SFields.title:
+				return "s";
+			case SFields.uuid:
+				return "s";
+		}
+	}
+	// public static checkQueryReturnType(result: any): string {
+	// 	if (result instanceof InsightError) {
+	// 		return "InsightError";
+	// 	} else if (Array.isArray(result)) {
+	// 		if (result.length > 0) {
+	// 			return  "InsightResult[]";
+	// 		} else {
+	// 			return "[]";
+	// 		}
+	// 	}
+	// 	return "undefined";
+	// }
+
 }
 
