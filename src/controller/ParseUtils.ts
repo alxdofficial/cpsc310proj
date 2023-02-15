@@ -34,7 +34,7 @@ export class ParseUtils {
 				return this.NHelper(json);
 			default:
 				// unrecognized key
-				console.log("unrecognized filter key: " + key);
+				// console.log("unrecognized filter key: " + key);
 				return null;
 		}
 	}
@@ -52,7 +52,7 @@ export class ParseUtils {
 				filter[Object.keys(filter)[0]]);
 			// if any clause failed to parse, fail.
 			if (filterObject == null) {
-				console.log("one clause in logic comparison failed to parse");
+				// console.log("one clause in logic comparison failed to parse");
 				return null;
 			} else {
 				arrayFilters.push(filterObject);
@@ -105,14 +105,14 @@ export class ParseUtils {
 	// return a Negation or null if failed to parse
 	private NHelper(json: any): Negation | null {
 		if (json.length > 1) {
-			console.log("too many filters in negation");
+			// console.log("too many filters in negation");
 			return null;
 		}
 		// console.log(Object.keys(json)[0]);
 		// console.log(json[Object.keys(json)[0]]);
 		let filter = this.multiplexInput(Object.keys(json)[0], json[Object.keys(json)[0]]);
 		if (filter == null) {
-			console.log("a valid filter could not be parsed for negation");
+			// console.log("a valid filter could not be parsed for negation");
 			return null;
 		} else {
 			return new Negation(filter);
@@ -126,7 +126,7 @@ export class ParseUtils {
 		if (this.id === "" || this.id === id) {
 			this.id = id;
 		} else {
-			console.log("this query refers to multiple datasets");
+			// console.log("this query refers to multiple datasets");
 			return null;
 		}
 		let fieldString: string = text.substring(firstUS + 1);
@@ -153,7 +153,7 @@ export class ParseUtils {
 		if (this.id === "" || this.id === id) {
 			this.id = id;
 		} else {
-			console.log("this query refers to multiple datasets");
+			// console.log("this query refers to multiple datasets");
 			return null;
 		}
 		let fieldString: string = text.substring(firstUS + 1);
@@ -176,7 +176,7 @@ export class ParseUtils {
 	private getSvalueAndWildCard (target: any): [WildcardPosition, string] | null {
 		// screen for when input is not a string
 		if (typeof target !== "string") {
-			console.log("S target value is not string");
+			// console.log("S target value is not string");
 			return null;
 		}
 		// start with no WC
@@ -191,7 +191,7 @@ export class ParseUtils {
 		// check for bla*h illegal
 		for (let i = 1; i < target.length - 1; i++) {
 			if (target.charAt(i) === "*") {
-				console.log("found wildcard in the middle of text. not allowed");
+				// console.log("found wildcard in the middle of text. not allowed");
 				return null;
 			}
 			targetString += target.charAt(i);
@@ -212,12 +212,12 @@ export class ParseUtils {
 	public parseOptions(json: any): InsightOption | null {
 		// check that COLUMNS exist
 		if (json["COLUMNS"] === undefined) {
-			console.log("COLUMNS key dont exist");
+			// console.log("COLUMNS key dont exist");
 			return null;
 		}
 		let jsonColumns = json["COLUMNS"];
 		if (jsonColumns.length < 1) {
-			console.log("no colmns in column key");
+			// console.log("no colmns in column key");
 			return null;
 		}
 		// get each column
@@ -228,14 +228,14 @@ export class ParseUtils {
 				idColumn = this.MgetIdandField(jsonColumn);
 			}
 			if (idColumn == null) {
-				console.log("one of the columns could not be parsed");
+				// console.log("one of the columns could not be parsed");
 				return null;
 			}
 			optionColumns.push(idColumn[1]);
 		}
 		// check we have at least 1 validated column
 		if (optionColumns.length < 1) {
-			console.log("no valid columns in options");
+			// console.log("no valid columns in options");
 			return null;
 		}
 		// check an ORDER is specified
@@ -251,7 +251,7 @@ export class ParseUtils {
 				if (optionColumns.includes(orderColumn)) {
 					order = orderColumn;
 				} else {
-					console.log("order column is not included in output column");
+					// console.log("order column is not included in output column");
 					return null;
 				}
 			}
