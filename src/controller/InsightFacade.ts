@@ -34,7 +34,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
 	constructor() {
-		console.log("InsightFacadeImpl::init()");
+		// console.log("InsightFacadeImpl::init()");
 		this.datasetIDs = [];															// Initialize an empty array of strings that will contain the currently added Dataset IDs
 		this.datasets = new Map();
 		this.sectionArr = [];
@@ -250,7 +250,11 @@ export default class InsightFacade implements IInsightFacade {
 		return new Promise<InsightResult[]>((resolve,reject) => {
 			const newParser: QueryParser = new QueryParser(query,this);
 			newParser.getQuery().then(function (returnedQuery: InsightQuery) {
-				return resolve(returnedQuery.doQuery());
+				return returnedQuery.doQuery().then((result) => {
+					return resolve(result);
+				}).catch((err) => {
+					return reject(err);
+				});
 			}).catch((err: InsightError | NotFoundError) => {
 				return reject(err);
 			});
