@@ -252,6 +252,7 @@ export default class InsightFacade implements IInsightFacade {
 			newParser.getQuery().then(function (returnedQuery: InsightQuery) {
 				return returnedQuery.doQuery().then((result) => {
 					return resolve(result);
+					//
 				}).catch((err) => {
 					return reject(err);
 				});
