@@ -119,7 +119,7 @@ export class MComparison implements InsightFilter {
 		this.value = value;
 	}
 	public doFilter(section: Section): boolean {
-		let sectionVal: number = Number(QueryUtils.getSectionData(section,this.mfield));
+		let sectionVal: number = QueryUtils.getSectionData(section, this.mfield) as number;
 		if (this.math === InsightM.lt) {
 			return sectionVal < this.value;
 		} else if (this.math === InsightM.gt) {
