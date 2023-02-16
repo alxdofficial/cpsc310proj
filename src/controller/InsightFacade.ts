@@ -57,7 +57,7 @@ export default class InsightFacade implements IInsightFacade {
 					return Promise.reject(new InsightError("Creating ./data failed!"));
 				});
 				const JSzip = new JSZip();
-				JSzip.loadAsync(content, {base64: true, checkCRC32: true}) 		// is loaded even if its invalid
+				JSzip.loadAsync(content, {base64: true, checkCRC32: true})        // is loaded even if its invalid
 					.then(async (zip) => {
 						await this.iterateFolders(zip);									// Iterate over the files, modifiy the class variables
 						if (this.rowCount === 0) {
@@ -247,12 +247,11 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public performQuery(query: unknown): Promise<InsightResult[]> {
-		return new Promise<InsightResult[]>((resolve,reject) => {
-			const newParser: QueryParser = new QueryParser(query,this);
+		return new Promise<InsightResult[]>((resolve, reject) => {
+			const newParser: QueryParser = new QueryParser(query, this);
 			newParser.getQuery().then(function (returnedQuery: InsightQuery) {
 				return returnedQuery.doQuery().then((result) => {
 					return resolve(result);
-					//
 				}).catch((err) => {
 					return reject(err);
 				});
