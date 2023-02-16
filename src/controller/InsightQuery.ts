@@ -90,17 +90,20 @@ export class LogicComparison implements InsightFilter {
 	}
 	 public doFilter(section: Section): boolean {
 		if (this.logic === Logic.And) {
-			let pred: boolean = true;
 			for (let filter of this.filterList) {
-				pred = pred && filter.doFilter(section);
+				// console.log(filter.doFilter(section));
+				if(!filter.doFilter(section)) {
+					return false;
+				}
 			}
-			return pred;
+			return true;
 		} else if (this.logic === Logic.Or) {
-			let pred: boolean = true;
 			for (let filter of this.filterList) {
-				pred = pred || filter.doFilter(section);
+				if(filter.doFilter(section)) {
+					return true;
+				}
 			}
-			return pred;
+			return false;
 		}
 		return false;
 	}
@@ -116,12 +119,13 @@ export class MComparison implements InsightFilter {
 		this.value = value;
 	}
 	public doFilter(section: Section): boolean {
+		let sectionVal: number = Number(QueryUtils.getSectionData(section,this.mfield));
 		if (this.math === InsightM.lt) {
-			return QueryUtils.getSectionData(section, this.mfield) < this.value;
+			return sectionVal < this.value;
 		} else if (this.math === InsightM.gt) {
-			return QueryUtils.getSectionData(section, this.mfield) > this.value;
+			return sectionVal > this.value;
 		} else if (this.math === InsightM.eq) {
-			return QueryUtils.getSectionData(section, this.mfield) === this.value;
+			return sectionVal === this.value;
 		}
 		return false;
 	}
@@ -138,11 +142,7 @@ export class SComparison implements InsightFilter{
 		this.value = value;
 	}
 	public doFilter(section: Section): boolean {
-		let fieldStr = QueryUtils.getSectionData(section,this.sfield);
-		if (typeof fieldStr !== "string") {
-			// this should never execute
-			throw new InsightError("do filter of scomparison got a m data from getSectionData");
-		}
+		let fieldStr = String(QueryUtils.getSectionData(section,this.sfield));
 		switch (this.wildcardPosition) {
 			case WildcardPosition.none:
 				return fieldStr === this.value;
