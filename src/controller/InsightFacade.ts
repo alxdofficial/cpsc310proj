@@ -61,15 +61,20 @@ export default class InsightFacade implements IInsightFacade {
 					kind: insightKind,
 					numRows: jsonString.numRows
 				};
-
-			this.datasets.set(newDataset, jsonString.sectionArr);
+			for (const str of jsonString.sectionArr) {
+				let toPush: Section = new Section(str.uuid, str.id, str.title, str.instructor,
+					str.dept, str.year, str.avg, str.pass, str.fail, str.audit);
+				this.sectionArr.push(toPush);
+			}
+			this.datasets.set(newDataset, this.sectionArr);
+			this.datasetIDs.push(jsonString.id);
+			this.sectionArr = []; // clean up the section array every time
 		}
 	}
 
 	public checkDataExists(): boolean {
 		return fs.existsSync("./data"); // does the data file exist?
 	}
-
 
 	// REQUIRES: An ID as a string, Content in base64 string, a dataset kind
 	// MODIFIES: this.datasets, this.sectionArr and this.rowcount
@@ -104,7 +109,7 @@ export default class InsightFacade implements IInsightFacade {
 						this.datasets.set(newDataSet, this.sectionArr); 				// Add the insightdataset and section array to the in memory representation of the data
 						this.datasetIDs.push(id); 										// on successful add, add the datasetID
 
-						await this.writeData(id, kind);											// Write to the disk
+						await this.writeData(id, kind);									// Write to the disk
 
 						this.rowCount = 0;												// CLEANUP: reset row count for future add calls
 						this.sectionArr = []; 											// CLEANUP: empty the array for sections for future calls
@@ -168,13 +173,11 @@ export default class InsightFacade implements IInsightFacade {
 		}
 		return false;
 	}
-
 	// REQUIRES: a JSON stringified string
 	// MODIFIES: N/A
 	// EFFECTS: parses the string as a JSON object, creates a section object with the fields.
 	public parseJSON(t: string) {
 		let localSectionArr: Section[] = [];
-		// console.log("3");
 		const result = JSON.parse(t).result; 		 	// Result is the array of the JSON objects
 
 		for (const jsonObject of result) {			 	// Each JSON object is one whole section in result, check if key is undefined
@@ -184,15 +187,11 @@ export default class InsightFacade implements IInsightFacade {
 			let toAdd: Section = new Section(jsonObject.id, jsonObject.Course,
 				jsonObject.Title, jsonObject.Professor, jsonObject.Subject,
 				jsonObject.Year, jsonObject.Avg, jsonObject.Pass, jsonObject.Fail, jsonObject.Audit);   // Create a new section
-
 			localSectionArr.push(toAdd); 					// Create a section object in one iteration, push it to the array
-
 			this.rowCount++;								// Increment the count of valid sections, "numRows is the number of valid sections in a dataset" @480
-
 		}
 		this.sectionArr.push(...localSectionArr);
 	}
-
 	// REQUIRES: a JSON object
 	// MODIFIES: N/A
 	// EFFECTS: reads all the fields and checks if the required fields are undefined.
@@ -221,7 +220,6 @@ export default class InsightFacade implements IInsightFacade {
 		}
 		return false;
 	}
-
 	// REQUIRES: a JSZip object, ID of the set and kind
 	// MODIFIES: N/A
 	// EFFECTS: Queues all the file reads and pushes into a promise array,
