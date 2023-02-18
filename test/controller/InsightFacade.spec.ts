@@ -161,16 +161,16 @@ describe("InsightFacade", function () {
 			});
 		});
 
-		// describe("addData with a VALID add, pairLiteLite has only one course with two sections inside", function () {
-		// 	it("should PASS with the valid added key passed", function () {
-		// 		const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
-		// 			.then(() => {
-		// 				const second = new InsightFacade();
-		// 			});
-		//
-		// 		return expect(result).to.eventually.deep.equal(["validKey"]);
-		// 	});
-		// });
+		describe("addData with a VALID add, pairLiteLite has only one course with two sections inside", function () {
+			it("should PASS with the valid added key passed", function () {
+				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
+					.then(() => {
+						const second = new InsightFacade();
+					});
+
+				return expect(result).to.eventually.deep.equal(["validKey"]);
+			});
+		});
 
 		//
 		// describe("addData with two VALID adds, pairLiteLite has only one course with two sections inside", function () {
