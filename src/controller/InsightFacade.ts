@@ -4,15 +4,14 @@ import {
 	InsightDatasetKind,
 	InsightError,
 	InsightResult,
-	NotFoundError, ResultTooLargeError
+	NotFoundError
 } from "./IInsightFacade";
 
 import fs from "fs-extra";
-import JSZip, {JSZipObject} from "jszip";
+import JSZip from "jszip";
 import Section from "./Section";
 import {QueryParser} from "./ParseQuery";
 import {InsightQuery} from "./InsightQuery";
-import {QueryUtils} from "./QueryUtils";
 
 
 /**
@@ -34,13 +33,47 @@ export default class InsightFacade implements IInsightFacade {
 
 
 	constructor() {
-		// console.log("InsightFacadeImpl::init()");
 		this.datasetIDs = [];															// Initialize an empty array of strings that will contain the currently added Dataset IDs
 		this.datasets = new Map();
 		this.sectionArr = [];
 		this.rowCount = 0;
+		this.crashRecovery();
 	}
 
+
+	public crashRecovery() {
+		if (!this.checkDataExists()) { // If data folder is empty, don't do anything
+			return;
+		}
+		const packageObj = fs.readdirSync("./data");
+		for (let key of packageObj) {
+			const file = fs.readFileSync("./data/" + key, "utf-8");
+			const jsonString = JSON.parse(file);
+			let insightKind: InsightDatasetKind = InsightDatasetKind.Sections; // init as sections
+			if (jsonString.kind === "sections") {
+				insightKind = InsightDatasetKind.Sections;
+			} else if (jsonString.kind === "rooms") {
+				insightKind = InsightDatasetKind.Rooms;
+			}
+			const newDataset: InsightDataset =
+				{
+					id: jsonString.id,
+					kind: insightKind,
+					numRows: jsonString.numRows
+				};
+
+			this.datasets.set(newDataset, jsonString.sectionArr);
+		}
+	}
+
+	public checkDataExists(): boolean {
+		return fs.existsSync("./data"); // does the data file exist?
+	}
+
+
+	// REQUIRES: An ID as a string, Content in base64 string, a dataset kind
+	// MODIFIES: this.datasets, this.sectionArr and this.rowcount
+	// EFFECTS: reads the content of the data source and reads it into memory and disk
 	public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		if (this.invalidID(id)) {														// Check that the id is valid
 			return Promise.reject(new InsightError("Invalid ID!"));
@@ -68,12 +101,10 @@ export default class InsightFacade implements IInsightFacade {
 							kind: kind,
 							numRows: this.rowCount
 						};
-
 						this.datasets.set(newDataSet, this.sectionArr); 				// Add the insightdataset and section array to the in memory representation of the data
 						this.datasetIDs.push(id); 										// on successful add, add the datasetID
 
-						const jsonString = JSON.stringify(this.sectionArr);				// Read the section array into a JSON object
-						await fs.appendFile("./data/" + id + ".json", jsonString); 	// Add the file
+						await this.writeData(id, kind);											// Write to the disk
 
 						this.rowCount = 0;												// CLEANUP: reset row count for future add calls
 						this.sectionArr = []; 											// CLEANUP: empty the array for sections for future calls
@@ -94,6 +125,18 @@ export default class InsightFacade implements IInsightFacade {
 	// EFFECTS: returns the map of all the insightdatasets as keys and all section objects in an array
 	public getAllDatasets(): Map<InsightDataset, Section[]> {
 		return this.datasets;
+	}
+
+	public async writeData(id: string, kind: InsightDatasetKind) {
+		const localMap = Object.fromEntries(this.datasets);				// Read the map into a JS object for JSON.stringify
+		const jsonString = JSON.stringify(localMap);				    // Read the dataset array into JSON, push that into save
+		const jsonObj = JSON.parse(jsonString);
+		jsonObj.sectionArr = this.sectionArr;
+		jsonObj.id = id;
+		jsonObj.kind = kind.toString();
+		jsonObj.numRows = this.rowCount;
+		const jsonObjToString = JSON.stringify(jsonObj);
+		await fs.appendFile("./data/" + id + ".json", jsonObjToString); 	// Add the file
 	}
 
 	// REQUIRES: a string that represents the dataset ID
@@ -147,12 +190,8 @@ export default class InsightFacade implements IInsightFacade {
 			this.rowCount++;								// Increment the count of valid sections, "numRows is the number of valid sections in a dataset" @480
 
 		}
-
 		this.sectionArr.push(...localSectionArr);
-
-
 	}
-
 
 	// REQUIRES: a JSON object
 	// MODIFIES: N/A
@@ -191,11 +230,8 @@ export default class InsightFacade implements IInsightFacade {
 		let promises = [];
 		try {
 			for (let i in zip.files) { // i is a JSON object within the array of files returned by zip.files
-				// console.log("1.9");
 				if (zip.files[i].name.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
 					if (!zip.files[i].dir) {							  	// If it's not the directory,
-						// console.log("2");
-
 						promises.push(zip.files[i].async("blob")
 							.then((blobStr) => {
 								return blobStr.text();
@@ -207,13 +243,11 @@ export default class InsightFacade implements IInsightFacade {
 					}
 				}
 			}
-			// console.log("6");
 			return await Promise.all(promises) // Wait for all the promises in the promise list to fulfill
 				.catch(() => {
 					throw new InsightError("error occurred while waited for queued promises to fulfil");
 				});
 		} catch (e) {
-			// console.log("throwing the caught error from iterate");
 			throw new InsightError();
 		}
 
@@ -226,23 +260,17 @@ export default class InsightFacade implements IInsightFacade {
 		if (this.invalidID(id)) {															// Check that the id is valid
 			return Promise.reject(new InsightError("Invalid ID!"));
 		}
-
 		if (!(this.datasetIDs.includes(id))) {												// Check that a valid data set was added with the key
 			return Promise.reject(new NotFoundError("ID Doesn't exist"));
 		}
-
 		for (const insightDataset of this.datasets.keys()) {								// Otherwise, will reach this condition and resolve
 			if (insightDataset.id === id) { // !!! this will not work YET b/c we have not implemented the map in addDataset. However, this should be the intended behaviour
 				this.datasets.delete(insightDataset);										// Delete the <K,V> pair from the map with this key, clears from memory
 				this.datasetIDs.splice(this.datasetIDs.indexOf(id), 1); 			// Delete the ID from the ID list, clears from memory
-
-				// console.log("Removed: " + id.toString());
 				fs.removeSync("./data/" + id.toString());								// Synchronously remove the dataset with the id in the ./data folder, clears from disk
-
 				return Promise.resolve(id.toString()); 										// after success
 			}
 		}
-
 		return Promise.reject(new InsightError("Some other error occurred")); 				// If not invalid, does exist but isn't in loop, throw this error
 	}
 

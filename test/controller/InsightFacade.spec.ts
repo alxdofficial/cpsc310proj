@@ -1,10 +1,8 @@
 import {
 	IInsightFacade,
-	InsightDataset,
 	InsightDatasetKind,
 	InsightError,
 	InsightResult,
-	NotFoundError,
 	ResultTooLargeError
 } from "../../src/controller/IInsightFacade";
 import InsightFacade from "../../src/controller/InsightFacade";
@@ -37,7 +35,7 @@ describe("InsightFacade", function () {
 		// This block runs once and loads the datasets.
 
 		// Just in case there is anything hanging around from a previous run of the test suite
-		clearDisk();
+		 clearDisk();
 	});
 
 	describe("Add/Remove/List Dataset", function () {
@@ -153,22 +151,27 @@ describe("InsightFacade", function () {
 				return expect(result).to.eventually.deep.equal(["validKey"]);
 			});
 		});
-		//
-		// describe("addData with an invalid add wrapped in two valid adds", function () {
-		// 	it("should fail with InsightError, invalid add wrapped between two valid ones", function () {
-		// 		const result = facade.addDataset("validKey", sectionsLite, InsightDatasetKind.Sections)
-		// 			.then(() => facade.addDataset("", sectionsLite, InsightDatasetKind.Sections))
-		// 			.then(() => facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections));
-		// 		return expect(result).to.eventually.be.rejectedWith(InsightError);
-		// 	});
-		// });
-		//
+
+		describe("addData with an invalid add wrapped in two valid adds", function () {
+			it("should fail with InsightError, invalid add wrapped between two valid ones", function () {
+				const result = facade.addDataset("validKey", sectionsLite, InsightDatasetKind.Sections)
+					.then(() => facade.addDataset("", sectionsLite, InsightDatasetKind.Sections))
+					.then(() => facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections));
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+		});
+
 		// describe("addData with a VALID add, pairLiteLite has only one course with two sections inside", function () {
 		// 	it("should PASS with the valid added key passed", function () {
-		// 		const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections);
+		// 		const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
+		// 			.then(() => {
+		// 				const second = new InsightFacade();
+		// 			});
+		//
 		// 		return expect(result).to.eventually.deep.equal(["validKey"]);
 		// 	});
 		// });
+
 		//
 		// describe("addData with two VALID adds, pairLiteLite has only one course with two sections inside", function () {
 		// 	it("should PASS with both valid keys added", function () {

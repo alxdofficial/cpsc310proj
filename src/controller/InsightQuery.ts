@@ -91,7 +91,6 @@ export class LogicComparison implements InsightFilter {
 	 public doFilter(section: Section): boolean {
 		if (this.logic === Logic.And) {
 			for (let filter of this.filterList) {
-				// console.log(filter.doFilter(section));
 				if(!filter.doFilter(section)) {
 					return false;
 				}
