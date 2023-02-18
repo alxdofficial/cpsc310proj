@@ -90,11 +90,12 @@ export class LogicComparison implements InsightFilter {
 	}
 	 public doFilter(section: Section): boolean {
 		if (this.logic === Logic.And) {
-			let pred: boolean = true;
 			for (let filter of this.filterList) {
-				pred = pred && filter.doFilter(section);
+				if(!filter.doFilter(section)) {
+					return false;
+				}
 			}
-			return pred;
+			return true;
 		} else if (this.logic === Logic.Or) {
 			for (let filter of this.filterList) {
 				if(filter.doFilter(section)) {
