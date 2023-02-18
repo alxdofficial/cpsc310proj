@@ -67,6 +67,7 @@ export default class InsightFacade implements IInsightFacade {
 				this.sectionArr.push(toPush);
 			}
 			this.datasets.set(newDataset, this.sectionArr);
+			this.datasetIDs.push(jsonString.id);
 			this.sectionArr = []; // clean up the section array every time
 		}
 	}
