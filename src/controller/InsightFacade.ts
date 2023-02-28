@@ -27,10 +27,8 @@ export default class InsightFacade implements IInsightFacade {
 	// datasets is one of: InsightDataset, Section[]
 	// interp. an InsightDataset associated with the sections within it.
 
-
 	private sectionArr: Section[];														// Push all the sections into an array, then push the array into the hashmap
 	private rowCount: number;															// The count of valid sections in this dataset, 0 then throw insight error, otherwise pass
-
 
 	constructor() {
 		this.datasetIDs = [];															// Initialize an empty array of strings that will contain the currently added Dataset IDs
@@ -173,6 +171,7 @@ export default class InsightFacade implements IInsightFacade {
 		}
 		return false;
 	}
+
 	// REQUIRES: a JSON stringified string
 	// MODIFIES: N/A
 	// EFFECTS: parses the string as a JSON object, creates a section object with the fields.
@@ -192,6 +191,7 @@ export default class InsightFacade implements IInsightFacade {
 		}
 		this.sectionArr.push(...localSectionArr);
 	}
+
 	// REQUIRES: a JSON object
 	// MODIFIES: N/A
 	// EFFECTS: reads all the fields and checks if the required fields are undefined.
@@ -220,6 +220,7 @@ export default class InsightFacade implements IInsightFacade {
 		}
 		return false;
 	}
+
 	// REQUIRES: a JSZip object, ID of the set and kind
 	// MODIFIES: N/A
 	// EFFECTS: Queues all the file reads and pushes into a promise array,

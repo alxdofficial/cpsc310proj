@@ -38,6 +38,7 @@ export class ParseUtils {
 				return null;
 		}
 	}
+
 	private logicHelper(logic: Logic, filters: any[]): LogicComparison | null {
 		// first check length of input array >= 1
 		if (filters.length < 1) {
@@ -62,6 +63,7 @@ export class ParseUtils {
 		// create Logic comp object
 		return new LogicComparison(logic,arrayFilters);
 	}
+
 	// return a MComparison or null if failed to parse
 	private MHelper(math: InsightM, json: any): MComparison | null {
 		// first check number of keys
@@ -82,6 +84,7 @@ export class ParseUtils {
 			return new MComparison(math, idAndField[1], value);
 		}
 	}
+
 	// return a SComparison or null if failed to parse
 	private SHelper(json: any): SComparison | null {
 		// first check number of keys
@@ -102,6 +105,7 @@ export class ParseUtils {
 			return new SComparison(idAndField[1], valueAndWC[0], valueAndWC[1]);
 		}
 	}
+
 	// return a Negation or null if failed to parse
 	private NHelper(json: any): Negation | null {
 		if (json.length > 1) {
@@ -118,6 +122,7 @@ export class ParseUtils {
 			return new Negation(filter);
 		}
 	}
+
 	// helper that takes a string, gets the id portion, sets the id field of this object if it hasnt been set yet or the gotten id is equal to the current id, and also the field portion. returns null if either is invalid
 	private MgetIdandField(text: string): [string, MFields] | null {
 		// console.log(text);
@@ -146,6 +151,7 @@ export class ParseUtils {
 				return null;
 		}
 	}
+
 	private SgetIdandField(text: string): [string, SFields] | null {
 		// console.log(text);
 		let firstUS: number = text.indexOf("_");
@@ -173,6 +179,7 @@ export class ParseUtils {
 				return null;
 		}
 	}
+
 	private getSvalueAndWildCard (target: any): [WildcardPosition, string] | null {
 		// screen for when input is not a string
 		if (typeof target !== "string") {
@@ -208,6 +215,7 @@ export class ParseUtils {
 		}
 		return [WC, targetString];
 	}
+
 	// given json, returns insight option object, and null if parsing error.
 	public parseOptions(json: any): InsightOption | null {
 		// check that COLUMNS exist

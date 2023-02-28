@@ -16,6 +16,7 @@ export class InsightQuery {
 		this.id = id;
 		this.facade = facade;
 	}
+
 	public async doQuery(): Promise<InsightResult[]> {
 		// the query promise
 		return new Promise((resolve, reject) => {
@@ -46,6 +47,7 @@ export class InsightQuery {
 			return resolve(this.makeOutput(outputSections));
 		});
 	}
+
 	public makeOutput(sections: Section[]): InsightResult[] {
 		// sort the sections if neccasary
 		let orderedSections = sections;
@@ -88,6 +90,7 @@ export class LogicComparison implements InsightFilter {
 		this.logic = logic;
 		this.filterList = filterList;
 	}
+
 	 public doFilter(section: Section): boolean {
 		if (this.logic === Logic.And) {
 			for (let filter of this.filterList) {
@@ -117,6 +120,7 @@ export class MComparison implements InsightFilter {
 		this.mfield = mfield;
 		this.value = value;
 	}
+
 	public doFilter(section: Section): boolean {
 		let sectionVal: number = QueryUtils.getSectionData(section, this.mfield) as number;
 		if (this.math === InsightM.lt) {
@@ -140,6 +144,7 @@ export class SComparison implements InsightFilter{
 		this.wildcardPosition = wildcardPosition;
 		this.value = value;
 	}
+
 	public doFilter(section: Section): boolean {
 		let fieldStr = String(QueryUtils.getSectionData(section,this.sfield));
 		switch (this.wildcardPosition) {
@@ -161,6 +166,7 @@ export class Negation implements InsightFilter {
 	public doFilter(section: Section): boolean {
 		return !this.filter.doFilter(section);
 	}
+
 	constructor(filter: InsightFilter) {
 		this.filter = filter;
 	}
