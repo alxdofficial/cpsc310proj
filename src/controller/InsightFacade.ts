@@ -12,6 +12,10 @@ import JSZip from "jszip";
 import Section from "./Section";
 import {QueryParser} from "./ParseQuery";
 import {InsightQuery} from "./InsightQuery";
+import {DataProcessor} from "./DataProcessor";
+import {Dataset} from "./Dataset";
+import {AddRoom} from "./AddRoom";
+import {AddSection} from "./AddSection";
 
 
 /**
@@ -74,6 +78,17 @@ export default class InsightFacade implements IInsightFacade {
 		return fs.existsSync("./data"); // does the data file exist?
 	}
 
+	public addSectionsDataSet(): Promise<string[]> {
+		// TODO complete me
+		return Promise.reject(InsightError);
+	}
+
+	public addRoomsDataset(): Promise<string[]> {
+		// TODO complete me
+		return Promise.reject(InsightError);
+
+	}
+
 	// REQUIRES: An ID as a string, Content in base64 string, a dataset kind
 	// MODIFIES: this.datasets, this.sectionArr and this.rowcount
 	// EFFECTS: reads the content of the data source and reads it into memory and disk
@@ -84,43 +99,51 @@ export default class InsightFacade implements IInsightFacade {
 		if (this.duplicateID(id)) {														// Check that there isn't a dataset already added with the same ID
 			return Promise.reject(new InsightError("Duplicate ID!"));
 		}
+		let dataset: Dataset = new Dataset(this.datasetIDs, this.datasets, this.sectionArr,
+			this.rowCount, id, content, kind);
+
 		if (kind === InsightDatasetKind.Rooms) {
-			return Promise.reject(new InsightError("Rooms is not valid for this checkpoint!"));
+			let roomAdder: DataProcessor = new AddRoom();
+			return Promise.resolve(roomAdder.addOnKind(dataset));
+		} else if (kind === InsightDatasetKind.Sections) {
+			let roomAdder: DataProcessor = new AddSection();
+			return Promise.resolve(roomAdder.addOnKind(dataset));
 		}
-		return new Promise((resolve, reject) => {
-			try {
-				fs.mkdir("./data").catch(() => { 									// Create the ./data directory that clearDisk() clears on each run, push dataset representations into this file
-					return Promise.reject(new InsightError("Creating ./data failed!"));
-				});
-				const JSzip = new JSZip();
-				JSzip.loadAsync(content, {base64: true, checkCRC32: true})        // is loaded even if its invalid
-					.then(async (zip) => {
-						await this.iterateFolders(zip);									// Iterate over the files, modifiy the class variables
-						if (this.rowCount === 0) {
-							throw new InsightError("No valid sections!");
-						}
-						const newDataSet: InsightDataset = {							// Create the dataset tuple
-							id: id,
-							kind: kind,
-							numRows: this.rowCount
-						};
-						this.datasets.set(newDataSet, this.sectionArr); 				// Add the insightdataset and section array to the in memory representation of the data
-						this.datasetIDs.push(id); 										// on successful add, add the datasetID
-
-						await this.writeData(id, kind);									// Write to the disk
-
-						this.rowCount = 0;												// CLEANUP: reset row count for future add calls
-						this.sectionArr = []; 											// CLEANUP: empty the array for sections for future calls
-						return resolve(this.datasetIDs); 								// resolve with an array of strings which are the added IDs
-					}
-					)
-					.catch((error) => {
-						return reject(new InsightError(error));
-					});
-			} catch (e) {
-				return reject(new InsightError());
-			}
-		});
+		return Promise.reject(new InsightError());
+		// return new Promise((resolve, reject) => {
+		// 	try {
+		// 		fs.mkdir("./data").catch(() => { 									// Create the ./data directory that clearDisk() clears on each run, push dataset representations into this file
+		// 			return Promise.reject(new InsightError("Creating ./data failed!"));
+		// 		});
+		// 		const JSzip = new JSZip();
+		// 		JSzip.loadAsync(content, {base64: true, checkCRC32: true})        // is loaded even if its invalid
+		// 			.then(async (zip) => {
+		// 				await this.iterateFolders(zip);									// Iterate over the files, modifiy the class variables
+		// 				if (this.rowCount === 0) {
+		// 					throw new InsightError("No valid sections!");
+		// 				}
+		// 				const newDataSet: InsightDataset = {							// Create the dataset tuple
+		// 					id: id,
+		// 					kind: kind,
+		// 					numRows: this.rowCount
+		// 				};
+		// 				this.datasets.set(newDataSet, this.sectionArr); 				// Add the insightdataset and section array to the in memory representation of the data
+		// 				this.datasetIDs.push(id); 										// on successful add, add the datasetID
+		//
+		// 				await this.writeData(id, kind);									// Write to the disk
+		//
+		// 				this.rowCount = 0;												// CLEANUP: reset row count for future add calls
+		// 				this.sectionArr = []; 											// CLEANUP: empty the array for sections for future calls
+		// 				return resolve(this.datasetIDs); 								// resolve with an array of strings which are the added IDs
+		// 			}
+		// 			)
+		// 			.catch((error) => {
+		// 				return reject(new InsightError(error));
+		// 			});
+		// 	} catch (e) {
+		// 		return reject(new InsightError());
+		// 	}
+		// });
 	}
 
 	// REQUIRES: N/A
@@ -130,17 +153,17 @@ export default class InsightFacade implements IInsightFacade {
 		return this.datasets;
 	}
 
-	public async writeData(id: string, kind: InsightDatasetKind) {
-		const localMap = Object.fromEntries(this.datasets);				// Read the map into a JS object for JSON.stringify
-		const jsonString = JSON.stringify(localMap);				    // Read the dataset array into JSON, push that into save
-		const jsonObj = JSON.parse(jsonString);
-		jsonObj.sectionArr = this.sectionArr;
-		jsonObj.id = id;
-		jsonObj.kind = kind.toString();
-		jsonObj.numRows = this.rowCount;
-		const jsonObjToString = JSON.stringify(jsonObj);
-		await fs.appendFile("./data/" + id + ".json", jsonObjToString); 	// Add the file
-	}
+	// public async writeData(id: string, kind: InsightDatasetKind) {
+	// 	const localMap = Object.fromEntries(this.datasets);				// Read the map into a JS object for JSON.stringify
+	// 	const jsonString = JSON.stringify(localMap);				    // Read the dataset array into JSON, push that into save
+	// 	const jsonObj = JSON.parse(jsonString);
+	// 	jsonObj.sectionArr = this.sectionArr;
+	// 	jsonObj.id = id;
+	// 	jsonObj.kind = kind.toString();
+	// 	jsonObj.numRows = this.rowCount;
+	// 	const jsonObjToString = JSON.stringify(jsonObj);
+	// 	await fs.appendFile("./data/" + id + ".json", jsonObjToString); 	// Add the file
+	// }
 
 	// REQUIRES: a string that represents the dataset ID
 	// MODIFIES: N/A
@@ -175,82 +198,81 @@ export default class InsightFacade implements IInsightFacade {
 	// REQUIRES: a JSON stringified string
 	// MODIFIES: N/A
 	// EFFECTS: parses the string as a JSON object, creates a section object with the fields.
-	public parseJSON(t: string) {
-		let localSectionArr: Section[] = [];
-		const result = JSON.parse(t).result; 		 	// Result is the array of the JSON objects
+	// public parseJSON(t: string) {
+	// 	let localSectionArr: Section[] = [];
+	// 	const result = JSON.parse(t).result; 		 	// Result is the array of the JSON objects
+	//
+	// 	for (const jsonObject of result) {			 	// Each JSON object is one whole section in result, check if key is undefined
+	// 		if (this.fieldIsUndefined(jsonObject)) {  	// Check all the fields of the current JSON object, if any required field is missing skip this object
+	// 			continue;
+	// 		}
+	// 		let toAdd: Section = new Section(jsonObject.id, jsonObject.Course,
+	// 			jsonObject.Title, jsonObject.Professor, jsonObject.Subject,
+	// 			jsonObject.Year, jsonObject.Avg, jsonObject.Pass, jsonObject.Fail, jsonObject.Audit);   // Create a new section
+	// 		localSectionArr.push(toAdd); 					// Create a section object in one iteration, push it to the array
+	// 		this.rowCount++;								// Increment the count of valid sections, "numRows is the number of valid sections in a dataset" @480
+	// 	}
+	// 	this.sectionArr.push(...localSectionArr);
+	// }
+	// // REQUIRES: a JSON object
+	// // MODIFIES: N/A
+	// // EFFECTS: reads all the fields and checks if the required fields are undefined.
+	// //          undefined, signal to skip the iteration
+	// public fieldIsUndefined(jsonObject: any): boolean {
+	// 	if (jsonObject.id === undefined) {
+	// 		return true;
+	// 	} else if (jsonObject.Course === undefined) {
+	// 		return true;
+	// 	} else if (jsonObject.Title === undefined) {
+	// 		return true;
+	// 	} else if (jsonObject.Professor === undefined) {
+	// 		return true;
+	// 	} else if (jsonObject.Subject === undefined) {
+	// 		return true;
+	// 	} else if (jsonObject.Year === undefined) {
+	// 		return true;
+	// 	} else if (jsonObject.Avg === undefined) {
+	// 		return true;
+	// 	} else if (jsonObject.Pass === undefined) {
+	// 		return true;
+	// 	} else if (jsonObject.Fail === undefined) {
+	// 		return true;
+	// 	} else if (jsonObject.Audit === undefined) {
+	// 		return true;
+	// 	}
+	// 	return false;
+	// }
 
-		for (const jsonObject of result) {			 	// Each JSON object is one whole section in result, check if key is undefined
-			if (this.fieldIsUndefined(jsonObject)) {  	// Check all the fields of the current JSON object, if any required field is missing skip this object
-				continue;
-			}
-			let toAdd: Section = new Section(jsonObject.id, jsonObject.Course,
-				jsonObject.Title, jsonObject.Professor, jsonObject.Subject,
-				jsonObject.Year, jsonObject.Avg, jsonObject.Pass, jsonObject.Fail, jsonObject.Audit);   // Create a new section
-			localSectionArr.push(toAdd); 					// Create a section object in one iteration, push it to the array
-			this.rowCount++;								// Increment the count of valid sections, "numRows is the number of valid sections in a dataset" @480
-		}
-		this.sectionArr.push(...localSectionArr);
-	}
-
-	// REQUIRES: a JSON object
-	// MODIFIES: N/A
-	// EFFECTS: reads all the fields and checks if the required fields are undefined.
-	//          undefined, signal to skip the iteration
-	public fieldIsUndefined(jsonObject: any): boolean {
-		if (jsonObject.id === undefined) {
-			return true;
-		} else if (jsonObject.Course === undefined) {
-			return true;
-		} else if (jsonObject.Title === undefined) {
-			return true;
-		} else if (jsonObject.Professor === undefined) {
-			return true;
-		} else if (jsonObject.Subject === undefined) {
-			return true;
-		} else if (jsonObject.Year === undefined) {
-			return true;
-		} else if (jsonObject.Avg === undefined) {
-			return true;
-		} else if (jsonObject.Pass === undefined) {
-			return true;
-		} else if (jsonObject.Fail === undefined) {
-			return true;
-		} else if (jsonObject.Audit === undefined) {
-			return true;
-		}
-		return false;
-	}
-
-	// REQUIRES: a JSZip object, ID of the set and kind
-	// MODIFIES: N/A
-	// EFFECTS: Queues all the file reads and pushes into a promise array,
-	//			executes promise.all and awaits for the promise from .all to fulfil
-	public async iterateFolders(zip: JSZip) {
-		let promises = [];
-		try {
-			for (let i in zip.files) { // i is a JSON object within the array of files returned by zip.files
-				if (zip.files[i].name.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
-					if (!zip.files[i].dir) {							  	// If it's not the directory,
-						promises.push(zip.files[i].async("blob")
-							.then((blobStr) => {
-								return blobStr.text();
-							})
-							.then((stringedBlob) => this.parseJSON(stringedBlob))
-							.catch(() => {
-								throw new InsightError();
-							}));
-					}
-				}
-			}
-			return await Promise.all(promises) // Wait for all the promises in the promise list to fulfill
-				.catch(() => {
-					throw new InsightError("error occurred while waited for queued promises to fulfil");
-				});
-		} catch (e) {
-			throw new InsightError();
-		}
-
-	}
+	// // REQUIRES: a JSZip object, ID of the set and kind
+	// // MODIFIES: N/A
+	// // EFFECTS: Queues all the file reads and pushes into a promise array,
+	// //			executes promise.all and awaits for the promise from .all to fulfil
+	// public async iterateFolders(zip: JSZip) {
+	// 	let promises = [];
+	// 	try {
+	// 		for (let i in zip.files) { // i is a JSON object within the array of files returned by zip.files
+	// 			if (zip.files[i].name.substring(0, 7) === "courses") { 	// Check that the courses are in a courses folder
+	// 				if (!zip.files[i].dir) {							  	// If it's not the directory,
+	// 					promises.push(zip.files[i].async("blob")
+	// 						.then((blobStr) => {
+	// 							return blobStr.text();
+	// 						})
+	// 						.then((stringedBlob) => this.parseJSON(stringedBlob))
+	// 						.catch(() => {
+	// 							throw new InsightError();
+	// 						}));
+	// 				}
+	// 			}
+	// 		}
+	// 		return await Promise.all(promises) // Wait for all the promises in the promise list to fulfill
+	// 			.catch(() => {
+	// 				throw new InsightError("error occurred while waited for queued promises to fulfil");
+	// 			});
+	// 	} catch (e) {
+	// 		throw new InsightError();
+	// 	}
+	//
+	// }
 
 	// REQUIRES: an ID
 	// MODIFIES: N/A
