@@ -1,26 +1,29 @@
 import {InsightDataset, InsightDatasetKind} from "./IInsightFacade";
 import Section from "./Section";
+import Room from "./Room";
 import fs from "fs-extra";
 
 export class Dataset {
 	private readonly datasetIDs: string[];
 	// datasetIDs is string[]
 	// interp. an array of the currently added datasetIDs
-	private readonly datasets: Map<InsightDataset, Section[]>;
+	private readonly datasets: Map<InsightDataset, object[]>;
 	// datasets is one of: InsightDataset, Section[]
 	// interp. an InsightDataset associated with the sections within it.
 
 	private sectionArr: Section[];														// Push all the sections into an array, then push the array into the hashmap
+	private roomArr: Room[];														// Push all the sections into an array, then push the array into the hashmap
 	private rowCount: number;															// The count of valid sections in this dataset, 0 then throw insight error, otherwise pass
 	private id: string;
 	private content: string;
 	private kind: InsightDatasetKind;
 
-	constructor(datasetIDs: string[], datasets: Map<InsightDataset, Section[]>, sectionArr: Section[]
+	constructor(datasetIDs: string[], datasets: Map<InsightDataset, object[]>, sectionArr: Section[], roomArr: Room[]
 		, rowCount: number, id: string, content: string, kind: InsightDatasetKind) {
 		this.datasetIDs = datasetIDs;
 		this.datasets = datasets;
 		this.sectionArr = sectionArr;
+		this.roomArr = roomArr;
 		this.rowCount = rowCount;
 		this.id = id;
 		this.content = content;
@@ -31,7 +34,7 @@ export class Dataset {
 		return this.datasetIDs;
 	}
 
-	public getDatasets(): Map<InsightDataset, Section[]> {
+	public getDatasets(): Map<InsightDataset, object[]> {
 		return this.datasets;
 	}
 
@@ -67,7 +70,19 @@ export class Dataset {
 		this.sectionArr = arr;
 	}
 
-	public async writeData() {
+	public async writeDataSections() {
+		const localMap = Object.fromEntries(this.datasets);				// Read the map into a JS object for JSON.stringify
+		const jsonString = JSON.stringify(localMap);				    // Read the dataset array into JSON, push that into save
+		const jsonObj = JSON.parse(jsonString);
+		jsonObj.sectionArr = this.sectionArr;
+		jsonObj.id = this.id;
+		jsonObj.kind = this.kind.toString();
+		jsonObj.numRows = this.rowCount;
+		const jsonObjToString = JSON.stringify(jsonObj);
+		await fs.appendFile("./data/" + this.id + ".json", jsonObjToString); 	// Add the file
+	}
+
+	public async writeDataRooms() {
 		const localMap = Object.fromEntries(this.datasets);				// Read the map into a JS object for JSON.stringify
 		const jsonString = JSON.stringify(localMap);				    // Read the dataset array into JSON, push that into save
 		const jsonObj = JSON.parse(jsonString);

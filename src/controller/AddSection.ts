@@ -34,7 +34,7 @@ export class AddSection implements DataProcessor {
 						dataset.getDatasets().set(newDataSet, dataset.getSectionArr()); 				// Add the insightdataset and section array to the in memory representation of the data
 						dataset.getDatasetIDs().push(dataset.getID()); 										// on successful add, add the datasetID
 
-						await dataset.writeData(); // TODO implement me
+						await dataset.writeDataSections();
 						dataset.setRowCount(0);												// CLEANUP: reset row count for future add calls
 						dataset.setSectionArr([]);											// CLEANUP: empty the array for sections for future calls
 						return resolve(dataset.getDatasetIDs()); 								// resolve with an array of strings which are the added IDs
@@ -49,8 +49,6 @@ export class AddSection implements DataProcessor {
 		});
 	}
 
-	public crashRecovery() {
-	}
 
 	// REQUIRES: a JSON object
 	// MODIFIES: N/A

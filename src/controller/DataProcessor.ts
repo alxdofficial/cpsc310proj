@@ -6,10 +6,6 @@ export interface DataProcessor {
 	// Abstraction of the methods its subtypes will implement such that we depend on abstraction rather than concrete
 	// impl.
 
-	// REQUIRES: An InsightFacade instance
-	// EFFECTS: Checks the archive if a dataset exists
-	// MODIFIES: Moves datasets from disk into memory
-	crashRecovery(): any;
 
 	// REQUIRES: An InsightFacade instance
 	// EFFECTS: Adds the dataset to memory
