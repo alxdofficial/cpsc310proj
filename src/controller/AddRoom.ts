@@ -109,16 +109,24 @@ export class AddRoom implements DataProcessor {
 		// console.log("calling geo");
 		// this.geoLocation("6245 Agronomy Road V6T 1Z4");
 
+		// Traverse until html tagname, then access childnodes, then traverse until body tagname,then childNoes of body, then until tagname is div
+		// , childnodes of div, tagname is section, childnodes of section, tagname is div, childnodes of div, tagname is table, childnodes of table, tagname is tbody
+		 // search tr tagname childnodes for each cell, a row correlate to a shortname, filepath and address
+
 		// Check if td-class, attrs, first element in array value is "views-field views-field-title"
 		// <td class="views-field views-field-field-building-code"> for building shortName
 		// go to childNodes of td-class, a, attrs, first element in array value as path
 		// a row has all the info for a single building, then with the path execute the room search where I will build the individual rooms
 
-		for (let i = 0; curr.childNodes[i] != null; i++) {
+		for (let i = 0;i < curr.childNodes.length; i++) {
 			if (curr.childNodes[i].nodeName === "html") {
-				console.log(curr.childNodes[i]);
+				console.log(curr.childNodes[i].childNodes[i]);
 			}
 		}
+
+		// is the NodeName == "table"? if it is, is there at least one <td> element with a valid class? if it is then we've found our table
+		// if the NodeName isn't table, keep searching each childnode in the list of childnodes
+
 
 		// TODO traverse tree until we find the first valid table
 		// TODO push all the file pathes and addresses into a Map, pass that Map into a method that looks for each building with the file path
