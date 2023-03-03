@@ -27,6 +27,7 @@ export class QueryUtils {
 				return section.getID();
 		}
 	}
+
 	public static MorSField(field: MFields | SFields): string {
 		switch (field) {
 			case MFields.avg:

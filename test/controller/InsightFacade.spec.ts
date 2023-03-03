@@ -1,5 +1,5 @@
 import {
-	IInsightFacade,
+	IInsightFacade, InsightDataset,
 	InsightDatasetKind,
 	InsightError,
 	InsightResult,
@@ -11,6 +11,7 @@ import {folderTest} from "@ubccpsc310/folder-test";
 import {expect, use} from "chai";
 import chaiAsPromised from "chai-as-promised";
 import {clearDisk, getContentFromArchives} from "../TestUtil";
+import {AddRoom} from "../../src/controller/AddRoom";
 
 use(chaiAsPromised);
 
@@ -19,6 +20,7 @@ describe("InsightFacade", function () {
 
 	// Declare datasets used in tests. You should add more datasets like this!
 	let sections: string;
+	let campus: string;
 	let oneInvalidSection: string;
 	let threeCourses: string;
 	let noCoursesFolder: string;
@@ -43,6 +45,7 @@ describe("InsightFacade", function () {
 			console.info(`Before: ${this.test?.parent?.title}`);
 
 			sections = getContentFromArchives("pair.zip");
+			campus = getContentFromArchives("campus.zip");
 			threeCourses = getContentFromArchives("ThreeCourses.zip");
 			noCoursesFolder = getContentFromArchives("noCoursesFolderButSectionInside.zip");
 			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
@@ -72,6 +75,26 @@ describe("InsightFacade", function () {
 			// This runs after each test, which should make each test independent of the previous one
 			console.info(`AfterTest: ${this.currentTest?.title}`);
 			clearDisk();
+		});
+
+		describe ("addDataset with a valid ROOMs dataset", function() {
+			it ("should be added and return a set of the currently added room IDS", function() {
+				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["campus"]);
+			});
+		});
+		describe ("addDataset with a valid ROOMs dataset", function() {
+			it ("should be added and return a set of the currently added room IDS", function() {
+				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["campus"]);
+			});
+		});
+
+		describe ("addDataset with a valid ROOMs dataset, wrong kind", function() {
+			it ("should NOT be added and return an InsightError", function() {
+				const result = facade.addDataset("campus", campus, InsightDatasetKind.Sections);
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
 		});
 		//
 		// // This is a unit test. You should create more like this!
@@ -163,12 +186,23 @@ describe("InsightFacade", function () {
 
 		describe("addData with a VALID add, pairLiteLite has only one course with two sections inside", function () {
 			it("should PASS with the valid added key passed", function () {
-				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
-					.then(() => {
-						const second = new InsightFacade();
-					});
+				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections);
 
 				return expect(result).to.eventually.deep.equal(["validKey"]);
+			});
+		});
+
+		describe("addData with a list and VALID add, pairLiteLite has only one course with two sections inside", function () {
+			it("should PASS with the valid added key passed", function () {
+				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
+					.then (()=> facade.listDatasets());
+				const newDataSet: InsightDataset = {							// Create the dataset tuple
+					id: "validKey",
+					kind: InsightDatasetKind.Sections,
+					numRows: 33
+				};
+
+				return expect(result).to.eventually.deep.equal([newDataSet]);
 			});
 		});
 
