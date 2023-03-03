@@ -84,12 +84,12 @@ export class AddRoom implements DataProcessor {
 		let promises = [];
 		try {
 			for (let i in zip.files) { // i is a JSON object within the array of files returned by zip.files
-				if (zip.files[i].name.substring(0, 9) === "index.htm") { 	// Check that the courses are in a courses folder
+				if (zip.files[i].name.substring(0, 9) === "index.htm") {
 					promises.push(zip.files[i].async("blob")
 						.then((blobStr) => {
 							return blobStr.text();
 						})
-						.then((stringedBlob) => this.traverseDoc(stringedBlob))
+						.then((stringedBlob) => this.traverseDoc(parse(stringedBlob), dataset))
 						.catch(() => {
 							throw new InsightError();
 						}));
@@ -103,25 +103,35 @@ export class AddRoom implements DataProcessor {
 		} catch (e) {
 			throw new InsightError();
 		}
-
 	}
 
-	public traverseDoc(doc: string) {
-		console.log("calling geo");
-		this.geoLocation("6245 Agronomy Road V6T 1Z4");
+	public traverseDoc(curr: any, dataset: Dataset) {
+		// console.log("calling geo");
+		// this.geoLocation("6245 Agronomy Road V6T 1Z4");
 
-		const document = parse(doc);
-		// for (let i = 0; document.childNodes[i] != null; i++) {
-		// 	if (document.childNodes[i].nodeName === "html") {
-		// 		console.log(document.childNodes[i]);
-		// 	}
-		// }
+		// Check if td-class, attrs, first element in array value is "views-field views-field-title"
+		// <td class="views-field views-field-field-building-code"> for building shortName
+		// go to childNodes of td-class, a, attrs, first element in array value as path
+		// a row has all the info for a single building, then with the path execute the room search where I will build the individual rooms
+
+		for (let i = 0; curr.childNodes[i] != null; i++) {
+			if (curr.childNodes[i].nodeName === "html") {
+				console.log(curr.childNodes[i]);
+			}
+		}
+
+		// TODO traverse tree until we find the first valid table
+		// TODO push all the file pathes and addresses into a Map, pass that Map into a method that looks for each building with the file path
+		// TODO and for each building, execute findAddress on the Value, which will call geoLocation
+		// "To find the valid table within an HTML file, you will need to look at the classes found on the <td> elements.
+		// As soon as you find one <td> element with a valid class, the entire table is valid."
+
+
 		// console.log(document);
 		console.log("returning from traverse");
-
 	}
 
-	public async geoLocation(address: string) {
+	public geoLocation(address: string) {
 		// TODO Send GET request using the http package to http://cs310.students.cs.ubc.ca:11316/api/v1/project_team<TEAM NUMBER>/<ADDRESS>
 		// TODO receive the interface GeoResponse from the request
 		// TODO return the Interface to the main method that constructs the Room object
@@ -154,21 +164,22 @@ export class AddRoom implements DataProcessor {
 	}
 
 	public parse(t: string, dataset: Dataset) {
-		let localSectionArr: Section[] = [];
+		let localRoomArr: Section[] = [];
 		const result = JSON.parse(t).result; 		 	// Result is the array of the JSON objects
 
 		for (const jsonObject of result) {			 	// Each JSON object is one whole section in result, check if key is undefined
 			if (this.fieldIsUndefined(jsonObject)) {  	// Check all the fields of the current JSON object, if any required field is missing skip this object
 				continue;
 			}
-			let toAdd: Section = new Section(jsonObject.id, jsonObject.Course,
-				jsonObject.Title, jsonObject.Professor, jsonObject.Subject,
-				jsonObject.Year, jsonObject.Avg, jsonObject.Pass, jsonObject.Fail, jsonObject.Audit);   // Create a new section
-			localSectionArr.push(toAdd); 					// Create a section object in one iteration, push it to the array
-			// Increment the count of valid sections, "numRows is the number of valid sections in a dataset" @480
-			dataset.setRowCount(dataset.getRowCount() + 1);
+			// TODO implement me below
+			// let toAdd: Section = new Section(jsonObject.id, jsonObject.Course,
+			// 	jsonObject.Title, jsonObject.Professor, jsonObject.Subject,
+			// 	jsonObject.Year, jsonObject.Avg, jsonObject.Pass, jsonObject.Fail, jsonObject.Audit);   // Create a new section
+			// localRoomArr.push(toAdd); 					// Create a section object in one iteration, push it to the array
+			// // Increment the count of valid sections, "numRows is the number of valid sections in a dataset" @480
+			// dataset.setRowCount(dataset.getRowCount() + 1);
 		}
-		dataset.getSectionArr().push(...localSectionArr);
+		dataset.getSectionArr().push(...localRoomArr);
 	}
 
 

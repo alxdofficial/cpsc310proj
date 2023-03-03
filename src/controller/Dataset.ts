@@ -48,6 +48,10 @@ export class Dataset {
 		return this.roomArr;
 	}
 
+	public addToRoomArr(room: Room) {
+		this.roomArr.push(room);
+	}
+
 
 	public getRowCount(): number {
 		return this.rowCount;

@@ -113,7 +113,7 @@ export default class InsightFacade implements IInsightFacade {
 		if (this.duplicateID(id)) {														// Check that there isn't a dataset already added with the same ID
 			return Promise.reject(new InsightError("Duplicate ID!"));
 		}
-		let dataset: Dataset = new Dataset(this.datasetIDs, this.datasets, this.sectionArr, [],
+		let dataset: Dataset = new Dataset(this.datasetIDs, this.datasets, this.sectionArr, this.roomArr,
 			this.rowCount, id, content, kind);
 
 		if (kind === InsightDatasetKind.Rooms) {
