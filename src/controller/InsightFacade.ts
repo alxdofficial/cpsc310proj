@@ -12,12 +12,11 @@ import JSZip from "jszip";
 import Section from "./Section";
 import Room from "./Room";
 import {QueryParser} from "./ParseQuery";
-import {InsightQuery} from "./InsightQuery";
+// import {InsightQuery} from "./InsightQuery"; // TODO undome
 import {DataProcessor} from "./DataProcessor";
 import {Dataset} from "./Dataset";
 import {AddRoom} from "./AddRoom";
 import {AddSection} from "./AddSection";
-import {DatasetUtils} from "./DatasetUtils";
 
 
 /**
@@ -104,17 +103,6 @@ export default class InsightFacade implements IInsightFacade {
 		return fs.existsSync("./data"); // does the data file exist?
 	}
 
-	public addSectionsDataSet(): Promise<string[]> {
-		// TODO complete me
-		return Promise.reject(InsightError);
-	}
-
-	public addRoomsDataset(): Promise<string[]> {
-		// TODO complete me
-		return Promise.reject(InsightError);
-
-	}
-
 	// REQUIRES: An ID as a string, Content in base64 string, a dataset kind
 	// MODIFIES: this.datasets, this.sectionArr and this.rowcount
 	// EFFECTS: reads the content of the data source and reads it into memory and disk
@@ -141,7 +129,7 @@ export default class InsightFacade implements IInsightFacade {
 	// REQUIRES: N/A
 	// MODIFIES: N/A
 	// EFFECTS: returns the map of all the insightdatasets as keys and all section objects in an array
-	public getAllDatasets(): Map<InsightDataset, object[]> {
+	public getAllDatasets(): Map<InsightDataset, Array<Section | Room>> {
 		return this.datasets;
 	}
 
@@ -186,7 +174,7 @@ export default class InsightFacade implements IInsightFacade {
 			return Promise.reject(new NotFoundError("ID Doesn't exist"));
 		}
 		for (const insightDataset of this.datasets.keys()) {								// Otherwise, will reach this condition and resolve
-			if (insightDataset.id === id) { // !!! this will not work YET b/c we have not implemented the map in addDataset. However, this should be the intended behaviour
+			if (insightDataset.id === id) {
 				this.datasets.delete(insightDataset);										// Delete the <K,V> pair from the map with this key, clears from memory
 				this.datasetIDs.splice(this.datasetIDs.indexOf(id), 1); 			// Delete the ID from the ID list, clears from memory
 				fs.removeSync("./data/" + id.toString());								// Synchronously remove the dataset with the id in the ./data folder, clears from disk
@@ -197,18 +185,20 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public performQuery(query: unknown): Promise<InsightResult[]> {
-		return new Promise<InsightResult[]>((resolve, reject) => {
-			const newParser: QueryParser = new QueryParser(query, this);
-			newParser.getQuery().then(function (returnedQuery: InsightQuery) {
-				return returnedQuery.doQuery().then((result) => {
-					return resolve(result);
-				}).catch((err) => {
-					return reject(err);
-				});
-			}).catch((err: InsightError | NotFoundError) => {
-				return reject(err);
-			});
-		});
+		// return new Promise<InsightResult[]>((resolve, reject) => {
+		// 	const newParser: QueryParser = new QueryParser(query, this);
+		// 	newParser.getQuery().then(function (returnedQuery: InsightQuery) {
+		// 		return returnedQuery.doQuery().then((result) => {
+		// 			return resolve(result);
+		// 		}).catch((err) => {
+		// 			return reject(err);
+		// 		});
+		// 	}).catch((err: InsightError | NotFoundError) => {
+		// 		return reject(err);
+		// 	});
+		// });
+
+		return Promise.reject(new InsightError()); // TODO undo me
 	}
 
 	public listDatasets(): Promise<InsightDataset[]> {		// Settling this promise: This promise only fufills, either an empty array or array of current datasets

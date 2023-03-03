@@ -2,8 +2,6 @@ import fs from "fs-extra";
 import JSZip from "jszip";
 import Section from "./Section";
 import {QueryParser} from "./ParseQuery";
-import {InsightQuery} from "./InsightQuery";
-import {DatasetUtils} from "./DatasetUtils";
 import {DataProcessor} from "./DataProcessor";
 import {InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
 import {Dataset} from "./Dataset";

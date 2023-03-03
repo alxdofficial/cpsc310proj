@@ -1,7 +1,8 @@
-import {InsightDataset, InsightDatasetKind} from "./IInsightFacade";
+import {InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
 import Section from "./Section";
 import Room from "./Room";
 import fs from "fs-extra";
+import JSZip from "jszip";
 
 export class Dataset {
 	private readonly datasetIDs: string[];
@@ -30,6 +31,7 @@ export class Dataset {
 		this.kind = kind;
 	}
 
+
 	public getDatasetIDs(): string[] {
 		return this.datasetIDs;
 	}
@@ -41,6 +43,11 @@ export class Dataset {
 	public getSectionArr(): Section[] {
 		return this.sectionArr;
 	}
+
+	public getRoomArr(): Room[] {
+		return this.roomArr;
+	}
+
 
 	public getRowCount(): number {
 		return this.rowCount;
@@ -70,11 +77,27 @@ export class Dataset {
 		this.sectionArr = arr;
 	}
 
+	public setRoomArr(arr: Room[]) {
+		this.roomArr = arr;
+	}
+
 	public async writeDataSections() {
 		const localMap = Object.fromEntries(this.datasets);				// Read the map into a JS object for JSON.stringify
 		const jsonString = JSON.stringify(localMap);				    // Read the dataset array into JSON, push that into save
 		const jsonObj = JSON.parse(jsonString);
 		jsonObj.sectionArr = this.sectionArr;
+		await this.writeToFile(jsonObj); // Add the file
+	}
+
+	public async writeDataRooms() {
+		const localMap = Object.fromEntries(this.datasets);				// Read the map into a JS object for JSON.stringify
+		const jsonString = JSON.stringify(localMap);				    // Read the dataset array into JSON, push that into save
+		const jsonObj = JSON.parse(jsonString);
+		jsonObj.roomArr = this.roomArr;
+		await this.writeToFile(jsonObj); // Add the file
+	}
+
+	public async writeToFile(jsonObj: any) {
 		jsonObj.id = this.id;
 		jsonObj.kind = this.kind.toString();
 		jsonObj.numRows = this.rowCount;
@@ -82,15 +105,5 @@ export class Dataset {
 		await fs.appendFile("./data/" + this.id + ".json", jsonObjToString); 	// Add the file
 	}
 
-	public async writeDataRooms() {
-		const localMap = Object.fromEntries(this.datasets);				// Read the map into a JS object for JSON.stringify
-		const jsonString = JSON.stringify(localMap);				    // Read the dataset array into JSON, push that into save
-		const jsonObj = JSON.parse(jsonString);
-		jsonObj.sectionArr = this.sectionArr;
-		jsonObj.id = this.id;
-		jsonObj.kind = this.kind.toString();
-		jsonObj.numRows = this.rowCount;
-		const jsonObjToString = JSON.stringify(jsonObj);
-		await fs.appendFile("./data/" + this.id + ".json", jsonObjToString); 	// Add the file
-	}
+
 }

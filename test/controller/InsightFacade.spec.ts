@@ -1,5 +1,5 @@
 import {
-	IInsightFacade,
+	IInsightFacade, InsightDataset,
 	InsightDatasetKind,
 	InsightError,
 	InsightResult,
@@ -11,6 +11,7 @@ import {folderTest} from "@ubccpsc310/folder-test";
 import {expect, use} from "chai";
 import chaiAsPromised from "chai-as-promised";
 import {clearDisk, getContentFromArchives} from "../TestUtil";
+import {AddRoom} from "../../src/controller/AddRoom";
 
 use(chaiAsPromised);
 
@@ -76,6 +77,12 @@ describe("InsightFacade", function () {
 			clearDisk();
 		});
 
+		describe ("addDataset with a valid ROOMs dataset", function() {
+			it ("should be added and return a set of the currently added room IDS", function() {
+				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["campus"]);
+			});
+		});
 		describe ("addDataset with a valid ROOMs dataset", function() {
 			it ("should be added and return a set of the currently added room IDS", function() {
 				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
@@ -182,6 +189,20 @@ describe("InsightFacade", function () {
 				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections);
 
 				return expect(result).to.eventually.deep.equal(["validKey"]);
+			});
+		});
+
+		describe("addData with a list and VALID add, pairLiteLite has only one course with two sections inside", function () {
+			it("should PASS with the valid added key passed", function () {
+				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
+					.then (()=> facade.listDatasets());
+				const newDataSet: InsightDataset = {							// Create the dataset tuple
+					id: "validKey",
+					kind: InsightDatasetKind.Sections,
+					numRows: 33
+				};
+
+				return expect(result).to.eventually.deep.equal([newDataSet]);
 			});
 		});
 
