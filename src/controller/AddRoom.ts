@@ -107,17 +107,20 @@ export class AddRoom implements DataProcessor {
 	public findHTMLNode(doc: any, dataset: Dataset) {
 		for (let i = 0; doc.childNodes[i] != null; i++) {
 			console.log(doc.childNodes[i]);
-			if (doc.childNodes[i].nodeName === "html") {
-				console.log("invoked traverse " + doc.childNodes[i]);
-				try {
-					this.traverseDoc(doc.childNode[i], dataset);
-				} catch (e) {
-					console.log("caught an error" + e);
-				}
-			}
+			this.findHTMLStr(doc, i, dataset);
 		}
 	}
 
+	public findHTMLStr(doc: any, i: number, dataset: Dataset) {
+		if (doc.childNodes[i].nodeName === "html") {
+			console.log("invoked traverse " + doc.childNodes[i]);
+			try {
+				this.traverseDoc(doc.childNode[i], dataset);
+			} catch (e) {
+				console.log("caught an error" + e);
+			}
+		}
+	}
 
 	public traverseDoc(curr: any, dataset: Dataset) {
 		console.log("inside traverse");
@@ -143,13 +146,11 @@ export class AddRoom implements DataProcessor {
 		// is the NodeName == "table"? if it is, is there at least one <td> element with a valid class? if it is then we've found our table
 		// if the NodeName isn't table, keep searching each childnode in the list of childnodes
 
-
 		// TODO traverse tree until we find the first valid table
 		// TODO push all the file pathes and addresses into a Map, pass that Map into a method that looks for each building with the file path
 		// TODO and for each building, execute findAddress on the Value, which will call geoLocation
 		// "To find the valid table within an HTML file, you will need to look at the classes found on the <td> elements.
 		// As soon as you find one <td> element with a valid class, the entire table is valid."
-
 
 		// console.log(document);
 		console.log("returning from traverse");
@@ -161,7 +162,11 @@ export class AddRoom implements DataProcessor {
 	public validTable(nodes: any): boolean {
 		for (let node of nodes) {
 			if (node.tagName === "td") {
-				if (nodes.attrs[0].value === "views-field views-field-field-building-image" || nodes.attrs[0].value === "views-field views-field-field-building-code" || nodes.attrs[0].value === "views-field views-field-title" || nodes.attrs[0].value === "views-field views-field-field-building-address" || nodes.attrs[0].value === "views-field views-field-nothing") {
+				if (nodes.attrs[0].value === "views-field views-field-field-building-image"
+					|| nodes.attrs[0].value === "views-field views-field-field-building-code"
+					|| nodes.attrs[0].value === "views-field views-field-title"
+					|| nodes.attrs[0].value === "views-field views-field-field-building-address"
+					|| nodes.attrs[0].value === "views-field views-field-nothing") {
 					return true; // if any of the classes exist, then it is a valid table;
 				}
 			} else {
@@ -175,7 +180,6 @@ export class AddRoom implements DataProcessor {
 		}
 		return false;
 	} // TODO IMPL ME
-
 
 	public searchRows(doc: any): Array<[string, string, string]> {
 		const foundData: Array<[string, string, string]> = [];
