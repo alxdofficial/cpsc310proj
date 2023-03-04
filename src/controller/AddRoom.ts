@@ -89,13 +89,12 @@ export class AddRoom implements DataProcessor {
 						.then((blobStr) => {
 							return blobStr.text();
 						})
-						.then((stringedBlob) => this.traverseDoc(parse(stringedBlob), dataset))
+						.then((stringedBlob) => this.findHTMLNode(parse(stringedBlob), dataset))
 						.catch(() => {
 							throw new InsightError();
 						}));
 				}
 			}
-			console.log("returning");
 			return await Promise.all(promises) // Wait for all the promises in the promise list to fulfill
 				.catch(() => {
 					throw new InsightError("error occurred while waited for queued promises to fulfil");
@@ -105,23 +104,40 @@ export class AddRoom implements DataProcessor {
 		}
 	}
 
+	public findHTMLNode(doc: any, dataset: Dataset) {
+		for (let i = 0; doc.childNodes[i] != null; i++) {
+			console.log(doc.childNodes[i]);
+			if (doc.childNodes[i].nodeName === "html") {
+				console.log("invoked traverse " + doc.childNodes[i]);
+				try {
+					this.traverseDoc(doc.childNode[i], dataset);
+				} catch (e) {
+					console.log("caught an error" + e);
+				}
+			}
+		}
+	}
+
+
 	public traverseDoc(curr: any, dataset: Dataset) {
+		console.log("inside traverse");
 		// console.log("calling geo");
 		// this.geoLocation("6245 Agronomy Road V6T 1Z4");
 
 		// Traverse until html tagname, then access childnodes, then traverse until body tagname,then childNoes of body, then until tagname is div
 		// , childnodes of div, tagname is section, childnodes of section, tagname is div, childnodes of div, tagname is table, childnodes of table, tagname is tbody
-		 // search tr tagname childnodes for each cell, a row correlate to a shortname, filepath and address
+		// search tr tagname childnodes for each cell, a row correlate to a shortname, filepath and address
 
 		// Check if td-class, attrs, first element in array value is "views-field views-field-title"
 		// <td class="views-field views-field-field-building-code"> for building shortName
 		// go to childNodes of td-class, a, attrs, first element in array value as path
 		// a row has all the info for a single building, then with the path execute the room search where I will build the individual rooms
 
-		for (let i = 0;i < curr.childNodes.length; i++) {
-			if (curr.childNodes[i].nodeName === "html") {
-				console.log(curr.childNodes[i].childNodes[i]);
-			}
+		if (curr.tagName === "table" && this.validTable(curr.childNodes)) {
+			this.searchRows(curr.childNodes);
+		}
+		for (let i = 0; i < curr.childNodes.length; i++) {
+			console.log(curr[i]);
 		}
 
 		// is the NodeName == "table"? if it is, is there at least one <td> element with a valid class? if it is then we've found our table
@@ -137,6 +153,57 @@ export class AddRoom implements DataProcessor {
 
 		// console.log(document);
 		console.log("returning from traverse");
+	}
+
+	// REQUIRES: list of childnodes of table passed by caller
+	// MODIFIES: N/A
+	// EFFECTS: returns true if there is at least one valid table, otherwise false
+	public validTable(nodes: any): boolean {
+		for (let node of nodes) {
+			if (node.tagName === "td") {
+				if (nodes.attrs[0].value === "views-field views-field-field-building-image" || nodes.attrs[0].value === "views-field views-field-field-building-code" || nodes.attrs[0].value === "views-field views-field-title" || nodes.attrs[0].value === "views-field views-field-field-building-address" || nodes.attrs[0].value === "views-field views-field-nothing") {
+					return true; // if any of the classes exist, then it is a valid table;
+				}
+			} else {
+				try {
+					this.validTable(node.childNodes);
+				} catch (e) {
+					console.log("no child nodes in this node");
+					// continues
+				}
+			}
+		}
+		return false;
+	} // TODO IMPL ME
+
+
+	public searchRows(doc: any): Array<[string, string, string]> {
+		const foundData: Array<[string, string, string]> = [];
+		let shortname: string;
+		let filepath: string;
+		let address: string;
+		for (const row in doc) {
+			shortname = this.findShortName(row);
+			filepath = this.findFilePath(row);
+			address = this.findAddress(row);
+			foundData.push([shortname, filepath, address]);
+		}
+		return foundData;
+	}
+
+	public findShortName(doc: any): string {
+		// TODO ME
+		return "stub";
+	}
+
+	public findFilePath(doc: any): string {
+		// TODO ME
+		return "stub";
+	}
+
+	public findAddress(doc: any): string {
+		// TODO ME
+		return "stub";
 	}
 
 	public geoLocation(address: string) {
