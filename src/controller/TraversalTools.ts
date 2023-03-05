@@ -1,22 +1,62 @@
 import {Dataset} from "./Dataset";
 import {AddRoom} from "./AddRoom";
 import http from "http";
-import {InsightError} from "./IInsightFacade";
+import {InsightDataset, InsightError} from "./IInsightFacade";
+import fs from "fs-extra";
+import {parse} from "parse5";
+import JSZip from "jszip";
 
 export class TraversalTools {
 
+	public zipped: JSZip = new JSZip();
 
-	public async buildRoom(fromIndex: string[]) {
-		for (let i = 0; i < fromIndex.length; i++) {
-			if (fromIndex[i].includes("htm")) {
-				console.log(fromIndex[i] + " " + i);
-				// TODO execute the read, then pass the results to a parse method, recursive search for table like before
+	public async unZip(dataset: Dataset) {
+		try {
+			const JSzip = new JSZip();
+			this.zipped = await JSzip.loadAsync(dataset.getContent(), {
+				base64: true,
+				checkCRC32: true
+			});
+
+
+		} catch (e) {
+			console.log("caught an error: " + e);
+		}
+		// TODO execute the read, then pass the results to a parse method, recursive search for table like before
+
+	}
+
+	// REQUIRES: a JSZip object, Dataset object
+	// MODIFIES: N/A
+	// EFFECTS: Queues all the file reads and pushes into a promise array,
+	//			executes promise.all and awaits for the promise from .all to fulfil
+	public async iterateCampus(zip: JSZip, fromIndex: string[], dataset: Dataset) {
+		let promises = [];
+		try {
+			for (let i in zip.files) { // i is a JSON object within the array of files returned by zip.files
+				if (zip.files[i].name === fromIndex[1].substring(2)) {
+					promises.push(zip.files[i].async("blob")
+						.then((blobStr) => {
+							return blobStr.text();
+						})
+						.then((stringedBlob) => console.log(""))
+						.catch(() => {
+							throw new InsightError();
+						}));
+				}
 			}
+			return await Promise.all(promises) // Wait for all the promises in the promise list to fulfill
+				.catch(() => {
+					throw new InsightError("error occurred while waited for queued promises to fulfil");
+				});
+		} catch (e) {
+			throw new InsightError();
 		}
 	}
 
 
 	public async searchRows(tableChildNodes: any, dataset: Dataset) {
+		await this.unZip(dataset);
 		let promises = [];
 		let shortname: string;
 		let filepath: string;
@@ -49,7 +89,7 @@ export class TraversalTools {
 						}
 					}
 				}
-				promises.push(this.buildRoom(currentInfo));
+				promises.push(this.iterateCampus(this.zipped, currentInfo, dataset));
 			}
 		}
 		return await Promise.all(promises)
