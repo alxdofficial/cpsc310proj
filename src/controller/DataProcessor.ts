@@ -16,8 +16,6 @@ export interface DataProcessor {
 	parse(str: string, dataset: Dataset): any;
 
 
-	fieldIsUndefined(jsonObject: any): boolean;
-
 	iterateFolders(zip: JSZip, dataset: Dataset): any;
 
 
