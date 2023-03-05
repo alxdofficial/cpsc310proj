@@ -7,9 +7,15 @@ import {QueryParser} from "./ParseQuery";
 import {DataProcessor} from "./DataProcessor";
 import {InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
 import {Dataset} from "./Dataset";
+import {TraversalTools} from "./TraversalTools";
 
 
 export class AddRoom implements DataProcessor {
+	public traversalTool: TraversalTools;
+
+	constructor() {
+		this.traversalTool = new TraversalTools();
+	}
 
 	public addOnKind(dataset: Dataset): Promise<string[]> {
 		return new Promise((resolve, reject) => {
@@ -107,21 +113,10 @@ export class AddRoom implements DataProcessor {
 			console.log("inside no curr childnodes");
 			return;
 		}
-		// console.log("calling geo");
-		// this.geoLocation("6245 Agronomy Road V6T 1Z4");
-
-		// Traverse until html tagname, then access childnodes, then traverse until body tagname,then childNoes of body, then until tagname is div
-		// , childnodes of div, tagname is section, childnodes of section, tagname is div, childnodes of div, tagname is table, childnodes of table, tagname is tbody
-		// search tr tagname childnodes for each cell, a row correlate to a shortname, filepath and address
-
-		// Check if td-class, attrs, first element in array value is "views-field views-field-title"
-		// <td class="views-field views-field-field-building-code"> for building shortName
-		// go to childNodes of td-class, a, attrs, first element in array value as path
-		// a row has all the info for a single building, then with the path execute the room search where I will build the individual rooms
-
-		if (curr.tagName === "table" && this.validTable(curr.childNodes)) { // TODO implement me
+		if (curr.tagName === "table" && this.traversalTool.validTable(curr.childNodes)) { // TODO implement me
 			console.log("found a valid table");
-			this.searchRows(curr.childNodes);
+			this.traversalTool.searchRows(curr.childNodes);
+			return; // return here, only one valid table so once we find don't need to keep going
 		}
 
 		for (let trait of curr.childNodes) {
@@ -132,17 +127,6 @@ export class AddRoom implements DataProcessor {
 			console.log("invoking travrse with " + trait.nodeName);
 			this.traverseNodes(trait.childNodes, dataset);
 		}
-
-		// is the NodeName == "table"? if it is, is there at least one <td> element with a valid class? if it is then we've found our table
-		// if the NodeName isn't table, keep searching each childnode in the list of childnodes
-
-		// TODO traverse tree until we find the first valid table
-		// TODO push all the file pathes and addresses into a Map, pass that Map into a method that looks for each building with the file path
-		// TODO and for each building, execute findAddress on the Value, which will call geoLocation
-		// "To find the valid table within an HTML file, you will need to look at the classes found on the <td> elements.
-		// As soon as you find one <td> element with a valid class, the entire table is valid."
-
-		// console.log(document);
 		console.log("returning from traverse");
 	}
 
@@ -151,137 +135,13 @@ export class AddRoom implements DataProcessor {
 	// EFFECTS: traverses the list of nodes mutually recursively
 	public traverseNodes(childNodeList: any, dataset: Dataset) {
 		for (let node of childNodeList) {
-			if (!node.childNodes || this.fitsExclusion(node.nodeName)) { // if the node doesn't have children, continue, otherwise search the children
+			if (!node.childNodes || this.traversalTool.fitsExclusion(node.nodeName)) { // if the node doesn't have children, continue, otherwise search the children
 				continue;
 			}
 			console.log("traversing nodes, node name is " + node.nodeName.toString());
 			this.traverseNode(node, dataset);
 		}
 
-	}
-
-	// REQUIRES: the nodeName
-	// MODIFIES: N/A
-	// EFFECTS: return true if the nodeName is not something we want to search
-	public fitsExclusion(name: string): boolean {
-		if (name === "meta") {
-			return true;
-		} else if (name === "link") {
-			return true;
-		} else if (name === "title") {
-			return true;
-		} else if (name === "script") {
-			return true;
-		} else if (name === "noscript") {
-			return true;
-		} else if (name === "footer") {
-			return true;
-		} else if (name === "header") {
-			return true;
-		}
-		return false;
-	}
-
-	// REQUIRES: list of childnodes of table passed by caller
-	// MODIFIES: N/A
-	// EFFECTS: returns true if there is at least one valid table, otherwise false
-
-	public validTable(tableChildNodes: any): boolean {
-		let tableBodyChildNodes;
-		for (let node of tableChildNodes) {
-			if (node.nodeName === "tbody") {
-				tableBodyChildNodes = node.childNodes;
-			}
-		}
-		for (let node of tableBodyChildNodes) {
-			if (node.nodeName === "tr") {
-				for (let innerNode of node.childNodes) {
-					if (innerNode.nodeName === "td") {
-						if (this.checkValidClass(innerNode.attrs[0].value)) {
-							return true;
-						}
-					}
-				}
-			}
-		}
-		return false;
-	} // TODO IMPL ME
-
-	public checkValidClass(attributeVals: string): boolean {
-		return attributeVals === "views-field views-field-field-building-image"
-			|| attributeVals === "views-field views-field-field-building-code"
-			|| attributeVals === "views-field views-field-title"
-			|| attributeVals === "views-field views-field-field-building-address"
-			|| attributeVals === "views-field views-field-nothing";
-
-	}
-
-	public searchRows(tableChildNodes: any): Array<[shortname: string, filepath: string, address: string]> {
-		const foundData: Array<[string, string, string]> = [];
-		let shortname: string;
-		let filepath: string;
-		let address: string;
-		let tableBodyChildNodes;
-		for (let node of tableChildNodes) {
-			if (node.nodeName === "tbody") {
-				tableBodyChildNodes = node.childNodes;
-			}
-		}
-		for (let node of tableBodyChildNodes) {
-			if (node.nodeName === "tr") {
-				for (let innerNode of node.childNodes) {
-					if (innerNode.nodeName === "td") {
-						shortname = this.findShortName(innerNode);
-						filepath = this.findFilePath(innerNode);
-						address = this.findAddress(innerNode);
-						foundData.push([shortname, filepath, address]);
-					}
-				}
-			}
-		}
-		return foundData;
-	}
-
-	public findShortName(cellObject: any): string {
-		for (let attribute of cellObject.attrs) {
-			if (attribute.value === "views-field views-field-field-building-code") {
-				for (let node of cellObject.childNodes) {
-					if (node.nodeName === "#text") {
-						console.log(node.value.replace(/\s/g, ""));
-						return node.value.replace(/\s/g, ""); // remove the spaces with: https://stackoverflow.com/questions/5963182/how-to-remove-spaces-from-a-string-using-javascript
-					}
-				}
-			}
-		}
-		return "unreachable";
-	}
-
-
-	public findFilePath(cellObject: any): string {
-		for (let attribute of cellObject.attrs) {
-			if (attribute.value === "views-field views-field-title") {
-				return this.filePath(cellObject);
-			}
-		}
-		return "unreachable";
-	}
-
-	public filePath(cellObject: any): string {
-		for (let node of cellObject.childNodes) {
-			if (node.nodeName === "a") {
-				for (let attr of node.attrs) {
-					if (attr.name === "href") {
-						return attr.value;
-					}
-				}
-			}
-		}
-		return "unreachable";
-	}
-
-	public findAddress(doc: any): string {
-		// TODO ME
-		return "stub";
 	}
 
 	public geoLocation(address: string) {
