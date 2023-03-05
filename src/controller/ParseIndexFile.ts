@@ -5,9 +5,9 @@ import {InsightDataset, InsightError} from "./IInsightFacade";
 import fs from "fs-extra";
 import {parse} from "parse5";
 import JSZip from "jszip";
+import {TreeTraversal} from "./TreeTraversal";
 
-export class TraversalTools {
-
+export class ParseIndexFile extends TreeTraversal{
 	public zipped: JSZip = new JSZip();
 
 	public async unZip(dataset: Dataset) {
@@ -32,6 +32,7 @@ export class TraversalTools {
 	//			executes promise.all and awaits for the promise from .all to fulfil
 	public async iterateCampus(zip: JSZip, fromIndex: string[], dataset: Dataset) {
 		let promises = [];
+		let roomAdder: AddRoom = new AddRoom();
 		try {
 			for (let i in zip.files) { // i is a JSON object within the array of files returned by zip.files
 				if (zip.files[i].name === fromIndex[1].substring(2)) {
@@ -39,7 +40,7 @@ export class TraversalTools {
 						.then((blobStr) => {
 							return blobStr.text();
 						})
-						.then((stringedBlob) => console.log(""))
+						.then((stringedBlob) => super.findHTMLNode(parse(stringedBlob), dataset))
 						.catch(() => {
 							throw new InsightError();
 						}));
@@ -154,6 +155,10 @@ export class TraversalTools {
 			}
 		}
 		return "unreachable";
+	}
+
+	public workOnFile(currentChildNodes: any, dataset: Dataset) {
+		console.log("working in the file");
 	}
 
 
