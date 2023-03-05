@@ -107,27 +107,22 @@ export class AddRoom implements DataProcessor {
 	// MODIFIES: N/A
 	// EFFECTS: traverses the document until it finds a table, then calls helpers to search the rows
 	public traverseNode(curr: any, dataset: Dataset) {
-		console.log("inside traverse");
-		console.log(curr.nodeName + " expect HTML");
 		if (!curr.childNodes) {
-			console.log("inside no curr childnodes");
 			return;
 		}
-		if (curr.tagName === "table" && this.traversalTool.validTable(curr.childNodes)) { // TODO implement me
-			console.log("found a valid table");
-			this.traversalTool.searchRows(curr.childNodes);
+		if (curr.tagName === "table" && this.validTable(curr.childNodes)) {
+			this.traversalTool.searchRows(curr.childNodes, dataset)
+				.catch(() => {
+					throw new InsightError();
+				});
 			return; // return here, only one valid table so once we find don't need to keep going
 		}
-
 		for (let trait of curr.childNodes) {
-			console.log("name is " + trait.nodeName);
 			if (!trait.childNodes) {
 				continue;
 			}
-			console.log("invoking travrse with " + trait.nodeName);
 			this.traverseNodes(trait.childNodes, dataset);
 		}
-		console.log("returning from traverse");
 	}
 
 	// REQUIRES: the list of childnodes passed by traverseNode, the dataset object
@@ -135,46 +130,69 @@ export class AddRoom implements DataProcessor {
 	// EFFECTS: traverses the list of nodes mutually recursively
 	public traverseNodes(childNodeList: any, dataset: Dataset) {
 		for (let node of childNodeList) {
-			if (!node.childNodes || this.traversalTool.fitsExclusion(node.nodeName)) { // if the node doesn't have children, continue, otherwise search the children
+			if (!node.childNodes || this.fitsExclusion(node.nodeName)) { // if the node doesn't have children, continue, otherwise search the children
 				continue;
 			}
-			console.log("traversing nodes, node name is " + node.nodeName.toString());
 			this.traverseNode(node, dataset);
 		}
-
 	}
 
-	public geoLocation(address: string) {
-		// TODO Send GET request using the http package to http://cs310.students.cs.ubc.ca:11316/api/v1/project_team<TEAM NUMBER>/<ADDRESS>
-		// TODO receive the interface GeoResponse from the request
-		// TODO return the Interface to the main method that constructs the Room object
-		console.log("in geo");
-		const encoded = encodeURIComponent(address);
-		const queryString = "http://cs310.students.cs.ubc.ca:11316/api/v1/project_team198/" + encoded;
-		console.log(queryString);
-		http.get(queryString, (res) => {
-			console.log(res.statusCode);
 
-			console.log("in the promise");
-			let location = "";
-			console.log("in get");
-			res.on("data", (data) => {
-				console.log("getting data");
-				location += data;
-			});
-
-			res.on("end", () => {
-				console.log("in end");
-				console.log(JSON.parse(location).title);
-			});
-		})
-			.on("error", (e) => {
-				console.log(e);
-			});
-
-		console.log("finsih geo");
-
+	// REQUIRES: the nodeName
+	// MODIFIES: N/A
+	// EFFECTS: return true if the nodeName is not something we want to search
+	public fitsExclusion(name: string): boolean {
+		if (name === "meta") {
+			return true;
+		} else if (name === "link") {
+			return true;
+		} else if (name === "title") {
+			return true;
+		} else if (name === "script") {
+			return true;
+		} else if (name === "noscript") {
+			return true;
+		} else if (name === "footer") {
+			return true;
+		} else if (name === "header") {
+			return true;
+		}
+		return false;
 	}
+
+	// REQUIRES: list of childnodes of table passed by caller
+	// MODIFIES: N/A
+	// EFFECTS: returns true if there is at least one valid table, otherwise false
+
+	public validTable(tableChildNodes: any): boolean {
+		let tableBodyChildNodes;
+		for (let node of tableChildNodes) {
+			if (node.nodeName === "tbody") {
+				tableBodyChildNodes = node.childNodes;
+			}
+		}
+		for (let node of tableBodyChildNodes) {
+			if (node.nodeName === "tr") {
+				for (let innerNode of node.childNodes) {
+					if (innerNode.nodeName === "td") {
+						if (this.checkValidClass(innerNode.attrs[0].value)) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	public checkValidClass(attributeVals: string): boolean {
+		return attributeVals === "views-field views-field-field-building-image"
+			|| attributeVals === "views-field views-field-field-building-code"
+			|| attributeVals === "views-field views-field-title"
+			|| attributeVals === "views-field views-field-field-building-address"
+			|| attributeVals === "views-field views-field-nothing";
+	}
+
 
 	public parse(t: string, dataset: Dataset) {
 		let localRoomArr: Section[] = [];
