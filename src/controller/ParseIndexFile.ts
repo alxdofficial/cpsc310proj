@@ -104,6 +104,7 @@ export class ParseIndexFile {
 				// promises.push(this.iterateCampus(this.zipped, currentInfo, dataset));
 				console.log("invoking geo location");
 				this.geoLocation(curr, promises, dataset);
+				console.log("going to next row");
 			}
 		}
 		console.log("waiting for the promises");
@@ -200,6 +201,7 @@ export class ParseIndexFile {
 		const queryString = "http://cs310.students.cs.ubc.ca:11316/api/v1/project_team198/" + encoded;
 		console.log(queryString);
 		http.get(queryString, (res) => {
+			// TODO figure out why this callback isn't being called. it was working before we were having queries with the proper URL
 			console.log(res.statusCode);
 
 			let location = "";
