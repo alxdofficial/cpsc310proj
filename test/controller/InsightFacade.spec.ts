@@ -83,12 +83,6 @@ describe("InsightFacade", function () {
 				return expect(result).to.eventually.deep.equal(["campus"]);
 			});
 		});
-		describe ("addDataset with a valid ROOMs dataset", function() {
-			it ("should be added and return a set of the currently added room IDS", function() {
-				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.deep.equal(["campus"]);
-			});
-		});
 
 		describe ("addDataset with a valid ROOMs dataset, wrong kind", function() {
 			it ("should NOT be added and return an InsightError", function() {

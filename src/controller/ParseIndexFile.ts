@@ -5,9 +5,10 @@ import {InsightDataset, InsightError} from "./IInsightFacade";
 import fs from "fs-extra";
 import {parse} from "parse5";
 import JSZip from "jszip";
-import {TreeTraversal} from "./TreeTraversal";
+import {TraverseBuildingFile} from "./TraverseBuildingFile";
+import {PartialRoom} from "./DataProcessor";
 
-export class ParseIndexFile extends TreeTraversal{
+export class ParseIndexFile {
 	public zipped: JSZip = new JSZip();
 
 	public async unZip(dataset: Dataset) {
@@ -30,17 +31,17 @@ export class ParseIndexFile extends TreeTraversal{
 	// MODIFIES: N/A
 	// EFFECTS: Queues all the file reads and pushes into a promise array,
 	//			executes promise.all and awaits for the promise from .all to fulfil
-	public async iterateCampus(zip: JSZip, fromIndex: string[], dataset: Dataset) {
+	public async iterateCampus(zip: JSZip, fromIndex: PartialRoom, dataset: Dataset) {
 		let promises = [];
 		let roomAdder: AddRoom = new AddRoom();
 		try {
 			for (let i in zip.files) { // i is a JSON object within the array of files returned by zip.files
-				if (zip.files[i].name === fromIndex[1].substring(2)) {
+				if (zip.files[i].name === fromIndex.path.substring(2)) {
 					promises.push(zip.files[i].async("blob")
 						.then((blobStr) => {
 							return blobStr.text();
 						})
-						.then((stringedBlob) => super.findHTMLNode(parse(stringedBlob), dataset))
+						.then((stringedBlob) => this.executeBuildingRead(parse(stringedBlob), dataset, fromIndex))
 						.catch(() => {
 							throw new InsightError();
 						}));
@@ -55,13 +56,14 @@ export class ParseIndexFile extends TreeTraversal{
 		}
 	}
 
+	public executeBuildingRead(doc: any, dataset: Dataset, fromIndex: PartialRoom) {
+		const buildingFileTraverser: TraverseBuildingFile = new TraverseBuildingFile();
+		buildingFileTraverser.findHTMLNode(doc, dataset, fromIndex);
+	}
 
 	public async searchRows(tableChildNodes: any, dataset: Dataset) {
 		await this.unZip(dataset);
-		let promises = [];
-		let shortname: string;
-		let filepath: string;
-		let address: string;
+		let promises: any[] = [];
 		let tableBodyChildNodes;
 		for (let node of tableChildNodes) {
 			if (node.nodeName === "tbody") {
@@ -70,29 +72,41 @@ export class ParseIndexFile extends TreeTraversal{
 		}
 		for (let node of tableBodyChildNodes) {
 			if (node.nodeName === "tr") {
-				let currentInfo = [];
+				const curr: PartialRoom =
+					{
+						fullName: "temp",
+						shortName: "temp",
+						lat: 0,
+						lon: 0,
+						address: "temp",
+						path: "temp"
+					};
 				for (let innerNode of node.childNodes) {
 					if (innerNode.nodeName === "td") {
 						if (this.isBuildingCode(innerNode)) {
-							shortname = this.findShortName(innerNode);
-							currentInfo.push(shortname);
-							// console.log(shortname);
+							curr.shortName = this.findShortName(innerNode);
+							console.log(curr.shortName);
 						}
 						if (this.findFilePath(innerNode)) {
-							filepath = this.filePath(innerNode);
-							currentInfo.push(filepath);
-							// console.log(filepath);
+							curr.path = this.filePath(innerNode);
+							console.log(curr.path);
 						}
 						if (this.isAddress(innerNode)) {
-							address = this.findAddress(innerNode);
-							currentInfo.push(address);
-							// console.log(address);
+							curr.address = this.findAddress(innerNode);
+							console.log(curr.address);
+						}
+						if (this.isFullName(innerNode)) {
+							curr.fullName = this.findFullName(innerNode);
+							console.log(curr.fullName);
 						}
 					}
 				}
-				promises.push(this.iterateCampus(this.zipped, currentInfo, dataset));
+				// promises.push(this.iterateCampus(this.zipped, currentInfo, dataset));
+				console.log("invoking geo location");
+				this.geoLocation(curr, promises, dataset);
 			}
 		}
+		console.log("waiting for the promises");
 		return await Promise.all(promises)
 			.catch(() => {
 				throw new InsightError();
@@ -151,31 +165,44 @@ export class ParseIndexFile extends TreeTraversal{
 	public findAddress(cellObject: any): string {
 		for (let node of cellObject.childNodes) {
 			if (node.nodeName === "#text") {
-				return node.value;
+				return node.value.replace(/(\r\n|\n|\r)/gm, " ").trim(); // remove line breaks in address: https://www.textfixer.com/tutorials/javascript-line-breaks.php
 			}
 		}
 		return "unreachable";
 	}
 
-	public workOnFile(currentChildNodes: any, dataset: Dataset) {
-		console.log("working in the file");
+	public isFullName(cellObject: any): boolean {
+		for (let attribute of cellObject.attrs) {
+			if (attribute.value === "views-field views-field-title") {
+				return true;
+			}
+		}
+		return false;
 	}
 
+	public findFullName(cellObject: any): string {
+		for (let node of cellObject.childNodes) {
+			if (node.nodeName === "a") {
+				for (let curr of node.childNodes) {
+					if (curr.nodeName === "#text") {
+						return curr.value;
+					}
+				}
+			}
+		}
+		return "unreachable";
+	}
 
-	public geoLocation(address: string): [lat: string, lon: string] {
-		// TODO Send GET request using the http package to http://cs310.students.cs.ubc.ca:11316/api/v1/project_team<TEAM NUMBER>/<ADDRESS>
-		// TODO receive the interface GeoResponse from the request
-		// TODO return the Interface to the main method that constructs the Room object
+	public geoLocation(currentInfo: PartialRoom, promises: Array<Promise<void[]>>,
+					   dataset: Dataset) {
 		console.log("in geo");
-		const encoded = encodeURIComponent(address);
+		const encoded = encodeURIComponent(currentInfo.address);
 		const queryString = "http://cs310.students.cs.ubc.ca:11316/api/v1/project_team198/" + encoded;
 		console.log(queryString);
 		http.get(queryString, (res) => {
 			console.log(res.statusCode);
 
-			console.log("in the promise");
 			let location = "";
-			console.log("in get");
 			res.on("data", (data) => {
 				console.log("getting data");
 				location += data;
@@ -183,7 +210,7 @@ export class ParseIndexFile extends TreeTraversal{
 
 			res.on("end", () => {
 				console.log("in end");
-				console.log(JSON.parse(location).title);
+				promises.push(this.iterateCampus(this.zipped, currentInfo, dataset));
 			});
 		})
 			.on("error", (e) => {
@@ -192,9 +219,5 @@ export class ParseIndexFile extends TreeTraversal{
 
 		console.log("finsih geo");
 
-		return ["stub", "stub"];
-
 	}
-
-
 }
