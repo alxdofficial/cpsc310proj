@@ -72,7 +72,7 @@ export class ParseIndexFile {
 		}
 		for (let node of tableBodyChildNodes) {
 			if (node.nodeName === "tr") {
-				const curr: PartialRoom = // if any of the interface fields are still "temp" except for fullname after, then that means we couldn't find the table cell that means the
+				const curr: PartialRoom = // if any of the interface fields are still "temp" except for fullname after, then that means we couldn't find the table cell that means the table cell doesn't exist, and that room isnt valid
 					{
 						fullName: "temp",
 						shortName: "temp",
@@ -85,25 +85,25 @@ export class ParseIndexFile {
 					if (innerNode.nodeName === "td") {
 						if (this.isShortName(innerNode)) {
 							curr.shortName = this.findShortName(innerNode);
-							console.log(curr.shortName);
+							// console.log(curr.shortName);
 						}
 						if (this.isFilePath(innerNode)) {
 							curr.path = this.findFilePath(innerNode);
-							console.log(curr.path);
+							// console.log(curr.path);
 						}
 						if (this.isAddress(innerNode)) {
 							curr.address = this.findAddress(innerNode);
-							console.log(curr.address);
+							// console.log(curr.address);
 						}
 						if (this.isFullName(innerNode)) {
 							curr.fullName = this.findFullName(innerNode);
-							console.log(curr.fullName);
+							// console.log(curr.fullName);
 						}
 					}
 				}
 				// promises.push(this.iterateCampus(this.zipped, currentInfo, dataset));
 				console.log("invoking geo location");
-				this.geoLocation(curr, promises, dataset);
+				promises.push(this.geoLocation(curr, promises, dataset));
 				console.log("going to next row");
 			}
 		}
@@ -151,7 +151,7 @@ export class ParseIndexFile {
 				}
 			}
 		}
-		return "unreachable";
+		return "";
 	}
 
 	public isAddress(cellObject: any): boolean {
@@ -169,7 +169,7 @@ export class ParseIndexFile {
 				return node.value.replace(/(\r\n|\n|\r)/gm, " ").trim(); // remove line breaks in address: https://www.textfixer.com/tutorials/javascript-line-breaks.php
 			}
 		}
-		return "unreachable";
+		return "";
 	}
 
 	public isFullName(cellObject: any): boolean {
@@ -191,7 +191,7 @@ export class ParseIndexFile {
 				}
 			}
 		}
-		return "unreachable";
+		return "";
 	}
 
 	public geoLocation(currentInfo: PartialRoom, promises: Array<Promise<void[]>>,
@@ -212,7 +212,12 @@ export class ParseIndexFile {
 
 			res.on("end", () => {
 				console.log("in end");
-				promises.push(this.iterateCampus(this.zipped, currentInfo, dataset));
+				let jsond = JSON.parse(location);
+				console.log("got location for " + currentInfo.address);
+				console.log("lat is" + jsond.lat);
+				console.log("lon is" + jsond.lon);
+				// promises.push(this.iterateCampus(this.zipped, currentInfo, dataset));
+				return this.iterateCampus(this.zipped, currentInfo, dataset);
 			});
 		})
 			.on("error", (e) => {
