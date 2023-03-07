@@ -72,7 +72,7 @@ export class ParseIndexFile {
 		}
 		for (let node of tableBodyChildNodes) {
 			if (node.nodeName === "tr") {
-				const curr: PartialRoom =
+				const curr: PartialRoom = // if any of the interface fields are still "temp" except for fullname after, then that means we couldn't find the table cell that means the
 					{
 						fullName: "temp",
 						shortName: "temp",
@@ -83,12 +83,12 @@ export class ParseIndexFile {
 					};
 				for (let innerNode of node.childNodes) {
 					if (innerNode.nodeName === "td") {
-						if (this.isBuildingCode(innerNode)) {
+						if (this.isShortName(innerNode)) {
 							curr.shortName = this.findShortName(innerNode);
 							console.log(curr.shortName);
 						}
-						if (this.findFilePath(innerNode)) {
-							curr.path = this.filePath(innerNode);
+						if (this.isFilePath(innerNode)) {
+							curr.path = this.findFilePath(innerNode);
 							console.log(curr.path);
 						}
 						if (this.isAddress(innerNode)) {
@@ -114,7 +114,7 @@ export class ParseIndexFile {
 			});
 	}
 
-	public isBuildingCode(cellObject: any): boolean {
+	public isShortName(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {
 			if (attribute.value === "views-field views-field-field-building-code") {
 				return true;
@@ -129,10 +129,10 @@ export class ParseIndexFile {
 				return node.value.replace(/\s/g, ""); // remove the spaces with: https://stackoverflow.com/questions/5963182/how-to-remove-spaces-from-a-string-using-javascript
 			}
 		}
-		return "unreachable";
+		return "";
 	}
 
-	public findFilePath(cellObject: any): boolean {
+	public isFilePath(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {
 			if (attribute.value === "views-field views-field-title") {
 				return true;
@@ -141,7 +141,7 @@ export class ParseIndexFile {
 		return false;
 	}
 
-	public filePath(cellObject: any): string {
+	public findFilePath(cellObject: any): string {
 		for (let node of cellObject.childNodes) {
 			if (node.nodeName === "a") {
 				for (let attr of node.attrs) {
