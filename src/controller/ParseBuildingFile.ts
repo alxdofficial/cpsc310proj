@@ -70,6 +70,7 @@ export class ParseBuildingFile {
 					}
 				}
 				// TODO set a new room into the room array here
+				// TODO: could invoke geolocation getter here, or actually the promise array might go here, not sure
 			}
 		}
 	}
