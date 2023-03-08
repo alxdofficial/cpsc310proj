@@ -36,7 +36,7 @@ export class ParseIndexFile {
 		let roomAdder: AddRoom = new AddRoom();
 		try {
 			for (let i in zip.files) { // i is a JSON object within the array of files returned by zip.files
-				if (zip.files[i].name === fromIndex.path.substring(2)) {
+				if (zip.files[i].name === fromIndex.path.substring(2)) { // if the file name and the path name is the same, unzip that folder
 					promises.push(zip.files[i].async("blob")
 						.then((blobStr) => {
 							return blobStr.text();

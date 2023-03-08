@@ -12,7 +12,7 @@ import {ParseBuildingFile} from "./ParseBuildingFile";
 import {TableValidity} from "./TableValidity";
 
 
-export class TraverseBuildingFile extends TableValidity{
+export class TraverseBuildingFile extends TableValidity {
 
 	public findHTMLNode(doc: any, dataset: Dataset, fromIndex: PartialRoom) {
 		for (let i = 0; i < doc.childNodes.length; i++) {
@@ -34,15 +34,20 @@ export class TraverseBuildingFile extends TableValidity{
 	// MODIFIES: N/A
 	// EFFECTS: traverses the document until it finds a table, then calls helpers to search the rows
 	public traverseNode(curr: any, dataset: Dataset, fromIndex: PartialRoom) {
+		console.log("in traverse");
 		if (!curr.childNodes) {
 			return;
 		}
 		if (curr.tagName === "table" && this.validTableBuilding(curr.childNodes)) {
 			const traverser: ParseBuildingFile = new ParseBuildingFile();
-			traverser.searchRows(curr.childNodes, dataset, fromIndex)
-				.catch(() => {
-					throw new InsightError();
-				});
+			try {
+				traverser.searchRows(curr.childNodes, dataset, fromIndex);
+			} catch (e) {
+				throw new InsightError("caught and error while searching rows");
+			}
+			// .catch(() => {
+			// 	throw new InsightError();
+			// });
 			return; // return here, only one valid table so once we find don't need to keep going
 		}
 		for (let trait of curr.childNodes) {

@@ -27,8 +27,7 @@ export class ParseBuildingFile {
 
 	}
 
-	public async searchRows(tableChildNodes: any, dataset: Dataset, fromIndex: PartialRoom) {
-		await this.unZip(dataset);
+	public searchRows(tableChildNodes: any, dataset: Dataset, fromIndex: PartialRoom) {
 		let promises = [];
 		let roomNumber: string;
 		let roomCapacity: string;
