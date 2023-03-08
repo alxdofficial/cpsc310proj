@@ -41,19 +41,20 @@ export class ParseBuildingFile {
 				tableBodyChildNodes = node.childNodes;
 			}
 		}
+		console.log("in search rows");
 		for (let node of tableBodyChildNodes) {
 			if (node.nodeName === "tr") {
 				for (let innerNode of node.childNodes) {
 					if (innerNode.nodeName === "td") {
 						if (this.isRoomNumber(innerNode)) {
-							// console.log(fromIndex.shortName + " buidling shortname " + fromIndex.path + " building filepath "
-							//	+ fromIndex.address + " building address" + fromIndex.fullName + " building full name");
+							console.log(fromIndex.shortName + " buidling shortname " + fromIndex.path + " building filepath "
+								+ fromIndex.address + " building address" + fromIndex.fullName + " building full name");
 							roomNumber = this.findRoomNumber(innerNode);
-							// console.log("room num is " + roomNumber);
+							console.log("room num is " + roomNumber);
 						}
 						if (this.isRoomCapacity(innerNode)) {
 							roomCapacity = this.findRoomCapacity(innerNode);
-							// console.log("room cap is " + roomCapacity);
+							console.log("room cap is " + roomCapacity);
 						}
 						if (this.isRoomFurniture(innerNode)) {
 							roomFurniture = this.findRoomFurniture(innerNode);
@@ -61,7 +62,7 @@ export class ParseBuildingFile {
 						}
 						if (this.isRoomType(innerNode)) {
 							roomType = this.findRoomType(innerNode);
-							// console.log("roome type is " + roomType);
+							console.log("roome type is " + roomType);
 						}
 						if (this.isHref(innerNode)) {
 							href = this.findHref(innerNode);

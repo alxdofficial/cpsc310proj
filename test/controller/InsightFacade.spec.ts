@@ -78,12 +78,25 @@ describe("InsightFacade", function () {
 		});
 
 		describe ("addDataset with a valid ROOMs dataset", function() {
+			it ("shosuld be added and return a set of the currently added room IDS", function() {
+				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["campus"]);
+			});
+		});
+
+		describe ("addDataset with a valid ROOMs dataset", function() {
 			it ("should be added and return a set of the currently added room IDS", function() {
 				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
 				return expect(result).to.eventually.deep.equal(["campus"]);
 			});
 		});
 
+		describe ("addDataset with a valid ROOMs dataset", function() {
+			it ("3should be added and return a set of the currently added room IDS", function() {
+				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["campus"]);
+			}); // TODO: these tests look like they are starting where the last one finishes, so the correct result that appears is the correct result from the last test. Prove by running just one test, and not many
+		});
 		describe ("addDataset with a valid ROOMs dataset, wrong kind", function() {
 			it ("should NOT be added and return an InsightError", function() {
 				const result = facade.addDataset("campus", campus, InsightDatasetKind.Sections);

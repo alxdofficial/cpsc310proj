@@ -89,7 +89,7 @@ export class ParseIndexFile {
 						}
 						if (this.isFilePath(innerNode)) {
 							curr.path = this.findFilePath(innerNode);
-							// console.log(curr.path);
+							 // console.log(curr.path);
 						}
 						if (this.isAddress(innerNode)) {
 							curr.address = this.findAddress(innerNode);
@@ -97,13 +97,12 @@ export class ParseIndexFile {
 						}
 						if (this.isFullName(innerNode)) {
 							curr.fullName = this.findFullName(innerNode);
-							// console.log(curr.fullName);
+							 // console.log(curr.fullName);
 						}
 					}
 				}
-				// promises.push(this.iterateCampus(this.zipped, currentInfo, dataset));
-				console.log("invoking geo location");
-				promises.push(this.geoLocation(curr, promises, dataset));
+				 promises.push(this.iterateCampus(this.zipped, curr, dataset));
+				// promises.push(this.geoLocation(curr, promises, dataset));
 				console.log("going to next row");
 			}
 		}
@@ -129,7 +128,7 @@ export class ParseIndexFile {
 				return node.value.replace(/\s/g, ""); // remove the spaces with: https://stackoverflow.com/questions/5963182/how-to-remove-spaces-from-a-string-using-javascript
 			}
 		}
-		return "";
+		return "unreachable";
 	}
 
 	public isFilePath(cellObject: any): boolean {
