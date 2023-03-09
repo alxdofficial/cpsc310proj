@@ -33,7 +33,6 @@ export class ParseIndexFile {
 	//			executes promise.all and awaits for the promise from .all to fulfil
 	public async iterateCampus(zip: JSZip, fromIndex: PartialRoom, dataset: Dataset) {
 		let promises = [];
-		let roomAdder: AddRoom = new AddRoom();
 		try {
 			for (let i in zip.files) { // i is a JSON object within the array of files returned by zip.files
 				if (zip.files[i].name === fromIndex.path.substring(2)) { // if the file name and the path name is the same, unzip that folder
@@ -101,7 +100,7 @@ export class ParseIndexFile {
 						}
 					}
 				}
-				 promises.push(this.iterateCampus(this.zipped, curr, dataset));
+				promises.push(this.iterateCampus(this.zipped, curr, dataset));
 				// promises.push(this.geoLocation(curr, promises, dataset));
 				console.log("going to next row");
 			}

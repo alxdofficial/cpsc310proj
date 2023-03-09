@@ -13,6 +13,9 @@ import {TableValidity} from "./TableValidity";
 
 export class AddRoom extends TableValidity implements DataProcessor {
 
+	private foundFlag: boolean = false;
+	private traversePromises: any[] = [];
+
 	public addOnKind(dataset: Dataset): Promise<string[]> {
 		return new Promise((resolve, reject) => {
 			try {
@@ -26,6 +29,7 @@ export class AddRoom extends TableValidity implements DataProcessor {
 				})        // is loaded even if its invalid
 					.then(async (zip) => {
 						await this.iterateFolders(zip, dataset);									// Iterate over the files, modifiy the class variables
+						console.log("back from iterate");
 						if (dataset.getRowCount() === 0) {
 							throw new InsightError("No valid rooms!");
 						}
@@ -40,6 +44,7 @@ export class AddRoom extends TableValidity implements DataProcessor {
 						await dataset.writeDataRooms();
 						dataset.setRowCount(0);												// CLEANUP: reset row count for future add calls
 						dataset.setRoomArr([]);											// CLEANUP: empty the array for sections for future calls
+						console.log("returning for good!");
 						return resolve(dataset.getDatasetIDs()); 								// resolve with an array of strings which are the added IDs
 					}
 					)
@@ -82,17 +87,25 @@ export class AddRoom extends TableValidity implements DataProcessor {
 	}
 
 
-	public findHTMLNode(doc: any, dataset: Dataset) {
+	public async findHTMLNode(doc: any, dataset: Dataset) {
+		let promises = [];
 		for (let i = 0; i < doc.childNodes.length; i++) {
-			this.findHTMLNodeName(doc.childNodes[i], i, dataset);
+			console.log("adding an html find to the promise arra");
+			promises.push(this.findHTMLNodeName(doc.childNodes[i], i, dataset));
 		}
+		console.log("waiting for the html promies");
+		await Promise.all(promises);
+		console.log("done waiting for the html promies");
 	}
 
-	public findHTMLNodeName(childNode: any, i: number, dataset: Dataset) {
+	public async findHTMLNodeName(childNode: any, i: number, dataset: Dataset) {
 		if (childNode.nodeName === "html") {
-			console.log("invoked traverse " + childNode.nodeName);
 			try {
-				this.traverseNode(childNode, dataset);
+				console.log("waitng for traverseNode");
+				this.traversePromises.push(this.traverseNode(childNode, dataset));
+				// await this.traverseNode(childNode, dataset);
+				await Promise.all(this.traversePromises);
+				console.log("DONE WAITING for TRAVSER");
 			} catch (e) {
 				console.log("caught an error" + e);
 			}
@@ -102,24 +115,30 @@ export class AddRoom extends TableValidity implements DataProcessor {
 	// REQUIRES: the HTML Document object with its traits and a dataset to pass for modification
 	// MODIFIES: N/A
 	// EFFECTS: traverses the document until it finds a table, then calls helpers to search the rows
-	public traverseNode(curr: any, dataset: Dataset) {
+	public async traverseNode(curr: any, dataset: Dataset) {
+		console.log("traversing a node");
 		if (!curr.childNodes) {
 			return;
 		}
+
 		if (curr.tagName === "table" && this.validTableIndex(curr.childNodes)) {
 			const traverser: ParseIndexFile = new ParseIndexFile();
-			traverser.searchRows(curr.childNodes, dataset)
+			console.log("FOUND A VALID TABLE AND TRAVERSING");
+			this.foundFlag = true; // signal to traverseLoN that we can stop because this table is valid
+			console.log("executing search rows");
+			return await traverser.searchRows(curr.childNodes, dataset)
 				.catch(() => {
 					throw new InsightError();
 				});
-			return; // return here, only one valid table so once we find don't need to keep going
 		}
+
 		for (let trait of curr.childNodes) {
 			if (!trait.childNodes) {
 				continue;
 			}
 			this.traverseNodes(trait.childNodes, dataset);
 		}
+		console.log("searched node all the way, no table");
 	}
 
 	// REQUIRES: the list of childnodes passed by traverseNode, the dataset object
@@ -130,7 +149,15 @@ export class AddRoom extends TableValidity implements DataProcessor {
 			if (!node.childNodes || this.fitsExclusion(node.nodeName)) { // if the node doesn't have children, continue, otherwise search the children
 				continue;
 			}
-			this.traverseNode(node, dataset);
+			if (this.foundFlag) {
+				console.log("found table, returning from LoN");
+				return;
+			}
+			this.traversePromises.push(this.traverseNode(node, dataset));
+			// this.traverseNode(node, dataset)
+			// 	.catch(() => {
+			// 		throw new InsightError();
+			// 	});
 		}
 	}
 

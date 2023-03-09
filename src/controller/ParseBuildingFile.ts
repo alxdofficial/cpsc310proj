@@ -9,26 +9,25 @@ import {TraverseBuildingFile} from "./TraverseBuildingFile";
 import {PartialRoom} from "./DataProcessor";
 
 export class ParseBuildingFile {
-	public zipped: JSZip = new JSZip();
+	// public zipped: JSZip = new JSZip();
 
-	public async unZip(dataset: Dataset) {
-		try {
-			const JSzip = new JSZip();
-			this.zipped = await JSzip.loadAsync(dataset.getContent(), {
-				base64: true,
-				checkCRC32: true
-			});
-
-
-		} catch (e) {
-			console.log("caught an error: " + e);
-		}
-		// TODO execute the read, then pass the results to a parse method, recursive search for table like before
-
-	}
+	// public async unZip(dataset: Dataset) {
+	// 	try {
+	// 		const JSzip = new JSZip();
+	// 		this.zipped = await JSzip.loadAsync(dataset.getContent(), {
+	// 			base64: true,
+	// 			checkCRC32: true
+	// 		});
+	//
+	//
+	// 	} catch (e) {
+	// 		console.log("caught an error: " + e);
+	// 	}
+	// 	// TODO execute the read, then pass the results to a parse method, recursive search for table like before
+	//
+	// }
 
 	public searchRows(tableChildNodes: any, dataset: Dataset, fromIndex: PartialRoom) {
-		let promises = [];
 		let roomNumber: string;
 		let roomCapacity: string;
 		let roomFurniture: string;

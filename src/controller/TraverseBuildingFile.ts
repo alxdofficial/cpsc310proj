@@ -34,7 +34,7 @@ export class TraverseBuildingFile extends TableValidity {
 	// MODIFIES: N/A
 	// EFFECTS: traverses the document until it finds a table, then calls helpers to search the rows
 	public traverseNode(curr: any, dataset: Dataset, fromIndex: PartialRoom) {
-		console.log("in traverse");
+		// console.log("in traverse");
 		if (!curr.childNodes) {
 			return;
 		}
