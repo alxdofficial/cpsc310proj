@@ -1,8 +1,8 @@
-import Section from "../Section";
+import Section from "../datasetProcessor/Section";
 import {rejects} from "assert";
 import {InsightError} from "../IInsightFacade";
 import {InsightFilter} from "./IInsightFilter";
-import Room from "../Room";
+import Room from "../datasetProcessor/Room";
 
 export enum Logic {And, Or}
 

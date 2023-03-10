@@ -1,6 +1,6 @@
-import Section from "../Section";
+import Section from "../datasetProcessor/Section";
 import {MFields, SFields} from "./InsightQuery";
-import Room from "../Room";
+import Room from "../datasetProcessor/Room";
 import {InsightError} from "../IInsightFacade";
 
 export class GetFieldData {

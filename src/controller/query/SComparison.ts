@@ -1,7 +1,7 @@
-import Section from "../Section";
+import Section from "../datasetProcessor/Section";
 import {QueryUtils} from "./QueryUtils";
 import {SFields} from "./InsightQuery";
-import Room from "../Room";
+import Room from "../datasetProcessor/Room";
 import {GetFieldData} from "./GetFieldData";
 import {InsightFilter} from "./IInsightFilter";
 

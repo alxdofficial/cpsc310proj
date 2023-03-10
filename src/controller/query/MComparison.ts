@@ -1,9 +1,9 @@
-import Section from "../Section";
+import Section from "../datasetProcessor/Section";
 import {QueryUtils} from "./QueryUtils";
 import {InsightFilter} from "./IInsightFilter";
 import {MFields} from "./InsightQuery";
 import {GetFieldData} from "./GetFieldData";
-import Room from "../Room";
+import Room from "../datasetProcessor/Room";
 export enum InsightM {lt, gt, eq}
 export class MComparison implements InsightFilter {
 	public math: InsightM;

@@ -1,6 +1,6 @@
-import Section from "../Section";
+import Section from "../datasetProcessor/Section";
 import {InsightFilter} from "./IInsightFilter";
-import Room from "../Room";
+import Room from "../datasetProcessor/Room";
 
 export class Negation implements InsightFilter {
 	public filter: InsightFilter;

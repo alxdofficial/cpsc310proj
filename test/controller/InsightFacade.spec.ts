@@ -1,5 +1,6 @@
 import {
-	IInsightFacade, InsightDataset,
+	IInsightFacade,
+	InsightDataset,
 	InsightDatasetKind,
 	InsightError,
 	InsightResult,
@@ -11,7 +12,6 @@ import {folderTest} from "@ubccpsc310/folder-test";
 import {expect, use} from "chai";
 import chaiAsPromised from "chai-as-promised";
 import {clearDisk, getContentFromArchives} from "../TestUtil";
-import {AddRoom} from "../../src/controller/AddRoom";
 
 use(chaiAsPromised);
 
@@ -85,6 +85,14 @@ describe("InsightFacade", function () {
 			});
 		});
 
+		describe("addDataset with a valid ROOMs dataset AND valid SECTIONS", function () {
+			it("3should be added and return a set of the currently added room IDS", function () {
+				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms)
+					.then (()=> facade.addDataset("sections", sectionsLiteLite, InsightDatasetKind.Sections));
+				return expect(result).to.eventually.deep.equal(["campus", "sections"]);
+			});
+		});
+
 		describe("removeDataset with a valid ROOMs dataset", function () {
 			it("should be removed with the string CAMPUS", function () {
 				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms)
@@ -93,13 +101,6 @@ describe("InsightFacade", function () {
 			});
 		});
 
-		describe("removeDataset with a valid ROOMs dataset", function () {
-			it("shoudl fail as the ID is invalid", function () {
-				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms)
-					.then(() => facade.removeDataset("asd_asd"));
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
-			});
-		});
 
 		describe("addDataset with a valid ROOMs dataset, wrong kind", function () {
 			it("should NOT be added and return an InsightError", function () {

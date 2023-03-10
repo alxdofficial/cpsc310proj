@@ -1,5 +1,5 @@
-import Section from "../Section";
-import Room from "../Room";
+import Section from "../datasetProcessor/Section";
+import Room from "../datasetProcessor/Room";
 
 export interface InsightFilter {
 	doFilter(section: Section | Room): Promise<boolean>

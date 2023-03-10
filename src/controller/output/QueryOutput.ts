@@ -1,4 +1,4 @@
-import Section from "../Section";
+import Section from "../datasetProcessor/Section";
 import {InsightResult} from "../IInsightFacade";
 import {QueryUtils} from "../query/QueryUtils";
 import {MFields, SFields} from "../query/InsightQuery";

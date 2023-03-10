@@ -1,7 +1,7 @@
 import {Dataset} from "./Dataset";
 import {AddRoom} from "./AddRoom";
 import http from "http";
-import {InsightDataset, InsightError} from "./IInsightFacade";
+import {InsightDataset, InsightError} from "../IInsightFacade";
 import fs from "fs-extra";
 import {parse} from "parse5";
 import JSZip from "jszip";

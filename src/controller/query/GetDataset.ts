@@ -1,7 +1,7 @@
 import InsightFacade from "../InsightFacade";
 import {InsightDataset, InsightError} from "../IInsightFacade";
-import Section from "../Section";
-import Room from "../Room";
+import Section from "../datasetProcessor/Section";
+import Room from "../datasetProcessor/Room";
 
 export class GetDataset {
 	public static getDataset(facade: InsightFacade, id: string): Promise<Array<Section | Room>> {

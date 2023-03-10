@@ -1,13 +1,7 @@
-import fs from "fs-extra";
-import JSZip from "jszip";
-import {parse} from "parse5";
-import * as http from "http";
-import Section from "./Section";
-import {QueryParser} from "./ParseQuery";
+
 import {DataProcessor, PartialRoom} from "./DataProcessor";
-import {InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
+import {InsightDataset, InsightDatasetKind, InsightError} from "../IInsightFacade";
 import {Dataset} from "./Dataset";
-import {ParseIndexFile} from "./ParseIndexFile";
 import {ParseBuildingFile} from "./ParseBuildingFile";
 import {TableValidity} from "./TableValidity";
 

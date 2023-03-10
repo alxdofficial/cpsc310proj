@@ -1,6 +1,6 @@
 import {Dataset} from "./Dataset";
 import http from "http";
-import {InsightDataset, InsightError} from "./IInsightFacade";
+import {InsightDataset, InsightError} from "../IInsightFacade";
 import {PartialBuilding, PartialRoom} from "./DataProcessor";
 import Room from "./Room";
 
@@ -51,7 +51,7 @@ export class ParseBuildingFile {
 		let toAdd = new Room(partial.fullName, partial.shortName, building.roomNumber,
 			partial.shortName + "_" + building.roomNumber,
 			partial.address, lat, lon, building.roomCapacity, building.roomType, building.roomFurn, building.href);
-		dataset.getRoomArr().push(toAdd);
+		dataset.addToRoomArr(toAdd);
 		dataset.setRowCount(dataset.getRowCount() + 1);
 	}
 

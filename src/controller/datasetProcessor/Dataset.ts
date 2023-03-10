@@ -1,4 +1,4 @@
-import {InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
+import {InsightDataset, InsightDatasetKind, InsightError} from "../IInsightFacade";
 import Section from "./Section";
 import Room from "./Room";
 import fs from "fs-extra";

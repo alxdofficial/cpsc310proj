@@ -1,4 +1,4 @@
-import {InsightDatasetKind} from "./IInsightFacade";
+import {InsightDatasetKind} from "../IInsightFacade";
 import JSZip from "jszip";
 import {Dataset} from "./Dataset";
 

@@ -1,7 +1,7 @@
-import Section from "../Section";
+import Section from "../datasetProcessor/Section";
 import InsightFacade from "../InsightFacade";
 import {InsightDataset, InsightError, InsightResult, ResultTooLargeError} from "../IInsightFacade";
-import Room from "../Room";
+import Room from "../datasetProcessor/Room";
 import {GetDataset} from "./GetDataset";
 import {InsightFilter} from "./IInsightFilter";
 import {InsightOption} from "../output/InsightOption";
