@@ -11,7 +11,7 @@ import fs from "fs-extra";
 import JSZip from "jszip";
 import Section from "./Section";
 import Room from "./Room";
-import {QueryParser} from "./ParseQuery";
+import {QueryParser} from "./parse/QueryParser";
 // import {InsightQuery} from "./InsightQuery"; // TODO undome
 import {DataProcessor} from "./DataProcessor";
 import {Dataset} from "./Dataset";

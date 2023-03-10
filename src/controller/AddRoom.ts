@@ -3,7 +3,7 @@ import JSZip from "jszip";
 import {parse} from "parse5";
 import * as http from "http";
 import Section from "./Section";
-import {QueryParser} from "./ParseQuery";
+import {QueryParser} from "./parse/QueryParser";
 import {DataProcessor} from "./DataProcessor";
 import {InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
 import {Dataset} from "./Dataset";
