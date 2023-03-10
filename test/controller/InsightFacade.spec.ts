@@ -37,7 +37,7 @@ describe("InsightFacade", function () {
 		// This block runs once and loads the datasets.
 
 		// Just in case there is anything hanging around from a previous run of the test suite
-		 clearDisk();
+		clearDisk();
 	});
 
 	describe("Add/Remove/List Dataset", function () {
@@ -77,28 +77,32 @@ describe("InsightFacade", function () {
 			clearDisk();
 		});
 
-		describe ("addDataset with a valid ROOMs dataset", function() {
-			it ("shosuld be added and return a set of the currently added room IDS", function() {
+
+		describe("addDataset with a valid ROOMs dataset", function () {
+			it("3should be added and return a set of the currently added room IDS", function () {
 				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
 				return expect(result).to.eventually.deep.equal(["campus"]);
 			});
 		});
 
-		describe ("addDataset with a valid ROOMs dataset", function() {
-			it ("should be added and return a set of the currently added room IDS", function() {
-				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.deep.equal(["campus"]);
+		describe("removeDataset with a valid ROOMs dataset", function () {
+			it("should be removed with the string CAMPUS", function () {
+				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms)
+					.then(() => facade.removeDataset("campus"));
+				return expect(result).to.eventually.deep.equal("campus");
 			});
 		});
 
-		describe ("addDataset with a valid ROOMs dataset", function() {
-			it ("3should be added and return a set of the currently added room IDS", function() {
-				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.deep.equal(["campus"]);
-			}); // TODO: these tests look like they are starting where the last one finishes, so the correct result that appears is the correct result from the last test. Prove by running just one test, and not many
+		describe("removeDataset with a valid ROOMs dataset", function () {
+			it("shoudl fail as the ID is invalid", function () {
+				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms)
+					.then(() => facade.removeDataset("asd_asd"));
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
 		});
-		describe ("addDataset with a valid ROOMs dataset, wrong kind", function() {
-			it ("should NOT be added and return an InsightError", function() {
+
+		describe("addDataset with a valid ROOMs dataset, wrong kind", function () {
+			it("should NOT be added and return an InsightError", function () {
 				const result = facade.addDataset("campus", campus, InsightDatasetKind.Sections);
 				return expect(result).to.eventually.be.rejectedWith(InsightError);
 			});
@@ -202,7 +206,7 @@ describe("InsightFacade", function () {
 		describe("addData with a list and VALID add, pairLiteLite has only one course with two sections inside", function () {
 			it("should PASS with the valid added key passed", function () {
 				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
-					.then (()=> facade.listDatasets());
+					.then(() => facade.listDatasets());
 				const newDataSet: InsightDataset = {							// Create the dataset tuple
 					id: "validKey",
 					kind: InsightDatasetKind.Sections,

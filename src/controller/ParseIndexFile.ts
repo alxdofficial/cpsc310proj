@@ -76,8 +76,6 @@ export class ParseIndexFile {
 					{
 						fullName: "temp",
 						shortName: "temp",
-						lat: 0,
-						lon: 0,
 						address: "temp",
 						path: "temp"
 					};
@@ -85,26 +83,21 @@ export class ParseIndexFile {
 					if (innerNode.nodeName === "td") {
 						if (this.isShortName(innerNode)) {
 							curr.shortName = this.findShortName(innerNode);
-							// console.log(curr.shortName);
 						}
 						if (this.isFilePath(innerNode)) {
 							curr.path = this.findFilePath(innerNode);
-							// console.log(curr.path);
 						}
 						if (this.isAddress(innerNode)) {
 							curr.address = this.findAddress(innerNode);
-							// console.log(curr.address);
 						}
 						if (this.isFullName(innerNode)) {
 							curr.fullName = this.findFullName(innerNode);
-							// console.log(curr.fullName);
 						}
 					}
 				}
 				promises.push(this.iterateCampus(this.zipped, curr, dataset));
 			}
 		}
-		console.log("waiting for the promises");
 		return await Promise.all(promises)
 			.catch(() => {
 				throw new InsightError();

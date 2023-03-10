@@ -7,10 +7,17 @@ export interface PartialRoom {
 
 	fullName: string;
 	shortName: string;
-	lat: number;
-	lon: number;
 	address: string;
 	path: string;
+}
+
+export interface PartialBuilding {
+
+	roomNumber: string;
+	roomCapacity: number;
+	roomFurn: string;
+	roomType: string;
+	href: string;
 }
 
 export interface DataProcessor {
@@ -22,9 +29,6 @@ export interface DataProcessor {
 	// EFFECTS: Adds the dataset to memory
 	// MODIFIES: Moves datasets from disk into memory
 	addOnKind(dataset: Dataset): Promise<string[]>;
-
-
-	parse(str: string, dataset: Dataset): any;
 
 
 	iterateFolders(zip: JSZip, dataset: Dataset): any;

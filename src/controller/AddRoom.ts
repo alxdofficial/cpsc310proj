@@ -29,7 +29,6 @@ export class AddRoom extends TableValidity implements DataProcessor {
 				})        // is loaded even if its invalid
 					.then(async (zip) => {
 						await this.iterateFolders(zip, dataset);									// Iterate over the files, modifiy the class variables
-						console.log("back from iterate");
 						if (dataset.getRowCount() === 0) {
 							throw new InsightError("No valid rooms!");
 						}
@@ -41,10 +40,10 @@ export class AddRoom extends TableValidity implements DataProcessor {
 						dataset.getDatasets().set(newDataSet, dataset.getRoomArr()); 				// Add the insightdataset and section array to the in memory representation of the data
 						dataset.getDatasetIDs().push(dataset.getID()); 										// on successful add, add the datasetID
 
-						await dataset.writeDataRooms();
+						await dataset.writeDataRooms();										// TODO IMPL me
+						console.log(dataset.getRoomArr());
 						dataset.setRowCount(0);												// CLEANUP: reset row count for future add calls
-						dataset.setRoomArr([]);											// CLEANUP: empty the array for sections for future calls
-						console.log("returning for good!");
+						dataset.setRoomArr([]);												// CLEANUP: empty the array for sections for future calls
 						return resolve(dataset.getDatasetIDs()); 								// resolve with an array of strings which are the added IDs
 					}
 					)
@@ -92,9 +91,7 @@ export class AddRoom extends TableValidity implements DataProcessor {
 		for (let i = 0; i < doc.childNodes.length; i++) {
 			promises.push(this.findHTMLNodeName(doc.childNodes[i], i, dataset));
 		}
-		console.log("waiting for the html promies");
 		await Promise.all(promises);
-		console.log("done waiting for the html promies");
 	}
 
 	public async findHTMLNodeName(childNode: any, i: number, dataset: Dataset) {
@@ -103,7 +100,7 @@ export class AddRoom extends TableValidity implements DataProcessor {
 				this.traversePromises.push(this.traverseNode(childNode, dataset));
 				await Promise.all(this.traversePromises);
 			} catch (e) {
-				console.log("caught an error" + e);
+				throw new InsightError("error occured while finding HTMLNodeName");
 			}
 		}
 	}
@@ -147,25 +144,5 @@ export class AddRoom extends TableValidity implements DataProcessor {
 			this.traversePromises.push(this.traverseNode(node, dataset));
 		}
 	}
-
-	public parse(t: string, dataset: Dataset) {
-		let localRoomArr: Section[] = [];
-		const result = JSON.parse(t).result; 		 	// Result is the array of the JSON objects
-
-		for (const jsonObject of result) {			 	// Each JSON object is one whole section in result, check if key is undefined
-			// if (this.fieldIsUndefined(jsonObject)) {  	// Check all the fields of the current JSON object, if any required field is missing skip this object
-			// 	continue;
-			// }
-			// TODO implement me below
-			// let toAdd: Section = new Section(jsonObject.id, jsonObject.Course,
-			// 	jsonObject.Title, jsonObject.Professor, jsonObject.Subject,
-			// 	jsonObject.Year, jsonObject.Avg, jsonObject.Pass, jsonObject.Fail, jsonObject.Audit);   // Create a new section
-			// localRoomArr.push(toAdd); 					// Create a section object in one iteration, push it to the array
-			// // Increment the count of valid sections, "numRows is the number of valid sections in a dataset" @480
-			// dataset.setRowCount(dataset.getRowCount() + 1);
-		}
-		dataset.getSectionArr().push(...localRoomArr);
-	}
-
 
 }

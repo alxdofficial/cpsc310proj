@@ -1,85 +1,73 @@
 import {Dataset} from "./Dataset";
-import {AddRoom} from "./AddRoom";
 import http from "http";
 import {InsightDataset, InsightError} from "./IInsightFacade";
-import fs from "fs-extra";
-import {parse} from "parse5";
-import JSZip from "jszip";
-import {TraverseBuildingFile} from "./TraverseBuildingFile";
-import {PartialRoom} from "./DataProcessor";
+import {PartialBuilding, PartialRoom} from "./DataProcessor";
+import Room from "./Room";
 
 export class ParseBuildingFile {
 
-	private geoPromises: any[] = [];
-
 	public searchRows(tableChildNodes: any, dataset: Dataset, fromIndex: PartialRoom, lat: number, lon: number) {
-		let roomNumber: string;
-		let roomCapacity: string;
-		let roomFurniture: string;
-		let roomType: string;
-		let href: string;
 		let tableBodyChildNodes;
 		for (let node of tableChildNodes) {
 			if (node.nodeName === "tbody") {
 				tableBodyChildNodes = node.childNodes;
 			}
 		}
-		console.log("in search rows");
 		for (let node of tableBodyChildNodes) {
 			if (node.nodeName === "tr") {
+				const curr: PartialBuilding = // if any of the interface fields are still "temp" except for fullname after, then that means we couldn't find the table cell that means the table cell doesn't exist, and that room isnt valid
+					{
+						roomNumber: "temp",
+						roomCapacity: 0,
+						roomFurn: "temp",
+						roomType: "temp",
+						href: "temp"
+					};
 				for (let innerNode of node.childNodes) {
 					if (innerNode.nodeName === "td") {
 						if (this.isRoomNumber(innerNode)) {
-							console.log(fromIndex.shortName + " buidling shortname " + fromIndex.path + " building filepath "
-								+ fromIndex.address + " building address" + fromIndex.fullName + " building full name");
-							roomNumber = this.findRoomNumber(innerNode);
-							console.log("room num is " + roomNumber);
+							curr.roomNumber = this.findRoomNumber(innerNode);
 						}
 						if (this.isRoomCapacity(innerNode)) {
-							roomCapacity = this.findRoomCapacity(innerNode);
-							console.log("room cap is " + roomCapacity);
+							curr.roomCapacity = parseInt(this.findRoomCapacity(innerNode), 10);
 						}
 						if (this.isRoomFurniture(innerNode)) {
-							roomFurniture = this.findRoomFurniture(innerNode);
-							console.log("funriture is:" + roomFurniture);
+							curr.roomFurn = this.findRoomFurniture(innerNode).trim();
 						}
 						if (this.isRoomType(innerNode)) {
-							roomType = this.findRoomType(innerNode);
-							console.log("roome type is " + roomType);
+							curr.roomType = this.findRoomType(innerNode).trim();
 						}
 						if (this.isHref(innerNode)) {
-							href = this.findHref(innerNode);
-							console.log("href is " + href);
+							curr.href = this.findHref(innerNode);
 						}
 					}
 				}
-
-				// TODO set a new room into the room array here
-				console.log("lat is " + lat);
-				console.log("lon is " + lon);
+				this.scaffoldRooms(curr, fromIndex, lat, lon, dataset);
 			}
 		}
 	}
 
-	// public scaffoldRooms()
+	public scaffoldRooms(building: PartialBuilding, partial: PartialRoom, lat: number, lon: number, dataset: Dataset) {
+		let toAdd = new Room(partial.fullName, partial.shortName, building.roomNumber,
+			partial.shortName + "_" + building.roomNumber,
+			partial.address, lat, lon, building.roomCapacity, building.roomType, building.roomFurn, building.href);
+		dataset.getRoomArr().push(toAdd);
+		dataset.setRowCount(dataset.getRowCount() + 1);
+	}
 
 
 	public async geoLocation(tableChildNodes: any, dataset: Dataset, fromIndex: PartialRoom) {
-		console.log("in geo");
 		const encoded = encodeURIComponent(fromIndex.address);
 		const queryString = "http://cs310.students.cs.ubc.ca:11316/api/v1/project_team198/" + encoded;
 		let lat: string;
 		let lon: string;
-		console.log(queryString);
 		return new Promise((resolve, reject) => http.get(queryString, (res) => {
 			let location = "";
 			res.on("data", (data) => {
-				console.log("getting data");
 				location += data;
 			});
 
 			res.on("end", () => {
-				console.log("in end");
 				let jsond = JSON.parse(location);
 				lat = jsond.lat;
 				lon = jsond.lon;
@@ -87,7 +75,6 @@ export class ParseBuildingFile {
 			});
 		})
 			.on("error", (e) => {
-				console.log(e);
 				return reject(new InsightError("error occured while getting coordinates"));
 			}));
 	}
