@@ -57,7 +57,6 @@ export class ParseBuildingFile {
 				// TODO set a new room into the room array here
 				console.log("lat is " + lat);
 				console.log("lon is " + lon);
-				// TODO: could invoke geolocation getter here, or actually the promise array might go here, not sure
 			}
 		}
 	}
@@ -73,9 +72,6 @@ export class ParseBuildingFile {
 		let lon: string;
 		console.log(queryString);
 		return new Promise((resolve, reject) => http.get(queryString, (res) => {
-			// TODO figure out why this callback isn't being called. it was working before we were having queries with the proper URL
-			console.log(res.statusCode);
-
 			let location = "";
 			res.on("data", (data) => {
 				console.log("getting data");
@@ -85,13 +81,9 @@ export class ParseBuildingFile {
 			res.on("end", () => {
 				console.log("in end");
 				let jsond = JSON.parse(location);
-				console.log("got location for " + fromIndex.address);
-				console.log("lat is" + jsond.lat);
-				console.log("lon is" + jsond.lon);
 				lat = jsond.lat;
 				lon = jsond.lon;
 				return resolve(this.searchRows(tableChildNodes, dataset, fromIndex, parseFloat(lat), parseFloat(lon)));
-				// return Promise.resolve();
 			});
 		})
 			.on("error", (e) => {

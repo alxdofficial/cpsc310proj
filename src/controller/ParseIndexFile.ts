@@ -11,8 +11,6 @@ import {PartialRoom} from "./DataProcessor";
 export class ParseIndexFile {
 	public zipped: JSZip = new JSZip();
 
-	private geoPromises: any[] = [];
-
 	public async unZip(dataset: Dataset) {
 		try {
 			const JSzip = new JSZip();
@@ -104,7 +102,6 @@ export class ParseIndexFile {
 					}
 				}
 				promises.push(this.iterateCampus(this.zipped, curr, dataset));
-				console.log("going to next row");
 			}
 		}
 		console.log("waiting for the promises");
@@ -129,7 +126,7 @@ export class ParseIndexFile {
 				return node.value.replace(/\s/g, ""); // remove the spaces with: https://stackoverflow.com/questions/5963182/how-to-remove-spaces-from-a-string-using-javascript
 			}
 		}
-		return "unreachable";
+		return "";
 	}
 
 	public isFilePath(cellObject: any): boolean {

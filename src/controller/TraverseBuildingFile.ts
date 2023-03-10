@@ -32,7 +32,7 @@ export class TraverseBuildingFile extends TableValidity {
 				this.traversePromises.push(this.traverseNode(childNode, dataset, fromIndex));
 				await Promise.all(this.traversePromises);
 			} catch (e) {
-				console.log("caught an error" + e);
+				throw new InsightError("error occured while finding HTML node");
 			}
 		}
 	}
