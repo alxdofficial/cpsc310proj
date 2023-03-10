@@ -5,17 +5,18 @@ import Room from "../Room";
 import {GetDataset} from "./GetDataset";
 import {InsightFilter} from "./IInsightFilter";
 import {InsightOption} from "../output/InsightOption";
-import {InsightTransformation} from "../output/InsightTransformation";
+import {Transformation} from "../output/Transformation";
 
 
 export class InsightQuery {
 	private id: string;
 	public body: InsightFilter;
 	public options: InsightOption;
-	public transformations: InsightTransformation;
+	public transformations: Transformation | null;
 	private facade: InsightFacade;
+
 	constructor(inputBody: InsightFilter, inputOptions: InsightOption,
-		inputTransformations: InsightTransformation, id: string, facade: InsightFacade) {
+		inputTransformations: Transformation | null, id: string, facade: InsightFacade) {
 		console.log("new instance of insight query");
 		this.body = inputBody;
 		this.options = inputOptions;

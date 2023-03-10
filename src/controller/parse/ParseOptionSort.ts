@@ -4,7 +4,7 @@ import {IDGetter} from "./IDGetter";
 import {FieldGetter} from "./FieldGetter";
 import {InsightError} from "../IInsightFacade";
 
-export class ParseOptionOrder {
+export class ParseOptionSort {
 	public static parseOptionOrder(json: any, optionColumns: Array<MFields | SFields>,
 								   parser: QueryParser): Promise<MFields | SFields | null> {
 		return new Promise((resolve, reject) => {
