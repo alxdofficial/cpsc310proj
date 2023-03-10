@@ -9,25 +9,10 @@ import {TraverseBuildingFile} from "./TraverseBuildingFile";
 import {PartialRoom} from "./DataProcessor";
 
 export class ParseBuildingFile {
-	// public zipped: JSZip = new JSZip();
 
-	// public async unZip(dataset: Dataset) {
-	// 	try {
-	// 		const JSzip = new JSZip();
-	// 		this.zipped = await JSzip.loadAsync(dataset.getContent(), {
-	// 			base64: true,
-	// 			checkCRC32: true
-	// 		});
-	//
-	//
-	// 	} catch (e) {
-	// 		console.log("caught an error: " + e);
-	// 	}
-	// 	// TODO execute the read, then pass the results to a parse method, recursive search for table like before
-	//
-	// }
+	private geoPromises: any[] = [];
 
-	public searchRows(tableChildNodes: any, dataset: Dataset, fromIndex: PartialRoom) {
+	public searchRows(tableChildNodes: any, dataset: Dataset, fromIndex: PartialRoom, lat: number, lon: number) {
 		let roomNumber: string;
 		let roomCapacity: string;
 		let roomFurniture: string;
@@ -68,13 +53,52 @@ export class ParseBuildingFile {
 						}
 					}
 				}
+
 				// TODO set a new room into the room array here
+				console.log("lat is " + lat);
+				console.log("lon is " + lon);
 				// TODO: could invoke geolocation getter here, or actually the promise array might go here, not sure
 			}
 		}
 	}
 
 	// public scaffoldRooms()
+
+
+	public async geoLocation(tableChildNodes: any, dataset: Dataset, fromIndex: PartialRoom) {
+		console.log("in geo");
+		const encoded = encodeURIComponent(fromIndex.address);
+		const queryString = "http://cs310.students.cs.ubc.ca:11316/api/v1/project_team198/" + encoded;
+		let lat: string;
+		let lon: string;
+		console.log(queryString);
+		return new Promise((resolve, reject) => http.get(queryString, (res) => {
+			// TODO figure out why this callback isn't being called. it was working before we were having queries with the proper URL
+			console.log(res.statusCode);
+
+			let location = "";
+			res.on("data", (data) => {
+				console.log("getting data");
+				location += data;
+			});
+
+			res.on("end", () => {
+				console.log("in end");
+				let jsond = JSON.parse(location);
+				console.log("got location for " + fromIndex.address);
+				console.log("lat is" + jsond.lat);
+				console.log("lon is" + jsond.lon);
+				lat = jsond.lat;
+				lon = jsond.lon;
+				return resolve(this.searchRows(tableChildNodes, dataset, fromIndex, parseFloat(lat), parseFloat(lon)));
+				// return Promise.resolve();
+			});
+		})
+			.on("error", (e) => {
+				console.log(e);
+				return reject(new InsightError("error occured while getting coordinates"));
+			}));
+	}
 
 	public isRoomNumber(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {

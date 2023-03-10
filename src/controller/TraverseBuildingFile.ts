@@ -14,16 +14,23 @@ import {TableValidity} from "./TableValidity";
 
 export class TraverseBuildingFile extends TableValidity {
 
-	public findHTMLNode(doc: any, dataset: Dataset, fromIndex: PartialRoom) {
+	private foundFlag: boolean = false;
+	private traversePromises: any[] = [];
+
+	public async findHTMLNode(doc: any, dataset: Dataset, fromIndex: PartialRoom) {
+		let promises = [];
 		for (let i = 0; i < doc.childNodes.length; i++) {
-			this.findHTMLNodeName(doc.childNodes[i], i, dataset, fromIndex);
+			promises.push(this.findHTMLNodeName(doc.childNodes[i], i, dataset, fromIndex));
 		}
+		await Promise.all(promises);
 	}
 
-	public findHTMLNodeName(childNode: any, i: number, dataset: Dataset, fromIndex: PartialRoom) {
+
+	public async findHTMLNodeName(childNode: any, i: number, dataset: Dataset, fromIndex: PartialRoom) {
 		if (childNode.nodeName === "html") {
 			try {
-				this.traverseNode(childNode, dataset, fromIndex);
+				this.traversePromises.push(this.traverseNode(childNode, dataset, fromIndex));
+				await Promise.all(this.traversePromises);
 			} catch (e) {
 				console.log("caught an error" + e);
 			}
@@ -33,21 +40,18 @@ export class TraverseBuildingFile extends TableValidity {
 	// REQUIRES: the HTML Document object with its traits and a dataset to pass for modification
 	// MODIFIES: N/A
 	// EFFECTS: traverses the document until it finds a table, then calls helpers to search the rows
-	public traverseNode(curr: any, dataset: Dataset, fromIndex: PartialRoom) {
-		// console.log("in traverse");
+	public async traverseNode(curr: any, dataset: Dataset, fromIndex: PartialRoom) {
 		if (!curr.childNodes) {
 			return;
 		}
 		if (curr.tagName === "table" && this.validTableBuilding(curr.childNodes)) {
 			const traverser: ParseBuildingFile = new ParseBuildingFile();
 			try {
-				traverser.searchRows(curr.childNodes, dataset, fromIndex);
+				this.foundFlag = true;
+				await traverser.geoLocation(curr.childNodes, dataset, fromIndex);
 			} catch (e) {
-				throw new InsightError("caught and error while searching rows");
+				throw new InsightError("caught an error while searching rows");
 			}
-			// .catch(() => {
-			// 	throw new InsightError();
-			// });
 			return; // return here, only one valid table so once we find don't need to keep going
 		}
 		for (let trait of curr.childNodes) {
@@ -66,7 +70,10 @@ export class TraverseBuildingFile extends TableValidity {
 			if (!node.childNodes || this.fitsExclusion(node.nodeName)) { // if the node doesn't have children, continue, otherwise search the children
 				continue;
 			}
-			this.traverseNode(node, dataset, fromIndex);
+			if (this.foundFlag) {
+				return;
+			}
+			this.traversePromises.push(this.traverseNode(node, dataset, fromIndex));
 		}
 	}
 

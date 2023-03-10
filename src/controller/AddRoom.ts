@@ -90,7 +90,6 @@ export class AddRoom extends TableValidity implements DataProcessor {
 	public async findHTMLNode(doc: any, dataset: Dataset) {
 		let promises = [];
 		for (let i = 0; i < doc.childNodes.length; i++) {
-			console.log("adding an html find to the promise arra");
 			promises.push(this.findHTMLNodeName(doc.childNodes[i], i, dataset));
 		}
 		console.log("waiting for the html promies");
@@ -101,11 +100,8 @@ export class AddRoom extends TableValidity implements DataProcessor {
 	public async findHTMLNodeName(childNode: any, i: number, dataset: Dataset) {
 		if (childNode.nodeName === "html") {
 			try {
-				console.log("waitng for traverseNode");
 				this.traversePromises.push(this.traverseNode(childNode, dataset));
-				// await this.traverseNode(childNode, dataset);
 				await Promise.all(this.traversePromises);
-				console.log("DONE WAITING for TRAVSER");
 			} catch (e) {
 				console.log("caught an error" + e);
 			}
@@ -116,16 +112,13 @@ export class AddRoom extends TableValidity implements DataProcessor {
 	// MODIFIES: N/A
 	// EFFECTS: traverses the document until it finds a table, then calls helpers to search the rows
 	public async traverseNode(curr: any, dataset: Dataset) {
-		console.log("traversing a node");
 		if (!curr.childNodes) {
 			return;
 		}
 
 		if (curr.tagName === "table" && this.validTableIndex(curr.childNodes)) {
 			const traverser: ParseIndexFile = new ParseIndexFile();
-			console.log("FOUND A VALID TABLE AND TRAVERSING");
 			this.foundFlag = true; // signal to traverseLoN that we can stop because this table is valid
-			console.log("executing search rows");
 			return await traverser.searchRows(curr.childNodes, dataset)
 				.catch(() => {
 					throw new InsightError();
@@ -138,7 +131,6 @@ export class AddRoom extends TableValidity implements DataProcessor {
 			}
 			this.traverseNodes(trait.childNodes, dataset);
 		}
-		console.log("searched node all the way, no table");
 	}
 
 	// REQUIRES: the list of childnodes passed by traverseNode, the dataset object
@@ -150,14 +142,9 @@ export class AddRoom extends TableValidity implements DataProcessor {
 				continue;
 			}
 			if (this.foundFlag) {
-				console.log("found table, returning from LoN");
 				return;
 			}
 			this.traversePromises.push(this.traverseNode(node, dataset));
-			// this.traverseNode(node, dataset)
-			// 	.catch(() => {
-			// 		throw new InsightError();
-			// 	});
 		}
 	}
 

@@ -11,6 +11,8 @@ import {PartialRoom} from "./DataProcessor";
 export class ParseIndexFile {
 	public zipped: JSZip = new JSZip();
 
+	private geoPromises: any[] = [];
+
 	public async unZip(dataset: Dataset) {
 		try {
 			const JSzip = new JSZip();
@@ -40,13 +42,14 @@ export class ParseIndexFile {
 						.then((blobStr) => {
 							return blobStr.text();
 						})
-						.then((stringedBlob) => this.executeBuildingRead(parse(stringedBlob), dataset, fromIndex))
+						.then((stringedBlob) =>
+							this.executeBuildingRead(parse(stringedBlob), dataset, fromIndex))
 						.catch(() => {
 							throw new InsightError();
 						}));
 				}
 			}
-			return await Promise.all(promises) // Wait for all the promises in the promise list to fulfill
+			await Promise.all(promises) // Wait for all the promises in the promise list to fulfill
 				.catch(() => {
 					throw new InsightError("error occurred while waited for queued promises to fulfil");
 				});
@@ -55,9 +58,9 @@ export class ParseIndexFile {
 		}
 	}
 
-	public executeBuildingRead(doc: any, dataset: Dataset, fromIndex: PartialRoom) {
+	public async executeBuildingRead(doc: any, dataset: Dataset, fromIndex: PartialRoom) {
 		const buildingFileTraverser: TraverseBuildingFile = new TraverseBuildingFile();
-		buildingFileTraverser.findHTMLNode(doc, dataset, fromIndex);
+		await buildingFileTraverser.findHTMLNode(doc, dataset, fromIndex);
 	}
 
 	public async searchRows(tableChildNodes: any, dataset: Dataset) {
@@ -88,7 +91,7 @@ export class ParseIndexFile {
 						}
 						if (this.isFilePath(innerNode)) {
 							curr.path = this.findFilePath(innerNode);
-							 // console.log(curr.path);
+							// console.log(curr.path);
 						}
 						if (this.isAddress(innerNode)) {
 							curr.address = this.findAddress(innerNode);
@@ -96,12 +99,11 @@ export class ParseIndexFile {
 						}
 						if (this.isFullName(innerNode)) {
 							curr.fullName = this.findFullName(innerNode);
-							 // console.log(curr.fullName);
+							// console.log(curr.fullName);
 						}
 					}
 				}
 				promises.push(this.iterateCampus(this.zipped, curr, dataset));
-				// promises.push(this.geoLocation(curr, promises, dataset));
 				console.log("going to next row");
 			}
 		}
@@ -190,39 +192,5 @@ export class ParseIndexFile {
 			}
 		}
 		return "";
-	}
-
-	public geoLocation(currentInfo: PartialRoom, promises: Array<Promise<void[]>>,
-					   dataset: Dataset) {
-		console.log("in geo");
-		const encoded = encodeURIComponent(currentInfo.address);
-		const queryString = "http://cs310.students.cs.ubc.ca:11316/api/v1/project_team198/" + encoded;
-		console.log(queryString);
-		http.get(queryString, (res) => {
-			// TODO figure out why this callback isn't being called. it was working before we were having queries with the proper URL
-			console.log(res.statusCode);
-
-			let location = "";
-			res.on("data", (data) => {
-				console.log("getting data");
-				location += data;
-			});
-
-			res.on("end", () => {
-				console.log("in end");
-				let jsond = JSON.parse(location);
-				console.log("got location for " + currentInfo.address);
-				console.log("lat is" + jsond.lat);
-				console.log("lon is" + jsond.lon);
-				// promises.push(this.iterateCampus(this.zipped, currentInfo, dataset));
-				return this.iterateCampus(this.zipped, currentInfo, dataset);
-			});
-		})
-			.on("error", (e) => {
-				console.log(e);
-			});
-
-		console.log("finsih geo");
-
 	}
 }

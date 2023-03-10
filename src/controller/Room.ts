@@ -1,5 +1,5 @@
 
-export default class Section {
+export default class Room {
 	public readonly fullname: string;
 	public readonly shortname: string;
 	public readonly number: string;
