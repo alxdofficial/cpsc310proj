@@ -42,10 +42,24 @@ export class ParseBuildingFile {
 						}
 					}
 				}
+				if (this.checkPartial(curr)) {
+					continue;
+				}
 				this.scaffoldRooms(curr, fromIndex, lat, lon, dataset);
 			}
 		}
 	}
+
+
+	// REQUIRES: a PartialBuilding (room)
+	// MODIFIES: N/A
+	// EFFECTS: checks the current PartialBuilding room if any entries are still a stub after checking the row
+	//			if it is, return true.
+	public checkPartial(partial: PartialBuilding): boolean {
+		return (partial.roomNumber === "temp" || partial.roomCapacity === 0 || // TODO this = 0 may not be valid, idk if theres a room with no capacity, i doubt it
+			partial.roomFurn === "temp" || partial.roomType === "temp" || partial.href === "temp");
+	}
+
 
 	public scaffoldRooms(building: PartialBuilding, partial: PartialRoom, lat: number, lon: number, dataset: Dataset) {
 		let toAdd = new Room(partial.fullName, partial.shortName, building.roomNumber,

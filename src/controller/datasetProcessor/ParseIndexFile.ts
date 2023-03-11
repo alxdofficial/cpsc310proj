@@ -95,6 +95,9 @@ export class ParseIndexFile {
 						}
 					}
 				}
+				if (this.checkPartial(curr)) {
+					continue;
+				}
 				promises.push(this.iterateCampus(this.zipped, curr, dataset));
 			}
 		}
@@ -102,6 +105,14 @@ export class ParseIndexFile {
 			.catch(() => {
 				throw new InsightError();
 			});
+	}
+
+	// REQUIRES: a PartialRoom
+	// MODIFIES: N/A
+	// EFFECTS: checks the current partial room if any entries are still a stub after checking the row
+	//			if it is, return true.
+	public checkPartial(partial: PartialRoom): boolean {
+		return (partial.shortName === "temp" || partial.address === "temp" || partial.path === "temp");
 	}
 
 	public isShortName(cellObject: any): boolean {
