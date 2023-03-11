@@ -89,6 +89,7 @@ export class ParseBuildingFile {
 			});
 		})
 			.on("error", (e) => {
+				// TODO not sure if we have to throw an error here, it might end all the promises, could just do nothing if the geo doesn't return because it wouldn't be valid
 				return reject(new InsightError("error occured while getting coordinates"));
 			}));
 	}
