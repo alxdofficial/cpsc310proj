@@ -11,13 +11,11 @@ import fs from "fs-extra";
 import JSZip from "jszip";
 import Section from "./datasetProcessor/Section";
 import Room from "./datasetProcessor/Room";
-import {QueryParser} from "./parse/QueryParser";
 // import {InsightQuery} from "./InsightQuery"; // TODO undome
 import {DataProcessor} from "./datasetProcessor/DataProcessor";
 import {Dataset} from "./datasetProcessor/Dataset";
 import {AddRoom} from "./datasetProcessor/AddRoom";
 import {AddSection} from "./datasetProcessor/AddSection";
-import {InsightQuery} from "./query/InsightQuery";
 
 
 /**

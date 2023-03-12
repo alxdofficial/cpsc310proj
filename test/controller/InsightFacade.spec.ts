@@ -117,7 +117,7 @@ describe("InsightFacade", function () {
 		describe("removeDataset with a valid LITE ROOMs, ESB is missing address TD in index", function () {
 			it("should be added and return a set of the currently added room IDS", function () {
 				const result = facade.addDataset("campusMissingRoomTD", campusMissingRoomTD, InsightDatasetKind.Rooms)
-					.then (()=> facade.removeDataset("campusMissingRoomTD"));
+					.then(() => facade.removeDataset("campusMissingRoomTD"));
 				return expect(result).to.eventually.deep.equal("campusMissingRoomTD");
 			});
 		});
@@ -135,7 +135,8 @@ describe("InsightFacade", function () {
 		// 21 valid rooms in LITE without ESB
 		describe("addDataset with a valid LITE ROOMs, WOOD room is missing cap in building file", function () {
 			it("3should be added and return a set of the currently added room IDS", function () {
-				const result = facade.addDataset("campusLiteInvalidBuildings", campusLiteInvalidBuildings, InsightDatasetKind.Rooms);
+				const result = facade.addDataset("campusLiteInvalidBuildings",
+					campusLiteInvalidBuildings, InsightDatasetKind.Rooms);
 				return expect(result).to.eventually.deep.equal(["campusLiteInvalidBuildings"]);
 			});
 		});
@@ -252,19 +253,20 @@ describe("InsightFacade", function () {
 			});
 		});
 
-		describe("addData with a list and VALID add, pairLiteLite has only one course with two sections inside", function () {
-			it("should PASS with the valid added key passed", function () {
-				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
-					.then(() => facade.listDatasets());
-				const newDataSet: InsightDataset = {							// Create the dataset tuple
-					id: "validKey",
-					kind: InsightDatasetKind.Sections,
-					numRows: 33
-				};
+		describe("addData with a list and VALID add, pairLiteLite has only one course with two sections inside",
+			function () {
+				it("should PASS with the valid added key passed", function () {
+					const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
+						.then(() => facade.listDatasets());
+					const newDataSet: InsightDataset = {							// Create the dataset tuple
+						id: "validKey",
+						kind: InsightDatasetKind.Sections,
+						numRows: 33
+					};
 
-				return expect(result).to.eventually.deep.equal([newDataSet]);
+					return expect(result).to.eventually.deep.equal([newDataSet]);
+				});
 			});
-		});
 
 		describe("addData with a ROOMS and VALID add", function () {
 			it("should PASS with the valid added key passed", function () {
