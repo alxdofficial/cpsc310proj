@@ -4,36 +4,23 @@ import Room from "../datasetProcessor/Room";
 import {InsightError} from "../IInsightFacade";
 
 export class GetFieldData {
-	// eslint-disable-next-line max-lines-per-function
 	public static getFieldData(entry: Section | Room, field: MFields | SFields): Promise<number | string> {
-		// eslint-disable-next-line max-lines-per-function
 		return new Promise((resolve, reject) => {
 			if (entry instanceof Section) {
 				switch (field) {
-					case MFields.avg:
-						return resolve(entry.avg);
-					case MFields.pass:
-						return resolve(entry.pass);
-					case MFields.fail:
-						return resolve(entry.fail);
-					case MFields.audit:
-						return resolve(entry.audit);
-					case MFields.year:
-						return resolve(entry.year);
-					case SFields.dept:
-						return resolve(entry.dept);
-					case SFields.id:
-						return resolve(entry.id);
-					case SFields.instructor:
-						return resolve(entry.instructor);
-					case SFields.title:
-						return resolve(entry.title);
-					case SFields.uuid:
-						return resolve(entry.getID());
-					default:
-						return reject(new InsightError("field" + field + " not found for entry of type 'Section'"));
+					case MFields.avg:return resolve(entry.avg);
+					case MFields.pass:return resolve(entry.pass);
+					case MFields.fail:return resolve(entry.fail);
+					case MFields.audit:return resolve(entry.audit);
+					case MFields.year:return resolve(entry.year);
+					case SFields.dept:return resolve(entry.dept);
+					case SFields.id:return resolve(entry.id);
+					case SFields.instructor:return resolve(entry.instructor);
+					case SFields.title:return resolve(entry.title);
+					case SFields.uuid:return resolve(entry.getID());
+					default:return reject(new InsightError("field" + field + " not found for entry of type 'Section'"));
 				}
-			} else if (entry instanceof Room) {
+			} else {
 				switch (field) {
 					case MFields.lon:
 						return resolve(entry.lon);
