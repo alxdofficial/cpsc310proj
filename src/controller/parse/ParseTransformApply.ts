@@ -50,14 +50,15 @@ export class ParseTransformApply {
 					">applykey"));
 			}
 			// check apply token
-			let applyTokenOrNull: ApplyTokens | null = this.getApplyToken(Object.keys(applybody)[0]);
+			let tokenStr: string = Object.keys(applybody)[0];
+			let applyTokenOrNull: ApplyTokens | null = this.getApplyToken(tokenStr);
 			if (applyTokenOrNull === null) {
 				return reject(new InsightError("apply tokens invalid in query->transform->" +
 					"apply[i]->applytoken"));
 			}
 			let applyToken: ApplyTokens = applyTokenOrNull;
 			// check the key
-			return this.getKey(applybody[applyToken],parser,fieldsThatExistInOptions).then((key) => {
+			return this.getKey(applybody[tokenStr],parser,fieldsThatExistInOptions).then((key) => {
 				// all good
 				return resolve(new ApplyRule(applyToken, key));
 			}).catch((err) => {

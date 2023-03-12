@@ -23,7 +23,7 @@ export class ParseTransformGroup {
 							return reject(new InsightError("getting id in query->transform->group failed deu to" +
 								" query referencing multiple datasets"));
 						} else {
-							let field: MFields | SFields | null = FieldGetter.getField(key);
+							let field: MFields | SFields | null = FieldGetter.getField(remainingStr);
 							if (field == null) {
 								return reject(new InsightError("getting field in query->transform->group failed"));
 							} else {

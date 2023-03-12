@@ -23,15 +23,18 @@ export class QueryParser {
 			// first do basic structure check, if good, call helpers.
 			let filter: InsightFilter;
 			let option: InsightOption;
-			if (Object.keys(this.inputJson).length === 2) {
+			if (Object.keys(this.inputJson).length <= 3) {
 				return ParseWhere.parseWhere(this.inputJson,this).then((fil) => {
 					filter = fil;
+					console.log(fil);
 				}).then(() => {
 					return ParseOption.parseOptions(this.inputJson, this);
 				}).then((opt) => {
 					option = opt;
+					console.log(opt);
 					return ParseTransform.parseTransform(this.inputJson,this, option.columns);
 				}).then((transform: Transformation | null) => {
+					console.log(transform);
 					// everything parsed successfully, so we just create insight query object and return it
 					return resolve(new InsightQuery(filter,option,transform,this.dataset_id, this.facade));
 				}).catch((err) => {
