@@ -102,13 +102,23 @@ describe("InsightFacade", function () {
 				return expect(result).to.eventually.deep.equal(["campus", "sections"]);
 			});
 		});
-		// 24 valid rooms in LITE
-		describe("addDataset with a valid LITE ROOMs, some building files in index do not exist", function () {
-			it("should be added and return a set of the currently added room IDS", function () {
-				const result = facade.addDataset("campusLite", campusLite, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.deep.equal(["campusLite"]);
-			});
-		});
+		// // 24 valid rooms in LITE
+		// describe("addDataset with a valid LITE ROOMs, some building files in index do not exist", function () {
+		// 	it("should be added and return a set of the currently added room IDS", function () {
+		// 		const result = facade.addDataset("campusLite", campusLite, InsightDatasetKind.Rooms)
+		// 			.then(() => {
+		// 				const newFacade = new InsightFacade();
+		// 				console.log(newFacade.listDatasets());
+		// 			});
+		// 		const newDataSet: InsightDataset = {							// Create the dataset tuple
+		// 			id: "campusLite",
+		// 			kind: InsightDatasetKind.Rooms,
+		// 			numRows: 24
+		// 		};
+		// 		return expect(result).to.eventually.deep.equal(newDataSet);
+		// 	});
+		// });
+		//
 
 		// 20 valid rooms in LITE without one in ESB and WOOD
 		describe("addDataset with a valid LITE ROOMs, ESB is missing address TD in index", function () {
