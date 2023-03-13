@@ -9,14 +9,13 @@ import {
 
 import fs from "fs-extra";
 import JSZip from "jszip";
-import Section from "./Section";
-import Room from "./Room";
-import {QueryParser} from "./ParseQuery";
+import Section from "./datasetProcessor/Section";
+import Room from "./datasetProcessor/Room";
 // import {InsightQuery} from "./InsightQuery"; // TODO undome
-import {DataProcessor} from "./DataProcessor";
-import {Dataset} from "./Dataset";
-import {AddRoom} from "./AddRoom";
-import {AddSection} from "./AddSection";
+import {DataProcessor} from "./datasetProcessor/DataProcessor";
+import {Dataset} from "./datasetProcessor/Dataset";
+import {AddRoom} from "./datasetProcessor/AddRoom";
+import {AddSection} from "./datasetProcessor/AddSection";
 
 
 /**

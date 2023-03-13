@@ -1,5 +1,5 @@
 
-export default class Section {
+export default class Room {
 	public readonly fullname: string;
 	public readonly shortname: string;
 	public readonly number: string;
@@ -8,12 +8,12 @@ export default class Section {
 	public readonly lat: number;
 	public readonly lon: number;
 	public readonly seats: number;
-	public readonly type: number;
-	public readonly furniture: number;
-	public readonly href: number;
+	public readonly type: string;
+	public readonly furniture: string;
+	public readonly href: string;
 
 	constructor(fullname: string, shortname: string, number: string, name: string,
-		address: string, lat: number, lon: number, seats: number, type: number, furniture: number, href: number) {
+		address: string, lat: number, lon: number, seats: number, type: string, furniture: string, href: string) {
 		this.fullname = fullname;
 		this.shortname = shortname;
 		this.number = number;

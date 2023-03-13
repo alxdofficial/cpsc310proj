@@ -1,9 +1,8 @@
 import fs from "fs-extra";
 import JSZip from "jszip";
 import Section from "./Section";
-import {QueryParser} from "./ParseQuery";
 import {DataProcessor} from "./DataProcessor";
-import {InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
+import {InsightDataset, InsightDatasetKind, InsightError} from "../IInsightFacade";
 import {Dataset} from "./Dataset";
 
 export class AddSection implements DataProcessor {
