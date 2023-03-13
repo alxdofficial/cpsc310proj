@@ -76,6 +76,11 @@ export class ParseBuildingFile {
 		let lat: string;
 		let lon: string;
 		return new Promise((resolve, reject) => http.get(queryString, (res) => {
+			const contentType = res.headers["content-type"]; // from Node.js example https://nodejs.org/api/http.html#httpgeturl-options-callback
+			if (res.statusCode !== 200 || !/^application\/json/.test(contentType as string)) {
+				res.resume();
+				return resolve("address getting failed");
+			}
 			let location = "";
 			res.on("data", (data) => {
 				location += data;
@@ -90,6 +95,7 @@ export class ParseBuildingFile {
 		})
 			.on("error", (e) => {
 				// TODO not sure if we have to throw an error here, it might end all the promises, could just do nothing if the geo doesn't return because it wouldn't be valid
+				console.log("on error");
 				return reject(new InsightError("error occured while getting coordinates"));
 			}));
 	}

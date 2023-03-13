@@ -37,8 +37,7 @@ export class AddRoom extends TableValidity implements DataProcessor {
 						dataset.getDatasets().set(newDataSet, dataset.getRoomArr()); 				// Add the insightdataset and section array to the in memory representation of the data
 						dataset.getDatasetIDs().push(dataset.getID()); 										// on successful add, add the datasetID
 
-						await dataset.writeDataRooms();										// TODO IMPL me
-						console.log(dataset.getDatasets().entries());
+						await dataset.writeDataRooms();
 						dataset.setRowCount(0);												// CLEANUP: reset row count for future add calls
 						dataset.setRoomArr([]);												// CLEANUP: empty the array for sections for future calls
 						return resolve(dataset.getDatasetIDs()); 								// resolve with an array of strings which are the added IDs
