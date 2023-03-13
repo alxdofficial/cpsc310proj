@@ -31,6 +31,7 @@ export class TableValidity {
 		for (let node of tableChildNodes) {
 			if (node.nodeName === "tbody") {
 				tableBodyChildNodes = node.childNodes;
+				break;
 			}
 		}
 		for (let node of tableBodyChildNodes) {

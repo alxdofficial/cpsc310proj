@@ -24,6 +24,8 @@ describe("InsightFacade", function () {
 	let campusLite: string;
 	let campusLiteInvalidBuildings: string;
 	let campusMissingRoomTD: string;
+	let campusNoTableInIndex: string;
+	let campusLiteESBInvalidAddress: string;
 	let oneInvalidSection: string;
 	let threeCourses: string;
 	let noCoursesFolder: string;
@@ -52,6 +54,8 @@ describe("InsightFacade", function () {
 			campusLite = getContentFromArchives("campusLite.zip");
 			campusLiteInvalidBuildings = getContentFromArchives("campusLiteInvalidBuildings.zip"); // ESB is missing the address TD, so we shouldn't see any ESB rooms
 			campusMissingRoomTD = getContentFromArchives("campusMissingRoomTD.zip"); // One of WOOD's rooms is missing the capacity class, so num rows should be 20 for Lite
+			campusNoTableInIndex = getContentFromArchives("campusNoTableInIndex.zip");
+			campusLiteESBInvalidAddress = getContentFromArchives("campusLiteESBInvalidAddress.zip");
 			threeCourses = getContentFromArchives("ThreeCourses.zip");
 			noCoursesFolder = getContentFromArchives("noCoursesFolderButSectionInside.zip");
 			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
@@ -113,6 +117,25 @@ describe("InsightFacade", function () {
 				return expect(result).to.eventually.deep.equal(["campusMissingRoomTD"]);
 			});
 		});
+
+		// 0 rooms because no table in index.htm
+		describe("addDataset with a no table in Index.htm", function () {
+			it("should throw insighterror with 0 valid rooms", function () {
+				const result = facade.addDataset("campusNoTableInIndex",
+					campusNoTableInIndex, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+		});
+
+		//
+		describe("addDataset ESB has invalid address", function () {
+			it("should skip ESB and fulfill without ESB rooms", function () {
+				const result = facade.addDataset("campusLiteESBInvalidAddress",
+					campusLiteESBInvalidAddress, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["campusLiteESBInvalidAddress"]);
+			});
+		});
+
 
 		describe("removeDataset with a valid LITE ROOMs, ESB is missing address TD in index", function () {
 			it("should be added and return a set of the currently added room IDS", function () {
