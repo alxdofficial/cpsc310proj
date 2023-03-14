@@ -1,4 +1,3 @@
-
 import {DataProcessor, PartialRoom} from "./DataProcessor";
 import {InsightDataset, InsightDatasetKind, InsightError} from "../IInsightFacade";
 import {Dataset} from "./Dataset";
@@ -39,6 +38,9 @@ export class TraverseBuildingFile extends TableValidity {
 			return;
 		}
 		if (curr.tagName === "table" && this.validTableBuilding(curr.childNodes)) {
+			if (!this.checkHeaders(curr.childNodes)) {
+				return new InsightError("missing a header!");
+			}
 			const traverser: ParseBuildingFile = new ParseBuildingFile();
 			try {
 				this.foundFlag = true;
@@ -54,6 +56,68 @@ export class TraverseBuildingFile extends TableValidity {
 			}
 			this.traverseNodes(trait.childNodes, dataset, fromIndex);
 		}
+	}
+
+	// REQUIRES: the list of childnodes passed by traverseNode, the childnodes of the table
+	// MODIFIES: N/A
+	// EFFECTS: traverse the header to see that all five columns exist
+	public checkHeaders(tableChildren: any): boolean {
+		for (let node of tableChildren) {
+			if (node.tagName === "thead") {
+				for (let header of node.childNodes) {
+					if (header.tagName === "tr") {
+						return this.verifyHeaders(header.childNodes);
+					}
+				}
+			}
+		}
+		return false; // no rows were found in the header
+	}
+
+	public verifyHeaders(curr: any): boolean {
+		let toCheck: string[] = [];
+		const validator: TableValidity = new TableValidity();
+		for (let node of curr) {
+			if (node.tagName === "th") {
+				for (let trait of node.attrs) {
+					if (validator.checkValidClassBuildingFile(trait.value)) {
+						toCheck.push(trait.value);
+					}
+				}
+			}
+		}
+		return this.verifyText(toCheck);
+	}
+
+	public verifyText(arr: string[]): boolean {
+		let b0: boolean = false;
+		let b1: boolean = false;
+		let b2: boolean = false;
+		let b3: boolean = false;
+		let b4: boolean = false;
+		for (let headerText of arr) {
+			if (headerText === "views-field views-field-field-room-number") {
+				b0 = true;
+				continue;
+			}
+			if (headerText === "views-field views-field-field-room-capacity") {
+				b1 = true;
+				continue;
+			}
+			if (headerText === "views-field views-field-field-room-furniture") {
+				b2 = true;
+				continue;
+			}
+			if (headerText === "views-field views-field-field-room-type") {
+				b3 = true;
+				continue;
+			}
+			if (headerText === "views-field views-field-nothing") {
+				b4 = true;
+			}
+
+		}
+		return b0 && b1 && b2 && b3 && b4;
 	}
 
 	// REQUIRES: the list of childnodes passed by traverseNode, the dataset object
