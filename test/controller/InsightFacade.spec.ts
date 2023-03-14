@@ -103,7 +103,8 @@ describe("InsightFacade", function () {
 
 		describe("ROOMS empty ESB short NAME", function () {
 			it("should be added and return a set of the currently added room IDS", function () {
-				const result = facade.addDataset("campusLiteEmptyESBShort", campusLiteEmptyESBShort, InsightDatasetKind.Rooms);
+				const result = facade.addDataset("campusLiteEmptyESBShort",
+					campusLiteEmptyESBShort, InsightDatasetKind.Rooms);
 				return expect(result).to.eventually.deep.equal(["campusLiteEmptyESBShort"]);
 			});
 		});
@@ -211,7 +212,8 @@ describe("InsightFacade", function () {
 
 		describe("Missing table header in BUILDING", function () {
 			it("should NOT be added and return an InsightError", function () {
-				const result = facade.addDataset("campusLiteMissingHeadersInBuilding", campusLiteMissingHeadersInBuilding, InsightDatasetKind.Rooms);
+				const result = facade.addDataset("campusLiteMissingHeadersInBuilding",
+					campusLiteMissingHeadersInBuilding, InsightDatasetKind.Rooms);
 				return expect(result).to.eventually.be.deep.equal(["campusLiteMissingHeadersInBuilding"]);
 			});
 		});
