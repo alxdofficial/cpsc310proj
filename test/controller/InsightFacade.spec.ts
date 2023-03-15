@@ -54,14 +54,14 @@ describe("InsightFacade", function () {
 
 			sections = getContentFromArchives("pair.zip");
 			campus = getContentFromArchives("campus.zip");
-			// campusLite = getContentFromArchives("campusLite.zip");
-			// campusLiteInvalidBuildings = getContentFromArchives("campusLiteInvalidBuildings.zip"); // ESB is missing the address TD, so we shouldn't see any ESB rooms
-			// campusMissingRoomTD = getContentFromArchives("campusMissingRoomTD.zip"); // One of WOOD's rooms is missing the capacity class, so num rows should be 20 for Lite
-			// campusNoTableInIndex = getContentFromArchives("campusNoTableInIndex.zip");
-			// campusLiteESBInvalidAddress = getContentFromArchives("campusLiteESBInvalidAddress.zip");
-			// campusLiteEmptyESBShort = getContentFromArchives("campusLiteEmptyESBShort.zip");
-			// campusLiteMissingHeadersInIndex = getContentFromArchives("campusLiteMissingHeadersInIndex.zip");
-			// campusLiteMissingHeadersInBuilding = getContentFromArchives("campusLiteMissingHeadersInBuilding.zip");
+			campusLite = getContentFromArchives("campusLite.zip");
+			campusLiteInvalidBuildings = getContentFromArchives("campusLiteInvalidBuildings.zip"); // ESB is missing the address TD, so we shouldn't see any ESB rooms
+			campusMissingRoomTD = getContentFromArchives("campusMissingRoomTD.zip"); // One of WOOD's rooms is missing the capacity class, so num rows should be 20 for Lite
+			campusNoTableInIndex = getContentFromArchives("campusNoTableInIndex.zip");
+			campusLiteESBInvalidAddress = getContentFromArchives("campusLiteESBInvalidAddress.zip");
+			campusLiteEmptyESBShort = getContentFromArchives("campusLiteEmptyESBShort.zip");
+			campusLiteMissingHeadersInIndex = getContentFromArchives("campusLiteMissingHeadersInIndex.zip");
+			campusLiteMissingHeadersInBuilding = getContentFromArchives("campusLiteMissingHeadersInBuilding.zip");
 			threeCourses = getContentFromArchives("ThreeCourses.zip");
 			noCoursesFolder = getContentFromArchives("noCoursesFolderButSectionInside.zip");
 			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
