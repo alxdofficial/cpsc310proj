@@ -176,6 +176,7 @@ export class ParseBuildingFile {
 		return "";
 	}
 
+// TODO maybe grab href from room number instead, so if the fields-nothing doesn;t exist we can still pass
 	public isHref(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {
 			if (attribute.value === "views-field views-field-nothing") {
