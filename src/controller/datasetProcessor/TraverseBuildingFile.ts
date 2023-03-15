@@ -15,7 +15,10 @@ export class TraverseBuildingFile extends TableValidity {
 		for (let i = 0; i < doc.childNodes.length; i++) {
 			promises.push(this.findHTMLNodeName(doc.childNodes[i], i, dataset, fromIndex));
 		}
-		await Promise.all(promises);
+		await Promise.all(promises)
+			.catch(() => {
+				throw new InsightError();
+			});
 	}
 
 
@@ -23,7 +26,10 @@ export class TraverseBuildingFile extends TableValidity {
 		if (childNode.nodeName === "html") {
 			try {
 				this.traversePromises.push(this.traverseNode(childNode, dataset, fromIndex));
-				await Promise.all(this.traversePromises);
+				await Promise.all(this.traversePromises)
+					.catch(() => {
+						throw new InsightError();
+					});
 			} catch (e) {
 				throw new InsightError("error occured while finding HTML node");
 			}
