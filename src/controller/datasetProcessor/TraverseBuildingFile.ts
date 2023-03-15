@@ -38,9 +38,9 @@ export class TraverseBuildingFile extends TableValidity {
 			return;
 		}
 		if (curr.tagName === "table" && this.validTableBuilding(curr.childNodes)) {
-			if (!this.checkHeaders(curr.childNodes)) {
-				return new InsightError("missing a header!");
-			}
+			// if (!this.checkHeaders(curr.childNodes)) {
+			// 	return new InsightError("missing a header!");
+			// }
 			const traverser: ParseBuildingFile = new ParseBuildingFile();
 			try {
 				this.foundFlag = true;

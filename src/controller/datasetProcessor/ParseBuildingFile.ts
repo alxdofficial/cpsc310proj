@@ -27,6 +27,7 @@ export class ParseBuildingFile {
 					if (innerNode.nodeName === "td") {
 						if (this.isRoomNumber(innerNode)) {
 							curr.roomNumber = this.findRoomNumber(innerNode);
+							curr.href = this.findHref(innerNode);
 						}
 						if (this.isRoomCapacity(innerNode)) {
 							curr.roomCapacity = parseInt(this.findRoomCapacity(innerNode), 10);
@@ -37,12 +38,9 @@ export class ParseBuildingFile {
 						if (this.isRoomType(innerNode)) {
 							curr.roomType = this.findRoomType(innerNode).trim();
 						}
-						if (this.isHref(innerNode)) {
-							curr.href = this.findHref(innerNode);
-						}
 					}
 				}
-				if (this.checkPartial(curr)) {
+				if (this.checkPartial(curr)) { // if this is true, skip the current room
 					continue;
 				}
 				this.scaffoldRooms(curr, fromIndex, lat, lon, dataset);
