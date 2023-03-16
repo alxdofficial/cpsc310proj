@@ -2,7 +2,7 @@ import {Dataset} from "./Dataset";
 import http from "http";
 import {InsightDataset, InsightError} from "../IInsightFacade";
 import {PartialBuilding, PartialRoom} from "./DataProcessor";
-import Room from "./Room";
+import Room from "../Room";
 
 export class ParseBuildingFile {
 
