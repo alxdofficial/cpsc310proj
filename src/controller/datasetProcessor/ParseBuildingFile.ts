@@ -30,7 +30,7 @@ export class ParseBuildingFile {
 						}
 						if (this.isRoomCapacity(innerNode)) {
 							curr.roomCapacity = parseInt(this.findRoomCapacity(innerNode), 10) || 0;
-							console.log(curr.roomCapacity);
+							// console.log(curr.roomCapacity);
 						}
 						if (this.isRoomFurniture(innerNode)) {
 							curr.roomFurn = this.findRoomFurniture(innerNode).trim();
