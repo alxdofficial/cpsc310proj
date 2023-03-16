@@ -206,6 +206,6 @@ export default class InsightFacade implements IInsightFacade {
 		for (const key of this.datasets.keys()) { 			// Iterate over the keyset, adding each key to the array
 			result.push(key);
 		}
-		return Promise.resolve(result);          			// Return the list
+		return Promise.resolve(result);          			// Return the list.
 	}
 }
