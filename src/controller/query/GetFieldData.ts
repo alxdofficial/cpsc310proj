@@ -4,10 +4,7 @@ import Room from "../Room";
 import {InsightError} from "../IInsightFacade";
 
 export class GetFieldData {
-
-
 	public static getFieldData(entry: Section | Room, field: MFields | SFields): Promise<number | string> {
-
 		if (entry instanceof Section) {
 			switch (field) {
 				case MFields.avg:
