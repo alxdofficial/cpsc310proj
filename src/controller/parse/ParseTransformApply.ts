@@ -60,7 +60,7 @@ export class ParseTransformApply {
 			// check the key
 			return this.getKey(applybody[tokenStr],parser,fieldsThatExistInOptions).then((key) => {
 				// all good
-				return resolve(new ApplyRule(applyToken, key));
+				return resolve(new ApplyRule(applyToken, key, applykey));
 			}).catch((err) => {
 				return reject(err);
 			});

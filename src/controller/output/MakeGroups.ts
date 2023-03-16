@@ -50,7 +50,10 @@ export class MakeGroups {
 	}
 
 	public static getHashKey(entry: Section | Room, grouping: QueryGroup): Promise<string> {
-		let key: string = "(";
+		let key: string = "";
+		if (grouping.groupKeys.length > 1) {
+			key += "(";
+		}
 		return GetFieldData.getFieldData(entry, grouping.groupKeys[0]).then((res) => {
 			key += String(res);
 		}).then(() => {
@@ -62,7 +65,9 @@ export class MakeGroups {
 				});
 			}
 		}).then(() => {
-			key += ")";
+			if (grouping.groupKeys.length > 1) {
+				key += ")";
+			}
 			return Promise.resolve(key);
 		}).catch((err) => {
 			return Promise.reject(err);

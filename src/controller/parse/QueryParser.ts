@@ -26,12 +26,12 @@ export class QueryParser {
 			if (Object.keys(this.inputJson).length <= 3) {
 				return ParseWhere.parseWhere(this.inputJson,this).then((fil) => {
 					filter = fil;
-					console.log(fil);
+					// console.log(fil);
 				}).then(() => {
 					return ParseOption.parseOptions(this.inputJson, this);
 				}).then((opt) => {
 					option = opt;
-					console.log(opt);
+					// console.log(opt);
 					return ParseTransform.parseTransform(this.inputJson,this, option.columns);
 				}).then((transform: Transformation | null) => {
 					console.log(transform);
