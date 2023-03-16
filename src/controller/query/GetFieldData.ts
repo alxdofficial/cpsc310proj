@@ -6,7 +6,7 @@ import {InsightError} from "../IInsightFacade";
 export class GetFieldData {
 	// eslint-disable-next-line max-lines-per-function
 	public static getFieldData(entry: Section | Room, field: MFields | SFields): Promise<number | string> {
-		// eslint-disable-next-line max-lines-per-function
+		// eslint-disable-next-line max-lines-per-function!!!
 		if (entry instanceof Section) {
 			switch (field) {
 				case MFields.avg:
