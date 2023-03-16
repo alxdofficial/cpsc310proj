@@ -23,7 +23,6 @@ export class ParseIndexFile {
 		} catch (e) {
 			console.log("caught an error: " + e);
 		}
-		// TODO execute the read, then pass the results to a parse method, recursive search for table like before
 
 	}
 
@@ -84,15 +83,14 @@ export class ParseIndexFile {
 						if (this.isShortName(innerNode)) {
 							curr.shortName = this.findShortName(innerNode);
 						}
-						// if (this.isFilePath(innerNode)) {
-						// 	curr.path = this.findFilePath(innerNode);
-						// }
+						if (this.isFilePath(innerNode)) {
+							curr.path = this.findFilePath(innerNode);
+						}
 						if (this.isAddress(innerNode)) {
 							curr.address = this.findAddress(innerNode);
 						}
 						if (this.isFullName(innerNode)) {
 							curr.fullName = this.findFullName(innerNode);
-							curr.path = this.findFilePath(innerNode);
 						}
 					}
 				}

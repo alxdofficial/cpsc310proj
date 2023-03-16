@@ -37,6 +37,7 @@ export class AddRoom extends TableValidity implements DataProcessor {
 						dataset.getDatasets().set(newDataSet, dataset.getRoomArr()); 				// Add the insightdataset and section array to the in memory representation of the data
 						dataset.getDatasetIDs().push(dataset.getID()); 										// on successful add, add the datasetID
 						await dataset.writeDataRooms();
+						// console.log(dataset.getDatasets());
 						dataset.setRowCount(0);												// CLEANUP: reset row count for future add calls
 						dataset.setRoomArr([]);												// CLEANUP: empty the array for sections for future calls
 						return resolve(dataset.getDatasetIDs()); 								// resolve with an array of strings which are the added IDs
@@ -115,9 +116,9 @@ export class AddRoom extends TableValidity implements DataProcessor {
 		}
 
 		if (curr.tagName === "table" && this.validTableIndex(curr.childNodes)) {
-			// if (!this.checkHeaders(curr.childNodes)) {
-			// 	return new InsightError("missing header in index");
-			// }
+			if (!this.checkHeaders(curr.childNodes)) {
+				return new InsightError("missing column in index");
+			}
 			const traverser: ParseIndexFile = new ParseIndexFile();
 			this.foundFlag = true; // signal to traverseLoN that we can stop because this table is valid
 			return await traverser.searchRows(curr.childNodes, dataset)
