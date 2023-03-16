@@ -9,8 +9,8 @@ import {
 
 import fs from "fs-extra";
 import JSZip from "jszip";
-import Section from "./datasetProcessor/Section";
-import Room from "./datasetProcessor/Room";
+import Section from "./Section";
+import Room from "./Room";
 // import {InsightQuery} from "./InsightQuery"; // TODO undome
 import {DataProcessor} from "./datasetProcessor/DataProcessor";
 import {Dataset} from "./datasetProcessor/Dataset";

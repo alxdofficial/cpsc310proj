@@ -4,9 +4,7 @@ import Room from "../Room";
 import {InsightError} from "../IInsightFacade";
 
 export class GetFieldData {
-	// eslint-disable-next-line max-lines-per-function
 	public static getFieldData(entry: Section | Room, field: MFields | SFields): Promise<number | string> {
-		// eslint-disable-next-line max-lines-per-function!!!
 		if (entry instanceof Section) {
 			switch (field) {
 				case MFields.avg:
@@ -34,30 +32,21 @@ export class GetFieldData {
 			}
 		} else {
 			switch (field) {
-				case MFields.lon:
-					return Promise.resolve(entry.lon);
-				case MFields.lat:
-					return Promise.resolve(entry.lat);
-				case MFields.seats:
-					return Promise.resolve(entry.seats);
-				case SFields.address:
-					return Promise.resolve(entry.address);
-				case SFields.fullname:
-					return Promise.resolve(entry.fullname);
-				case SFields.furniture:
-					return Promise.resolve(entry.furniture);
-				case SFields.href:
-					return Promise.resolve(entry.href);
-				case SFields.number:
-					return Promise.resolve(entry.number);
-				case SFields.name:
-					return Promise.resolve(entry.name);
-				case SFields.shortname:
-					return Promise.resolve(entry.shortname);
-				case SFields.type:
-					return Promise.resolve(entry.type);
-				default:
-					return Promise.reject(new InsightError("field" + field + " not found for entry of type 'Room'"));
+
+				case MFields.lon:return Promise.resolve(entry.lon);
+				case MFields.lat:return Promise.resolve(entry.lat);
+				case MFields.seats:return Promise.resolve(entry.seats);
+				case SFields.address:return Promise.resolve(entry.address);
+				case SFields.fullname:return Promise.resolve(entry.fullname);
+				case SFields.furniture:return Promise.resolve(entry.furniture);
+				case SFields.href:return Promise.resolve(entry.href);
+				case SFields.number:return Promise.resolve(entry.number);
+				case SFields.name:return Promise.resolve(entry.name);
+				case SFields.shortname:return Promise.resolve(entry.shortname);
+				case SFields.type:return Promise.resolve(entry.type);
+				default:return Promise.reject(new InsightError("field" + field +
+					" not found for entry of type 'Room'"));
+
 			}
 		}
 	}

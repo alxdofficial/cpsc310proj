@@ -84,14 +84,15 @@ export class ParseIndexFile {
 						if (this.isShortName(innerNode)) {
 							curr.shortName = this.findShortName(innerNode);
 						}
-						if (this.isFilePath(innerNode)) {
-							curr.path = this.findFilePath(innerNode);
-						}
+						// if (this.isFilePath(innerNode)) {
+						// 	curr.path = this.findFilePath(innerNode);
+						// }
 						if (this.isAddress(innerNode)) {
 							curr.address = this.findAddress(innerNode);
 						}
 						if (this.isFullName(innerNode)) {
 							curr.fullName = this.findFullName(innerNode);
+							curr.path = this.findFilePath(innerNode);
 						}
 					}
 				}
@@ -112,7 +113,8 @@ export class ParseIndexFile {
 	// EFFECTS: checks the current partial room if any entries are still a stub after checking the row
 	//			if it is, return true.
 	public checkPartial(partial: PartialRoom): boolean {
-		return (partial.shortName === "temp" || partial.address === "temp" || partial.path === "temp");
+		return (partial.shortName === "temp" || partial.address === "temp"
+			|| partial.path === "temp" || partial.fullName === "temp");
 	}
 
 	public isShortName(cellObject: any): boolean {
