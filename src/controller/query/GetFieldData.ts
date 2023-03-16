@@ -4,7 +4,10 @@ import Room from "../Room";
 import {InsightError} from "../IInsightFacade";
 
 export class GetFieldData {
+
+
 	public static getFieldData(entry: Section | Room, field: MFields | SFields): Promise<number | string> {
+
 		if (entry instanceof Section) {
 			switch (field) {
 				case MFields.avg:
@@ -32,6 +35,7 @@ export class GetFieldData {
 			}
 		} else {
 			switch (field) {
+
 				case MFields.lon:return Promise.resolve(entry.lon);
 				case MFields.lat:return Promise.resolve(entry.lat);
 				case MFields.seats:return Promise.resolve(entry.seats);
@@ -45,6 +49,7 @@ export class GetFieldData {
 				case SFields.type:return Promise.resolve(entry.type);
 				default:return Promise.reject(new InsightError("field" + field +
 					" not found for entry of type 'Room'"));
+
 			}
 		}
 	}

@@ -5,11 +5,13 @@ import {QueryParser} from "./QueryParser";
 import {MFields, SFields} from "../query/InsightQuery";
 import {ParseTransformApply} from "./ParseTransformApply";
 
+
 export class ParseTransform {
 	public static parseTransform(json: any, parser: QueryParser,
 								 fieldsThatExistInOptions: Array<MFields | SFields>): Promise<Transformation | null> {
 		// first check if transform is specified
 		if (json["TRANSFORMATIONS"] !== undefined) {
+
 			let transformClause = json["TRANSFORMATIONS"];
 			let alreadyParsedApplyKeys: string[] = [];
 			let group: QueryGroup;
