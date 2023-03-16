@@ -9,14 +9,13 @@ import {
 
 import fs from "fs-extra";
 import JSZip from "jszip";
-import Section from "./Section";
-import Room from "./Room";
-import {QueryParser} from "./parse/QueryParser";
+import Section from "./datasetProcessor/Section";
+import Room from "./datasetProcessor/Room";
 // import {InsightQuery} from "./InsightQuery"; // TODO undome
-import {DataProcessor} from "./DataProcessor";
-import {Dataset} from "./Dataset";
-import {AddRoom} from "./AddRoom";
-import {AddSection} from "./AddSection";
+import {DataProcessor} from "./datasetProcessor/DataProcessor";
+import {Dataset} from "./datasetProcessor/Dataset";
+import {AddRoom} from "./datasetProcessor/AddRoom";
+import {AddSection} from "./datasetProcessor/AddSection";
 
 
 /**
@@ -89,10 +88,10 @@ export default class InsightFacade implements IInsightFacade {
 				kind: insightKind,
 				numRows: jsonString.numRows
 			};
-		for (const str of jsonString.sectionArr) {
-			// let toPush: Room = new Room(str.uuid, str.id, str.title, str.instructor, // TODO IMPLEMENT ME
-			// 	str.dept, str.year, str.avg, str.pass, str.fail, str.audit);
-			// this.roomArr.push(toPush);
+		for (const str of jsonString.roomArr) {
+			let toPush: Room = new Room(str.fullname, str.shortname, str.number, str.name, // TODO IMPLEMENT ME
+				str.address, str.lat, str.lon, str.seats, str.type, str.furniture, str.href);
+			this.roomArr.push(toPush);
 		}
 		this.datasets.set(newDataset, this.roomArr);
 		this.datasetIDs.push(jsonString.id);
