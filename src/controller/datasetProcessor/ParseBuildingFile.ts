@@ -38,6 +38,9 @@ export class ParseBuildingFile {
 						if (this.isRoomType(innerNode)) {
 							curr.roomType = this.findRoomType(innerNode).trim();
 						}
+						// if (this.isHref(innerNode)) {
+						// 	curr.href = this.findHref(innerNode);
+						// }
 					}
 				}
 				if (this.checkPartial(curr)) { // if this is true, skip the current room
