@@ -33,6 +33,7 @@ describe("InsightFacade", function () {
 	let campusWoodMissingHeader: string;
 	let woodMissingSomeCap: string;
 	let twoTables: string;
+	let tableAtEnd: string;
 	let oneInvalidSection: string;
 	let threeCourses: string;
 	let noCoursesFolder: string;
@@ -70,6 +71,7 @@ describe("InsightFacade", function () {
 			campusWoodMissingHeader = getContentFromArchives("campusWoodMissingHeader.zip");
 			woodMissingSomeCap = getContentFromArchives("woodMissingSomeCap.zip");
 			twoTables = getContentFromArchives("twoTables.zip");
+			tableAtEnd = getContentFromArchives("tableAtEnd.zip");
 			threeCourses = getContentFromArchives("ThreeCourses.zip");
 			noCoursesFolder = getContentFromArchives("noCoursesFolderButSectionInside.zip");
 			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
@@ -106,6 +108,14 @@ describe("InsightFacade", function () {
 			it("should be added and return a set of the currently added room IDS", function () {
 				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
 				return expect(result).to.eventually.deep.equal(["campus"]);
+			});
+		});
+
+		describe("index has talbe at end", function () {
+			it("should fulfil with the table at the end of the index file", function () {
+				const result = facade.addDataset("tableAtEnd",
+					tableAtEnd, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["tableAtEnd"]);
 			});
 		});
 
