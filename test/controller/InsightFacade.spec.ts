@@ -32,6 +32,7 @@ describe("InsightFacade", function () {
 	let campusIndexNotInRoot: string;
 	let campusWoodMissingHeader: string;
 	let woodMissingSomeCap: string;
+	let twoTables: string;
 	let oneInvalidSection: string;
 	let threeCourses: string;
 	let noCoursesFolder: string;
@@ -68,6 +69,7 @@ describe("InsightFacade", function () {
 			campusIndexNotInRoot = getContentFromArchives("campusIndexNotInRoot.zip");
 			campusWoodMissingHeader = getContentFromArchives("campusWoodMissingHeader.zip");
 			woodMissingSomeCap = getContentFromArchives("woodMissingSomeCap.zip");
+			twoTables = getContentFromArchives("twoTables.zip");
 			threeCourses = getContentFromArchives("ThreeCourses.zip");
 			noCoursesFolder = getContentFromArchives("noCoursesFolderButSectionInside.zip");
 			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
@@ -112,6 +114,14 @@ describe("InsightFacade", function () {
 				const result = facade.addDataset("campusIndexNotInRoot",
 					campusIndexNotInRoot, InsightDatasetKind.Rooms);
 				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+		});
+
+		describe("two tables, second one is the valid one", function () {
+			it("should fulfil with rooms in WOOD", function () {
+				const result = facade.addDataset("twoTables",
+					twoTables, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["twoTables"]);
 			});
 		});
 
