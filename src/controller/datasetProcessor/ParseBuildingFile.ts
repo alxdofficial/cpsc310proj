@@ -18,7 +18,7 @@ export class ParseBuildingFile {
 				const curr: PartialBuilding = // if any of the interface fields are still "temp" except for fullname after, then that means we couldn't find the table cell that means the table cell doesn't exist, and that room isnt valid
 					{
 						roomNumber: "temp",
-						roomCapacity: 0,
+						roomCapacity: -1,
 						roomFurn: "temp",
 						roomType: "temp",
 						href: "temp"
@@ -27,10 +27,10 @@ export class ParseBuildingFile {
 					if (innerNode.nodeName === "td") {
 						if (this.isRoomNumber(innerNode)) {
 							curr.roomNumber = this.findRoomNumber(innerNode);
-							curr.href = this.findHref(innerNode);
 						}
 						if (this.isRoomCapacity(innerNode)) {
-							curr.roomCapacity = parseInt(this.findRoomCapacity(innerNode), 10);
+							curr.roomCapacity = parseInt(this.findRoomCapacity(innerNode), 10) || 0;
+							console.log(curr.roomCapacity);
 						}
 						if (this.isRoomFurniture(innerNode)) {
 							curr.roomFurn = this.findRoomFurniture(innerNode).trim();
@@ -38,9 +38,9 @@ export class ParseBuildingFile {
 						if (this.isRoomType(innerNode)) {
 							curr.roomType = this.findRoomType(innerNode).trim();
 						}
-						// if (this.isHref(innerNode)) {
-						// 	curr.href = this.findHref(innerNode);
-						// }
+						if (this.isHref(innerNode)) {
+							curr.href = this.findHref(innerNode);
+						}
 					}
 				}
 				if (this.checkPartial(curr)) { // if this is true, skip the current room
@@ -57,7 +57,7 @@ export class ParseBuildingFile {
 	// EFFECTS: checks the current PartialBuilding room if any entries are still a stub after checking the row
 	//			if it is, return true.
 	public checkPartial(partial: PartialBuilding): boolean {
-		return (partial.roomNumber === "temp" || partial.roomCapacity === 0 || // TODO this = 0 may not be valid, idk if theres a room with no capacity, i doubt it
+		return (partial.roomNumber === "temp" || partial.roomCapacity === -1 ||
 			partial.roomFurn === "temp" || partial.roomType === "temp" || partial.href === "temp");
 	}
 
@@ -95,9 +95,8 @@ export class ParseBuildingFile {
 			});
 		})
 			.on("error", (e) => {
-				// TODO not sure if we have to throw an error here, it might end all the promises, could just do nothing if the geo doesn't return because it wouldn't be valid
 				console.log("on error");
-				return reject(new InsightError("error occured while getting coordinates"));
+				return resolve("some error occured");
 			}));
 	}
 
@@ -138,7 +137,7 @@ export class ParseBuildingFile {
 				return node.value.replace(/\s/g, ""); // remove the spaces with: https://stackoverflow.com/questions/5963182/how-to-remove-spaces-from-a-string-using-javascript
 			}
 		}
-		return "";
+		return "0";
 	}
 
 	public isRoomFurniture(cellObject: any): boolean {
