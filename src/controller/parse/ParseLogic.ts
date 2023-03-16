@@ -22,7 +22,7 @@ export class ParseLogic {
 				return Promise.reject(err);
 			});
 		}
-		// return Logic comp object
+		// return Logic comp object.
 		return Promise.resolve(new LogicComparison(logic,filterObjects));
 	}
 }
