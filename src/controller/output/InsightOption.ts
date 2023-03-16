@@ -1,9 +1,10 @@
 import {MFields, SFields} from "../query/InsightQuery";
+import {InsightSort} from "./InsightSort";
 
 export class InsightOption {
-	public columns: Array<MFields | SFields>;
-	public sort: MFields | SFields | null = null;
-	constructor(columns: Array<MFields | SFields>, sort: MFields | SFields | null) {
+	public columns: string[];
+	public sort: InsightSort | null = null;
+	constructor(columns: string[], sort: InsightSort | null) {
 		this.columns = columns;
 		this.sort = sort;
 	}

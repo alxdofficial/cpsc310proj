@@ -4,18 +4,20 @@ import {ApplyTokens} from "./Transformation";
 import {GetFieldData} from "../query/GetFieldData";
 import {MFields, SFields} from "../query/InsightQuery";
 import {InsightError} from "../IInsightFacade";
+import e from "express";
 
 export class TransformationHelpers {
 	public static helper(resultInGroup: Array<Section | Room>, token: ApplyTokens,
 					  field: MFields | SFields): Promise<number> {
-		let getDataPromises = [];
-		let val: number | undefined; // passed into helpers to calc min max and sum
-		let count: number = 0; // unique counts of data values in group
-		let alreadyExistingData: number[] = [];
-		for (let entry of resultInGroup) {
-			getDataPromises.push(GetFieldData.getFieldData(entry, field).then((entryVal) => {
-				if (!(typeof entryVal === "number")) {
-					return Promise.reject(new InsightError("type is not number when trying to do transformation"));
+		return new Promise((resolve, reject) => {
+			let val: number | undefined; // passed into helpers to calc min max and sum
+			let count: number = 0; // unique counts of data values in group
+			let alreadyExistingData: number[] = [];
+			//
+			for (let entry of resultInGroup) {
+				let entryVal = GetFieldData.getFieldData(entry, field);
+				if (entryVal == null || typeof entryVal !== "number") {
+					return reject(new InsightError("retrieve data from entry failed in apply transformations"));
 				}
 				// handle min, max, sum, avg
 				val = this.minMaxSumHelper(val, entryVal, token);
@@ -24,26 +26,21 @@ export class TransformationHelpers {
 					count++;
 					alreadyExistingData.push(entryVal);
 				}
-			}).catch((err) => {
-				return Promise.reject(err);
-			}));
-		}
-		return Promise.all(getDataPromises).then(() => {
+			}
+			// check the calculated val is valid
 			if (!(typeof val === "number")) {
-				return Promise.reject(new InsightError("value calulated in transformation of not of type number"));
+				return reject(new InsightError("value calulated in transformation of not of type number"));
 			}
 			let numVal: number = val;
 			if (token === ApplyTokens.SUM || token === ApplyTokens.MIN || token === ApplyTokens.MAX) {
-				return Promise.resolve(numVal);
+				return resolve(numVal);
 			} else if (token === ApplyTokens.AVG) {
-				return Promise.resolve(numVal / resultInGroup.length);
+				return resolve(numVal / resultInGroup.length);
 			} else if (token === ApplyTokens.COUNT) {
-				return Promise.resolve(count);
+				return resolve(count);
 			}
-			return Promise.reject(new InsightError("doing transformation for a group failed because an" +
+			return reject(new InsightError("doing transformation for a group failed because an" +
 				" unexpected apply token found"));
-		}).catch((err) => {
-			return Promise.reject(err);
 		});
 	}
 

@@ -5,6 +5,7 @@ import {Transformation} from "./Transformation";
 import {QueryGroup} from "./QueryGroup";
 import {GetFieldData} from "../query/GetFieldData";
 import e from "express";
+import {InsightError} from "../IInsightFacade";
 
 export class MakeGroups {
 	public static makeGroups(results: Array<Section | Room>,
@@ -27,10 +28,13 @@ export class MakeGroups {
 
 	private static makeGroupHelper(results: Array<Section | Room>,
 								  grouping: QueryGroup): Promise<Map<string, Array<Section | Room>>> {
-		let hashmap: Map<string, Array<Section | Room>> = new Map();
-		let mapAccessPromisesArray = [];
-		for (let result of results) {
-			mapAccessPromisesArray.push(this.getHashKey(result, grouping).then((key) => {
+		return new Promise((resolve, reject) => {
+			let hashmap: Map<string, Array<Section | Room>> = new Map();
+			for (let result of results) {
+				let key = this.getHashKey(result, grouping);
+				if (key == null) {
+					return reject(new InsightError("hashkey failed to compute when making groups"));
+				}
 				let arrInMap: Array<Section | Room> | undefined = hashmap.get(key);
 				if (arrInMap === undefined) {
 					hashmap.set(key, [result]);
@@ -38,39 +42,21 @@ export class MakeGroups {
 					arrInMap.push(result);
 					hashmap.set(key, arrInMap);
 				}
-			}).catch((err) => {
-				return Promise.reject(err);
-			}));
-		}
-		return Promise.all(mapAccessPromisesArray).then(() => {
-			return Promise.resolve(hashmap);
-		}).catch((err) => {
-			return Promise.reject(err);
+			}
+			return resolve(hashmap);
 		});
 	}
 
-	public static getHashKey(entry: Section | Room, grouping: QueryGroup): Promise<string> {
-		let key: string = "";
-		if (grouping.groupKeys.length > 1) {
-			key += "(";
+	public static getHashKey(entry: Section | Room, grouping: QueryGroup): string | null {
+		let hash: string = "";
+		for (let groupKey of grouping.groupKeys) {
+			let entryVal = GetFieldData.getFieldData(entry, groupKey);
+			if (entryVal == null) {
+				return null;
+			}
+			hash += String(entryVal) + ",";
 		}
-		return GetFieldData.getFieldData(entry, grouping.groupKeys[0]).then((res) => {
-			key += String(res);
-		}).then(() => {
-			for (let i = 1; i < grouping.groupKeys.length; i++) {
-				GetFieldData.getFieldData(entry, grouping.groupKeys[i]).then((res) => {
-					key += "," + String(res);
-				}).catch((err) => {
-					return Promise.reject(err);
-				});
-			}
-		}).then(() => {
-			if (grouping.groupKeys.length > 1) {
-				key += ")";
-			}
-			return Promise.resolve(key);
-		}).catch((err) => {
-			return Promise.reject(err);
-		});
+		hash = hash.slice(0, -1);
+		return hash;
 	}
 }
