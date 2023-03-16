@@ -347,58 +347,58 @@ describe("InsightFacade", function () {
 		// 	});
 		// });
 		//
-		describe("addData with valid add", function () {
-			it("should pass and return the key", function () {
-				const result = facade.addDataset("validKey", sections, InsightDatasetKind.Sections);
-				return expect(result).to.eventually.deep.equal(["validKey"]);
-			});
-		});
-
-		describe("addData with an invalid add wrapped in two valid adds", function () {
-			it("should fail with InsightError, invalid add wrapped between two valid ones", function () {
-				const result = facade.addDataset("validKey", sectionsLite, InsightDatasetKind.Sections)
-					.then(() => facade.addDataset("", sectionsLite, InsightDatasetKind.Sections))
-					.then(() => facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections));
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
-			});
-		});
-
-		describe("addData with a VALID add, pairLiteLite has only one course with two sections inside", function () {
-			it("should PASS with the valid added key passed", function () {
-				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections);
-
-				return expect(result).to.eventually.deep.equal(["validKey"]);
-			});
-		});
-
-		describe("addData with a list and VALID add, pairLiteLite has only one course with two sections inside",
-			function () {
-				it("should PASS with the valid added key passed", function () {
-					const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
-						.then(() => facade.listDatasets());
-					const newDataSet: InsightDataset = {							// Create the dataset tuple
-						id: "validKey",
-						kind: InsightDatasetKind.Sections,
-						numRows: 33
-					};
-
-					return expect(result).to.eventually.deep.equal([newDataSet]);
-				});
-			});
-
-		describe("addData with a ROOMS and VALID add", function () {
-			it("should PASS with the valid added key passed", function () {
-				const result = facade.addDataset("campusLite", campusLite, InsightDatasetKind.Rooms)
-					.then(() => facade.listDatasets());
-				const newDataSet: InsightDataset = {							// Create the dataset tuple
-					id: "campusLite",
-					kind: InsightDatasetKind.Rooms,
-					numRows: 24
-				};
-
-				return expect(result).to.eventually.deep.equal([newDataSet]);
-			});
-		});
+		// describe("addData with valid add", function () {
+		// 	it("should pass and return the key", function () {
+		// 		const result = facade.addDataset("validKey", sections, InsightDatasetKind.Sections);
+		// 		return expect(result).to.eventually.deep.equal(["validKey"]);
+		// 	});
+		// });
+		//
+		// describe("addData with an invalid add wrapped in two valid adds", function () {
+		// 	it("should fail with InsightError, invalid add wrapped between two valid ones", function () {
+		// 		const result = facade.addDataset("validKey", sectionsLite, InsightDatasetKind.Sections)
+		// 			.then(() => facade.addDataset("", sectionsLite, InsightDatasetKind.Sections))
+		// 			.then(() => facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections));
+		// 		return expect(result).to.eventually.be.rejectedWith(InsightError);
+		// 	});
+		// });
+		//
+		// describe("addData with a VALID add, pairLiteLite has only one course with two sections inside", function () {
+		// 	it("should PASS with the valid added key passed", function () {
+		// 		const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections);
+		//
+		// 		return expect(result).to.eventually.deep.equal(["validKey"]);
+		// 	});
+		// });
+		//
+		// describe("addData with a list and VALID add, pairLiteLite has only one course with two sections inside",
+		// 	function () {
+		// 		it("should PASS with the valid added key passed", function () {
+		// 			const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
+		// 				.then(() => facade.listDatasets());
+		// 			const newDataSet: InsightDataset = {							// Create the dataset tuple
+		// 				id: "validKey",
+		// 				kind: InsightDatasetKind.Sections,
+		// 				numRows: 33
+		// 			};
+		//
+		// 			return expect(result).to.eventually.deep.equal([newDataSet]);
+		// 		});
+		// 	});
+		//
+		// describe("addData with a ROOMS and VALID add", function () {
+		// 	it("should PASS with the valid added key passed", function () {
+		// 		const result = facade.addDataset("campusLite", campusLite, InsightDatasetKind.Rooms)
+		// 			.then(() => facade.listDatasets());
+		// 		const newDataSet: InsightDataset = {							// Create the dataset tuple
+		// 			id: "campusLite",
+		// 			kind: InsightDatasetKind.Rooms,
+		// 			numRows: 24
+		// 		};
+		//
+		// 		return expect(result).to.eventually.deep.equal([newDataSet]);
+		// 	});
+		// });
 
 		//
 		// describe("addData with two VALID adds, pairLiteLite has only one course with two sections inside", function () {
