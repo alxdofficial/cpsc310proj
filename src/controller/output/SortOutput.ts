@@ -24,9 +24,9 @@ export class SortOutput {
 				let i = 0;
 				while (res === 0 && i < sortConfig.fields.length) {
 					// check if comparing string or number
-					if (typeof mapA.get(sortConfig.fields[i]) === "string") {
+					if (typeof mapA.get(sortConfig.fields[i]) === "number") {
 						let valA: number = Number(mapA.get(sortConfig.fields[i]));
-						let valB: number = Number(mapA.get(sortConfig.fields[i]));
+						let valB: number = Number(mapB.get(sortConfig.fields[i]));
 						if (valA < valB) {
 							res = sortConfig.direction * -1;
 						} else {
@@ -34,7 +34,7 @@ export class SortOutput {
 						}
 					} else {
 						let valA: string = String(mapA.get(sortConfig.fields[i]));
-						let valB: string = String(mapA.get(sortConfig.fields[i]));
+						let valB: string = String(mapB.get(sortConfig.fields[i]));
 						res = sortConfig.direction * valA.localeCompare(valB);
 					}
 					i++;
