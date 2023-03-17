@@ -4,7 +4,6 @@ import {ApplyTokens} from "./Transformation";
 import {GetFieldData} from "../query/GetFieldData";
 import {MFields, SFields} from "../query/InsightQuery";
 import {InsightError} from "../IInsightFacade";
-import e from "express";
 
 export class TransformationHelpers {
 	public static helper(resultInGroup: Array<Section | Room>, token: ApplyTokens,
@@ -12,30 +11,35 @@ export class TransformationHelpers {
 		return new Promise((resolve, reject) => {
 			let val: number | undefined; // passed into helpers to calc min max and sum
 			let count: number = 0; // unique counts of data values in group
-			let alreadyExistingData: number[] = [];
+			let alreadyExistingData: Array<string | number> = [];
 			//
 			for (let entry of resultInGroup) {
 				let entryVal = GetFieldData.getFieldData(entry, field);
-				if (entryVal == null || typeof entryVal !== "number") {
+				// handle count
+				if (entryVal == null) {
 					return reject(new InsightError("retrieve data from entry failed in apply transformations"));
 				}
-				// handle min, max, sum, avg
-				val = this.minMaxSumHelper(val, entryVal, token);
-				// handle count
 				if (!alreadyExistingData.includes(entryVal)) {
 					count++;
 					alreadyExistingData.push(entryVal);
 				}
+				if (typeof entryVal !== "number" && token !== ApplyTokens.COUNT) {
+					return reject(new InsightError("retrieve data from entry failed in apply transformations"));
+				}
+				// handle min, max, sum, avg
+				val = this.minMaxSumHelper(val, entryVal, token);
 			}
-			// check the calculated val is valid
-			if (!(typeof val === "number")) {
-				return reject(new InsightError("value calulated in transformation of not of type number"));
+			if (val === undefined) {
+				return reject(new InsightError("retrieve data from entry failed in apply transformations," +
+					" result is underfined"));
 			}
-			let numVal: number = val;
-			if (token === ApplyTokens.SUM || token === ApplyTokens.MIN || token === ApplyTokens.MAX) {
-				return resolve(numVal);
-			} else if (token === ApplyTokens.AVG) {
-				return resolve(numVal / resultInGroup.length);
+			if (token === ApplyTokens.MIN || token === ApplyTokens.MAX) {
+				return resolve(val);
+			} else if (token === ApplyTokens.SUM) {
+				return resolve(Number(val.toFixed(2)));
+			}else if (token === ApplyTokens.AVG) {
+				let avg: number = val / resultInGroup.length;
+				return resolve(Number(avg.toFixed(2)));
 			} else if (token === ApplyTokens.COUNT) {
 				return resolve(count);
 			}
@@ -44,7 +48,14 @@ export class TransformationHelpers {
 		});
 	}
 
-	private static minMaxSumHelper(current: number | undefined, entryVal: number, token: ApplyTokens): number {
+	private static minMaxSumHelper(current: number | undefined, entryVal: number | string,
+								   token: ApplyTokens): number {
+		if (token === ApplyTokens.COUNT) {
+			return 0;
+		}
+		if (typeof entryVal !== "number") {
+			return 0;
+		}
 		if (current === undefined) {
 			return entryVal;
 		}
@@ -64,8 +75,6 @@ export class TransformationHelpers {
 			case ApplyTokens.SUM:
 			case ApplyTokens.AVG:
 				return current + entryVal;
-			case ApplyTokens.COUNT:
-				return 0;
 			default:
 				console.log("unexpected apply token found");
 				return 0;
