@@ -1,6 +1,5 @@
 import {
 	IInsightFacade,
-	InsightDataset,
 	InsightDatasetKind,
 	InsightError,
 	InsightResult,
@@ -109,12 +108,14 @@ describe("InsightFacade", function () {
 			clearDisk();
 		});
 
-		describe("all building files are missing one column header, katharine said all columns will have a hgeader", function () {
-			it("should be rejected as there will be no valid rooms", function () {
-				const result = facade.addDataset("allBuildingsMissingColumn", allBuildingsMissingColumn, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
+		describe("all building files are missing one column header, katharine said all columns will have a hgeader",
+			function () {
+				it("should be rejected as there will be no valid rooms", function () {
+					const result = facade.addDataset("allBuildingsMissingColumn",
+						allBuildingsMissingColumn, InsightDatasetKind.Rooms);
+					return expect(result).to.eventually.be.rejectedWith(InsightError);
+				});
 			});
-		});
 
 		describe("addDataset with a valid ROOMs dataset", function () {
 			it("should be added and return a set of the currently added room IDS", function () {
