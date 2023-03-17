@@ -16,29 +16,32 @@ export class LogicComparison implements InsightFilter {
 
 	public doFilter(entry: Section | Room): Promise<boolean> {
 		return new Promise((resolve, reject) => {
+			let promises = [];
 			if (this.logic === Logic.And) {
 				let pred = true;
 				for (let filter of this.filterList) {
-					filter.doFilter(entry).then((res: boolean) => {
-						pred = pred && res;
-					}).catch((err: InsightError) => {
-						return reject(err);
-					});
-				}
-				return resolve(pred);
-			} else if (this.logic === Logic.Or) {
-				for (let filter of this.filterList) {
-					filter.doFilter(entry).then((res) => {
-						if (res) {
-							return resolve(true);
-						}
+					promises.push(filter.doFilter(entry).then((res) => {
+						pred = (pred && res);
 					}).catch((err) => {
 						return reject(err);
-					});
+					}));
 				}
-				return resolve(false);
+				return Promise.all(promises).then((res) => {
+					return resolve(pred);
+				});
+			} else if (this.logic === Logic.Or) {
+				let pred = false;
+				for (let filter of this.filterList) {
+					promises.push(filter.doFilter(entry).then((res) => {
+						pred = (pred || res);
+					}).catch((err) => {
+						return reject(err);
+					}));
+				}
+				return Promise.all(promises).then((res) => {
+					return resolve(pred);
+				});
 			}
-			return false;
 		});
 	}
 }
