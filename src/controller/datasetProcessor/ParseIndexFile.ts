@@ -117,7 +117,8 @@ export class ParseIndexFile {
 
 	public isShortName(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {
-			if (attribute.value === "views-field views-field-field-building-code") {
+			if (attribute.value === "views-field views-field-field-building-code"
+				|| attribute.value === "views-field-field-building-code views-field") {
 				return true;
 			}
 		}
@@ -135,7 +136,8 @@ export class ParseIndexFile {
 
 	public isFilePath(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {
-			if (attribute.value === "views-field views-field-title") {
+			if (attribute.value === "views-field views-field-title"
+				|| attribute.value === "views-field-title views-field") {
 				return true;
 			}
 		}
@@ -157,7 +159,8 @@ export class ParseIndexFile {
 
 	public isAddress(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {
-			if (attribute.value === "views-field views-field-field-building-address") {
+			if (attribute.value === "views-field views-field-field-building-address"
+			|| attribute.value === "views-field-field-building-address views-field") {
 				return true;
 			}
 		}
@@ -175,7 +178,8 @@ export class ParseIndexFile {
 
 	public isFullName(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {
-			if (attribute.value === "views-field views-field-title") {
+			if (attribute.value === "views-field views-field-title"
+			|| attribute.value === "views-field-title views-field") {
 				return true;
 			}
 		}

@@ -12,9 +12,6 @@ export class ParseTransformApply {
 				return reject(new InsightError("APPLY key misisng in query->transform"));
 			} else {
 				let applyClause = json["APPLY"];
-				if (applyClause.length < 1) {
-					return reject(new InsightError("apply rule list is empty in query->transform->apply"));
-				}
 				// create array of apply rules
 				let applyRules: ApplyRule[] = [];
 				for (let applyRule of applyClause) {
