@@ -193,7 +193,7 @@ export default class InsightFacade implements IInsightFacade {
 		let parser: QueryParser = new QueryParser(query, this);
 		let parsedQuery: InsightQuery;
 		return parser.getQuery().then((q) => {
-			console.log("parse success");
+			// console.log("parse success");
 			parsedQuery = q;
 			// console.log(query);
 			return parsedQuery.doQuery();
