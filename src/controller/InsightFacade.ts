@@ -12,16 +12,16 @@ import Section from "./Section";
 import Room from "./Room";
 // import {InsightQuery} from "./InsightQuery"; // TODO undome
 
-import {DataProcessor} from "./DataProcessor";
-import {Dataset} from "./Dataset";
-import {AddRoom} from "./AddRoom";
-import {AddSection} from "./AddSection";
+import {DataProcessor} from "./datasetProcessor/DataProcessor";
+import {Dataset} from "./datasetProcessor/Dataset";
+import {AddRoom} from "./datasetProcessor/AddRoom";
+import {AddSection} from "./datasetProcessor/AddSection";
 import {MakeGroups} from "./output/MakeGroups";
 import {ApplyTransformation} from "./output/ApplyTransformation";
 import {InsightQuery} from "./query/InsightQuery";
 import {QueryOutput} from "./output/QueryOutput";
 import {SortOutput} from "./output/SortOutput";
-
+import {QueryParser} from "./parse/QueryParser";
 
 
 /**
