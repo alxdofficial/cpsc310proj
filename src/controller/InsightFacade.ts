@@ -10,8 +10,8 @@ import {
 import fs from "fs-extra";
 import Section from "./Section";
 import Room from "./Room";
-import {QueryParser} from "./parse/QueryParser";
 // import {InsightQuery} from "./InsightQuery"; // TODO undome
+
 import {DataProcessor} from "./DataProcessor";
 import {Dataset} from "./Dataset";
 import {AddRoom} from "./AddRoom";
@@ -21,6 +21,7 @@ import {ApplyTransformation} from "./output/ApplyTransformation";
 import {InsightQuery} from "./query/InsightQuery";
 import {QueryOutput} from "./output/QueryOutput";
 import {SortOutput} from "./output/SortOutput";
+
 
 
 /**
@@ -93,10 +94,10 @@ export default class InsightFacade implements IInsightFacade {
 				kind: insightKind,
 				numRows: jsonString.numRows
 			};
-		for (const str of jsonString.sectionArr) {
-			// let toPush: Room = new Room(str.uuid, str.id, str.title, str.instructor, // TODO IMPLEMENT ME
-			// 	str.dept, str.year, str.avg, str.pass, str.fail, str.audit);
-			// this.roomArr.push(toPush);
+		for (const str of jsonString.roomArr) {
+			let toPush: Room = new Room(str.fullname, str.shortname, str.number, str.name, // TODO IMPLEMENT ME
+				str.address, str.lat, str.lon, str.seats, str.type, str.furniture, str.href);
+			this.roomArr.push(toPush);
 		}
 		this.datasets.set(newDataset, this.roomArr);
 		this.datasetIDs.push(jsonString.id);
@@ -218,6 +219,6 @@ export default class InsightFacade implements IInsightFacade {
 		for (const key of this.datasets.keys()) { 			// Iterate over the keyset, adding each key to the array
 			result.push(key);
 		}
-		return Promise.resolve(result);          			// Return the list
+		return Promise.resolve(result);          			// Return the list.
 	}
 }

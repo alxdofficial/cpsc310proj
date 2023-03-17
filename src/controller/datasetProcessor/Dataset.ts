@@ -1,10 +1,12 @@
-import {InsightDataset, InsightDatasetKind, InsightError} from "./IInsightFacade";
-import Section from "./Section";
-import Room from "./Room";
+import {InsightDataset, InsightDatasetKind, InsightError} from "../IInsightFacade";
+import Section from "../Section";
+import Room from "../Room";
 import fs from "fs-extra";
 import JSZip from "jszip";
 
 export class Dataset {
+
+
 	private readonly datasetIDs: string[];
 	// datasetIDs is string[]
 	// interp. an array of the currently added datasetIDs

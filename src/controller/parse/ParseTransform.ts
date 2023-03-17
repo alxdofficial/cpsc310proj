@@ -3,14 +3,15 @@ import {QueryGroup} from "../output/QueryGroup";
 import {ParseTransformGroup} from "./ParseTransformGroup";
 import {QueryParser} from "./QueryParser";
 import {MFields, SFields} from "../query/InsightQuery";
-// eslint-disable-next-line import/namespace
 import {ParseTransformApply} from "./ParseTransformApply";
 import {InsightError} from "../IInsightFacade";
+
 export class ParseTransform {
 	public static parseTransform(json: any, parser: QueryParser, optionColumns: string[]):
 		Promise<Transformation | null> {
 		// first check if transform is specified
-		if (json["TRANSFORMATIONS"]  !== undefined) {
+		if (json["TRANSFORMATIONS"] !== undefined) {
+
 			let transformClause = json["TRANSFORMATIONS"];
 			let alreadyParsedApplyKeys: string[] = [];
 			let group: QueryGroup;
