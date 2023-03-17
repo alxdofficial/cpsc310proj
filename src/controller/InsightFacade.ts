@@ -188,7 +188,7 @@ export default class InsightFacade implements IInsightFacade {
 		return Promise.reject(new InsightError("Some other error occurred")); 				// If not invalid, does exist but isn't in loop, throw this error
 	}
 
-	public performQuery(query: unknown): Promise<InsightResult[]> {  // FIXME do we need to resolve or reject when we return? like Promise.resolve for all the returns
+	public performQuery(query: unknown): Promise<InsightResult[]> {
 		let parser: QueryParser = new QueryParser(query, this);
 		let parsedQuery: InsightQuery;
 		return parser.getQuery().then((q) => {
