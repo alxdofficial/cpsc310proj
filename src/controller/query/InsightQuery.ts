@@ -1,6 +1,6 @@
 import Section from "../Section";
 import InsightFacade from "../InsightFacade";
-import {InsightError,  ResultTooLargeError} from "../IInsightFacade";
+import {InsightError, ResultTooLargeError} from "../IInsightFacade";
 import Room from "../Room";
 import {GetDataset} from "./GetDataset";
 import {InsightFilter} from "./IInsightFilter";
@@ -48,15 +48,30 @@ export class InsightQuery {
 				}
 				return Promise.all(filterPromises).then(() => {
 					resolve(qualifyingResults);
-				});
+				})
+					.catch(() => {
+						return reject(new InsightError());
+					});
 			});
 		});
 	}
 }
 
-export enum MFields { avg="avg",pass="pass",fail="fail",audit="audit",year="year",lat="lat",lon="lon",seats="seats"}
-export enum SFields { dept="dept",id="id",instructor="instructor",title="title",uuid="uuid",
-	fullname="fullname",shortname="shortname",number="number",name="name",
-	address="address",type="type",furniture="furniture",href="href"}
+export enum MFields {
+	avg = "avg",
+	pass = "pass",
+	fail = "fail",
+	audit = "audit",
+	year = "year",
+	lat = "lat",
+	lon = "lon",
+	seats = "seats"
+}
+
+export enum SFields {
+	dept = "dept", id = "id", instructor = "instructor", title = "title", uuid = "uuid",
+	fullname = "fullname", shortname = "shortname", number = "number", name = "name",
+	address = "address", type = "type", furniture = "furniture", href = "href"
+}
 
 
