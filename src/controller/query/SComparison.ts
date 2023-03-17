@@ -32,7 +32,7 @@ export class SComparison implements InsightFilter{
 					return resolve(val.startsWith(this.value));
 				case WildcardPosition.both:
 					return resolve(val.includes(this.value));
-			}
+			} // FIXME does it need a default case? like reject(....)
 		});
 	}
 }

@@ -18,7 +18,7 @@ export class ParseTransform {
 			return ParseTransformGroup.parseTransformGroup(transformClause, parser).then((res) => {
 				group = res;
 			}).then(() => {
-				return ParseTransformApply.parseApply(transformClause,parser, alreadyParsedApplyKeys);
+				return ParseTransformApply.parseApply(transformClause,parser, alreadyParsedApplyKeys); // FIXME resolve or reject here I think
 			}).then((rules) => {
 				if (this.checkGroupAndApplyColumns(group,rules,optionColumns.slice(), parser)) {
 					return Promise.resolve(new Transformation(group,rules));

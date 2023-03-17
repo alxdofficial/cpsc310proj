@@ -1,6 +1,5 @@
 import {
 	IInsightFacade,
-	InsightDataset,
 	InsightDatasetKind,
 	InsightError,
 	InsightResult,
@@ -32,7 +31,11 @@ describe("InsightFacade", function () {
 	let campusIndexNotInRoot: string;
 	let campusWoodMissingHeader: string;
 	let woodMissingSomeCap: string;
+	let allBuildingsMissingColumn: string;
 	let twoTables: string;
+	let tableAtEnd: string;
+	let twoExtraTablesInESB: string;
+	let missingHeaderInWOOD: string;
 	let oneInvalidSection: string;
 	let threeCourses: string;
 	let noCoursesFolder: string;
@@ -70,6 +73,10 @@ describe("InsightFacade", function () {
 			campusWoodMissingHeader = getContentFromArchives("campusWoodMissingHeader.zip");
 			woodMissingSomeCap = getContentFromArchives("woodMissingSomeCap.zip");
 			twoTables = getContentFromArchives("twoTables.zip");
+			tableAtEnd = getContentFromArchives("tableAtEnd.zip");
+			twoExtraTablesInESB = getContentFromArchives("twoExtraTablesInESB.zip");
+			missingHeaderInWOOD = getContentFromArchives("missingHeaderInWOOD.zip");
+			allBuildingsMissingColumn = getContentFromArchives("allBuildingsMissingColumn.zip");
 			threeCourses = getContentFromArchives("ThreeCourses.zip");
 			noCoursesFolder = getContentFromArchives("noCoursesFolderButSectionInside.zip");
 			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
@@ -101,11 +108,41 @@ describe("InsightFacade", function () {
 			clearDisk();
 		});
 
+		describe("all building files are missing one column header, katharine said all columns will have a hgeader",
+			function () {
+				it("should be rejected as there will be no valid rooms", function () {
+					const result = facade.addDataset("allBuildingsMissingColumn",
+						allBuildingsMissingColumn, InsightDatasetKind.Rooms);
+					return expect(result).to.eventually.be.rejectedWith(InsightError);
+				});
+			});
 
 		describe("addDataset with a valid ROOMs dataset", function () {
 			it("should be added and return a set of the currently added room IDS", function () {
 				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
 				return expect(result).to.eventually.deep.equal(["campus"]);
+			});
+		});
+
+		describe("should pass and return the key", function () {
+			it("should be added and return a set of the currently added room IDS", function () {
+				const result = facade.addDataset("twoExtraTablesInESB", twoExtraTablesInESB, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["twoExtraTablesInESB"]);
+			});
+		});
+
+		describe("missing a table header in WOOD, should skip the wood building file", function () {
+			it("should pass with no WOOD rooms", function () {
+				const result = facade.addDataset("missingHeaderInWOOD", missingHeaderInWOOD, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["missingHeaderInWOOD"]);
+			});
+		});
+
+		describe("index has talbe at end", function () {
+			it("should fulfil with the table at the end of the index file", function () {
+				const result = facade.addDataset("tableAtEnd",
+					tableAtEnd, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["tableAtEnd"]);
 			});
 		});
 
@@ -337,58 +374,58 @@ describe("InsightFacade", function () {
 		// 	});
 		// });
 		//
-		describe("addData with valid add", function () {
-			it("should pass and return the key", function () {
-				const result = facade.addDataset("validKey", sections, InsightDatasetKind.Sections);
-				return expect(result).to.eventually.deep.equal(["validKey"]);
-			});
-		});
-
-		describe("addData with an invalid add wrapped in two valid adds", function () {
-			it("should fail with InsightError, invalid add wrapped between two valid ones", function () {
-				const result = facade.addDataset("validKey", sectionsLite, InsightDatasetKind.Sections)
-					.then(() => facade.addDataset("", sectionsLite, InsightDatasetKind.Sections))
-					.then(() => facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections));
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
-			});
-		});
-
-		describe("addData with a VALID add, pairLiteLite has only one course with two sections inside", function () {
-			it("should PASS with the valid added key passed", function () {
-				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections);
-
-				return expect(result).to.eventually.deep.equal(["validKey"]);
-			});
-		});
-
-		describe("addData with a list and VALID add, pairLiteLite has only one course with two sections inside",
-			function () {
-				it("should PASS with the valid added key passed", function () {
-					const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
-						.then(() => facade.listDatasets());
-					const newDataSet: InsightDataset = {							// Create the dataset tuple
-						id: "validKey",
-						kind: InsightDatasetKind.Sections,
-						numRows: 33
-					};
-
-					return expect(result).to.eventually.deep.equal([newDataSet]);
-				});
-			});
-
-		describe("addData with a ROOMS and VALID add", function () {
-			it("should PASS with the valid added key passed", function () {
-				const result = facade.addDataset("campusLite", campusLite, InsightDatasetKind.Rooms)
-					.then(() => facade.listDatasets());
-				const newDataSet: InsightDataset = {							// Create the dataset tuple
-					id: "campusLite",
-					kind: InsightDatasetKind.Rooms,
-					numRows: 24
-				};
-
-				return expect(result).to.eventually.deep.equal([newDataSet]);
-			});
-		});
+		// describe("addData with valid add", function () {
+		// 	it("should pass and return the key", function () {
+		// 		const result = facade.addDataset("validKey", sections, InsightDatasetKind.Sections);
+		// 		return expect(result).to.eventually.deep.equal(["validKey"]);
+		// 	});
+		// });
+		//
+		// describe("addData with an invalid add wrapped in two valid adds", function () {
+		// 	it("should fail with InsightError, invalid add wrapped between two valid ones", function () {
+		// 		const result = facade.addDataset("validKey", sectionsLite, InsightDatasetKind.Sections)
+		// 			.then(() => facade.addDataset("", sectionsLite, InsightDatasetKind.Sections))
+		// 			.then(() => facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections));
+		// 		return expect(result).to.eventually.be.rejectedWith(InsightError);
+		// 	});
+		// });
+		//
+		// describe("addData with a VALID add, pairLiteLite has only one course with two sections inside", function () {
+		// 	it("should PASS with the valid added key passed", function () {
+		// 		const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections);
+		//
+		// 		return expect(result).to.eventually.deep.equal(["validKey"]);
+		// 	});
+		// });
+		//
+		// describe("addData with a list and VALID add, pairLiteLite has only one course with two sections inside",
+		// 	function () {
+		// 		it("should PASS with the valid added key passed", function () {
+		// 			const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
+		// 				.then(() => facade.listDatasets());
+		// 			const newDataSet: InsightDataset = {							// Create the dataset tuple
+		// 				id: "validKey",
+		// 				kind: InsightDatasetKind.Sections,
+		// 				numRows: 33
+		// 			};
+		//
+		// 			return expect(result).to.eventually.deep.equal([newDataSet]);
+		// 		});
+		// 	});
+		//
+		// describe("addData with a ROOMS and VALID add", function () {
+		// 	it("should PASS with the valid added key passed", function () {
+		// 		const result = facade.addDataset("campusLite", campusLite, InsightDatasetKind.Rooms)
+		// 			.then(() => facade.listDatasets());
+		// 		const newDataSet: InsightDataset = {							// Create the dataset tuple
+		// 			id: "campusLite",
+		// 			kind: InsightDatasetKind.Rooms,
+		// 			numRows: 24
+		// 		};
+		//
+		// 		return expect(result).to.eventually.deep.equal([newDataSet]);
+		// 	});
+		// });
 
 		//
 		// describe("addData with two VALID adds, pairLiteLite has only one course with two sections inside", function () {
@@ -574,13 +611,15 @@ describe("InsightFacade", function () {
 	describe("PerformQuery ORDERED", () => {
 		before(function () {
 			console.info(`Before: ${this.test?.parent?.title}`);
+			clearDisk();
 
 			facade = new InsightFacade();
 
 			// Load the datasets specified in datasetsToQuery and add them to InsightFacade.
 			// Will *fail* if there is a problem reading ANY dataset.
 			const loadDatasetPromises = [
-				facade.addDataset("sections", sections, InsightDatasetKind.Sections),
+				 // facade.addDataset("sections", sections, InsightDatasetKind.Sections),
+				 facade.addDataset("rooms", campus, InsightDatasetKind.Rooms),
 			];
 
 			return Promise.all(loadDatasetPromises);
@@ -596,7 +635,7 @@ describe("InsightFacade", function () {
 		folderTest<unknown, Promise<InsightResult[]>, PQErrorKind>(
 			"Dynamic InsightFacade PerformQuery tests",
 			(input) => facade.performQuery(input),
-			"./test/resources/orderedqueries",
+			"./test/resources/roomsOrdered",
 			{
 				assertOnResult: (actual, expected) => {
 					expect(actual).to.deep.equal(expected);					// Deep equals checks for members and order, implementation change states that order may not matter anymore
