@@ -1,6 +1,6 @@
 import Section from "../Section";
 import InsightFacade from "../InsightFacade";
-import {InsightDataset, InsightError, InsightResult, ResultTooLargeError} from "../IInsightFacade";
+import {InsightError,  ResultTooLargeError} from "../IInsightFacade";
 import Room from "../Room";
 import {GetDataset} from "./GetDataset";
 import {InsightFilter} from "./IInsightFilter";
@@ -17,7 +17,7 @@ export class InsightQuery {
 
 	constructor(inputBody: InsightFilter, inputOptions: InsightOption,
 		inputTransformations: Transformation | null, id: string, facade: InsightFacade) {
-		console.log("new instance of insight query");
+		// console.log("new instance of insight query");
 		this.body = inputBody;
 		this.options = inputOptions;
 		this.id = id;

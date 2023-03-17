@@ -21,9 +21,9 @@ export class MakeGroups {
 			// }
 			// map.set(groupKey, outputArray);
 			// return Promise.resolve(map);
-			return this.makeGroupHelper(results, new QueryGroup([]));
+			return this.makeGroupHelper(results, new QueryGroup([])); // FIXME i think these should return resolve
 		} else {
-			return this.makeGroupHelper(results, query.transformations.groups);
+			return this.makeGroupHelper(results, query.transformations.groups); // FIXME i think these should return resolve
 		}
 	}
 

@@ -38,7 +38,7 @@ export class LogicComparison implements InsightFilter {
 				}
 				return resolve(false);
 			}
-			return false;
+			return false; // FIXME i think should be reject or resolve false and not just false
 		});
 	}
 }

@@ -39,7 +39,7 @@ export class SortOutput {
 					}
 					i++;
 				}
-				return res;
+				return res; // FIXME resolve or reject here I think
 			});
 			return resolve(arr);
 		});

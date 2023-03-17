@@ -12,9 +12,9 @@ export class ApplyTransformation {
 		Array<Section | Room>>, transformation: Transformation | null, parser: QueryParser, optionColumns: string[]):
 		Promise<Array<Map<string, string | number>>> {
 		if (transformation == null) {
-			return MakeMapArray.makeMapArray(groupedResults,optionColumns,parser, []);
+			return MakeMapArray.makeMapArray(groupedResults,optionColumns,parser, []); // FIXME i think these should return resolve
 		} else {
-			return MakeMapArray.makeMapArray(groupedResults,optionColumns,parser,transformation.applyRuleList);
+			return MakeMapArray.makeMapArray(groupedResults,optionColumns,parser,transformation.applyRuleList); // FIXME i think these should return resolve
 		}
 	}
 }
