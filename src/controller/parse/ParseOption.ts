@@ -14,7 +14,7 @@ export class ParseOption {
 				let optionClause = json["OPTIONS"];
 				// call helpers
 				let columns: string[];
-				return ParseOptionColumns.parseOptionColumns(optionClause, parser).then((cols) => {
+				return ParseOptionColumns.parseOptionColumns(optionClause, parser).then((cols) => { // FIXME resolve or reject here I think, can it return then return? I think it should await for cols then return resolve what is in the then
 					columns = cols;
 					return ParseOptionSort.parseOptionOrder(optionClause, cols, parser);
 				}).then((order) => {

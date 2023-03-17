@@ -11,9 +11,9 @@ export class ParseN {
 			return Promise.reject(new InsightError("too many filters in negation"));
 		}
 		let key = Object.keys(json)[0];
-		return ParseMultiplex.multiplexInput(key, json[key], parser).then((res) => {
-			return Promise.resolve(new Negation(res));
-		}).catch((err) => {
+		return ParseMultiplex.multiplexInput(key, json[key], parser).then((res) => { // FIXME resolve or reject here I think, can it return then return? I think it should await for res then return resolve what is in the then
+			return Promise.resolve(new Negation(res)); // like const res = await Parse multiplex....
+		}).catch((err) => {								// return Promise.resolve ...
 			return Promise.reject(err);
 		});
 	}
