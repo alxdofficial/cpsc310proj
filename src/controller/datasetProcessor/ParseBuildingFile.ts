@@ -102,7 +102,8 @@ export class ParseBuildingFile {
 
 	public isRoomNumber(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {
-			if (attribute.value === "views-field views-field-field-room-number") {
+			if (attribute.value === "views-field views-field-field-room-number"
+				|| attribute.value === "views-field-field-room-number views-field") {
 				return true;
 			}
 		}
@@ -124,7 +125,8 @@ export class ParseBuildingFile {
 
 	public isRoomCapacity(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {
-			if (attribute.value === "views-field views-field-field-room-capacity") {
+			if (attribute.value === "views-field views-field-field-room-capacity"
+				|| attribute.value === "views-field-field-room-capacity views-field") {
 				return true;
 			}
 		}
@@ -142,7 +144,8 @@ export class ParseBuildingFile {
 
 	public isRoomFurniture(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {
-			if (attribute.value === "views-field views-field-field-room-furniture") {
+			if (attribute.value === "views-field views-field-field-room-furniture"
+				|| attribute.value === "views-field-field-room-furniture views-field") {
 				return true;
 			}
 		}
@@ -160,7 +163,8 @@ export class ParseBuildingFile {
 
 	public isRoomType(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {
-			if (attribute.value === "views-field views-field-field-room-type") {
+			if (attribute.value === "views-field views-field-field-room-type"
+				|| attribute.value === "views-field-field-room-type views-field") {
 				return true;
 			}
 		}
@@ -176,10 +180,10 @@ export class ParseBuildingFile {
 		return "";
 	}
 
-// TODO maybe grab href from room number instead, so if the fields-nothing doesn;t exist we can still pass
 	public isHref(cellObject: any): boolean {
 		for (let attribute of cellObject.attrs) {
-			if (attribute.value === "views-field views-field-nothing") {
+			if (attribute.value === "views-field views-field-nothing"
+				|| attribute.value === "views-field-nothing views-field") {
 				return true;
 			}
 		}

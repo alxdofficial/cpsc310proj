@@ -12,7 +12,7 @@ export class ParseMultiplex {
 	public static multiplexInput(key: string, json: any, parser: QueryParser): Promise<InsightFilter> {
 		switch (key) {
 			case "AND":
-				return ParseLogic.logicHelper(Logic.And, json, parser);
+				return ParseLogic.logicHelper(Logic.And, json, parser); // FIXME i think these should all be return resolve
 			case "OR":
 				return ParseLogic.logicHelper(Logic.Or, json, parser);
 			case "LT":

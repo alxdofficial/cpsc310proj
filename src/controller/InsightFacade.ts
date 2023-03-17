@@ -94,7 +94,7 @@ export default class InsightFacade implements IInsightFacade {
 				numRows: jsonString.numRows
 			};
 		for (const str of jsonString.roomArr) {
-			let toPush: Room = new Room(str.fullname, str.shortname, str.number, str.name, // TODO IMPLEMENT ME
+			let toPush: Room = new Room(str.fullname, str.shortname, str.number, str.name,
 				str.address, str.lat, str.lon, str.seats, str.type, str.furniture, str.href);
 			this.roomArr.push(toPush);
 		}
@@ -192,10 +192,11 @@ export default class InsightFacade implements IInsightFacade {
 		let parser: QueryParser = new QueryParser(query, this);
 		let parsedQuery: InsightQuery;
 		return parser.getQuery().then((q) => {
-			console.log("parse success");
+			// console.log("parse success");
 			parsedQuery = q;
 			return parsedQuery.doQuery();
 		}).then((res) => {
+			// console.log(res);
 			return MakeGroups.makeGroups(res, parsedQuery);
 		}).then((groups) => {
 			// all queries undergo "transformation" even if some dont have a trans specified.

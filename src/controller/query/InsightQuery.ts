@@ -1,6 +1,6 @@
 import Section from "../Section";
 import InsightFacade from "../InsightFacade";
-import {InsightDataset, InsightError, InsightResult, ResultTooLargeError} from "../IInsightFacade";
+import {InsightError,  ResultTooLargeError} from "../IInsightFacade";
 import Room from "../Room";
 import {GetDataset} from "./GetDataset";
 import {InsightFilter} from "./IInsightFilter";
@@ -17,7 +17,7 @@ export class InsightQuery {
 
 	constructor(inputBody: InsightFilter, inputOptions: InsightOption,
 		inputTransformations: Transformation | null, id: string, facade: InsightFacade) {
-		console.log("new instance of insight query");
+		// console.log("new instance of insight query");
 		this.body = inputBody;
 		this.options = inputOptions;
 		this.id = id;
@@ -30,20 +30,25 @@ export class InsightQuery {
 		return new Promise((resolve, reject) => {
 			return GetDataset.getDataset(this.facade, this.id).then((data) => {
 				let qualifyingResults: Array<Section | Room> = [];
+				let filterPromises = [];
 				for (let entry of data) {
-					this.body.doFilter(entry).then((addPred: boolean) => {
-						if (addPred) {
-							qualifyingResults.push(entry);
-						}
-					}).catch((err: InsightError) => {
-						return reject(err);
-					});
+					filterPromises.push(
+						this.body.doFilter(entry).then((addPred) => {
+							if (addPred) {
+								qualifyingResults.push(entry);
+							}
+							return;
+						}).catch((err: InsightError) => {
+							return reject(err);
+						}));
 				}
 				// check if too many results
 				if (qualifyingResults.length > 5000) {
 					return reject(new ResultTooLargeError());
 				}
-				return resolve(qualifyingResults);
+				return Promise.all(filterPromises).then(() => {
+					resolve(qualifyingResults);
+				});
 			});
 		});
 	}

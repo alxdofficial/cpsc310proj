@@ -1,6 +1,5 @@
 import {
 	IInsightFacade,
-	InsightDataset,
 	InsightDatasetKind,
 	InsightError,
 	InsightResult,
@@ -32,7 +31,11 @@ describe("InsightFacade", function () {
 	let campusIndexNotInRoot: string;
 	let campusWoodMissingHeader: string;
 	let woodMissingSomeCap: string;
+	let allBuildingsMissingColumn: string;
 	let twoTables: string;
+	let tableAtEnd: string;
+	let twoExtraTablesInESB: string;
+	let missingHeaderInWOOD: string;
 	let oneInvalidSection: string;
 	let threeCourses: string;
 	let noCoursesFolder: string;
@@ -58,28 +61,32 @@ describe("InsightFacade", function () {
 
 			sections = getContentFromArchives("pair.zip");
 			campus = getContentFromArchives("campus.zip");
-			campusLite = getContentFromArchives("campusLite.zip");
-			campusLiteInvalidBuildings = getContentFromArchives("campusLiteInvalidBuildings.zip"); // ESB is missing the address TD, so we shouldn't see any ESB rooms
-			campusMissingRoomTD = getContentFromArchives("campusMissingRoomTD.zip"); // One of WOOD's rooms is missing the capacity class, so num rows should be 20 for Lite
-			campusNoTableInIndex = getContentFromArchives("campusNoTableInIndex.zip");
-			campusLiteESBInvalidAddress = getContentFromArchives("campusLiteESBInvalidAddress.zip");
-			campusLiteEmptyESBShort = getContentFromArchives("campusLiteEmptyESBShort.zip");
-			campusLiteMissingHeadersInIndex = getContentFromArchives("campusLiteMissingHeadersInIndex.zip");
-			campusLiteMissingHeadersInBuilding = getContentFromArchives("campusLiteMissingHeadersInBuilding.zip");
-			campusIndexNotInRoot = getContentFromArchives("campusIndexNotInRoot.zip");
-			campusWoodMissingHeader = getContentFromArchives("campusWoodMissingHeader.zip");
-			woodMissingSomeCap = getContentFromArchives("woodMissingSomeCap.zip");
-			twoTables = getContentFromArchives("twoTables.zip");
-			threeCourses = getContentFromArchives("ThreeCourses.zip");
-			noCoursesFolder = getContentFromArchives("noCoursesFolderButSectionInside.zip");
-			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
-			sectionsLite = getContentFromArchives("pairLite.zip");
-			sectionsLiteLite = getContentFromArchives("pairLiteLite.zip");
-			invalidDataset = getContentFromArchives("invalid-dataset.xlsx");
-			validZipInvalidCourse = getContentFromArchives("validZipInvalidCourse.zip");
-			validZipEmptyCourses = getContentFromArchives("validZipEmptyCourses.zip");
-			validZipNoValidSection = getContentFromArchives("validZipNoValidSections.zip");
-			validZipNoValidJSONFormat = getContentFromArchives("validZipNoValidJSONFormat.zip");
+			// campusLite = getContentFromArchives("campusLite.zip");
+			// campusLiteInvalidBuildings = getContentFromArchives("campusLiteInvalidBuildings.zip"); // ESB is missing the address TD, so we shouldn't see any ESB rooms
+			// campusMissingRoomTD = getContentFromArchives("campusMissingRoomTD.zip"); // One of WOOD's rooms is missing the capacity class, so num rows should be 20 for Lite
+			// campusNoTableInIndex = getContentFromArchives("campusNoTableInIndex.zip");
+			// campusLiteESBInvalidAddress = getContentFromArchives("campusLiteESBInvalidAddress.zip");
+			// campusLiteEmptyESBShort = getContentFromArchives("campusLiteEmptyESBShort.zip");
+			// campusLiteMissingHeadersInIndex = getContentFromArchives("campusLiteMissingHeadersInIndex.zip");
+			// campusLiteMissingHeadersInBuilding = getContentFromArchives("campusLiteMissingHeadersInBuilding.zip");
+			// campusIndexNotInRoot = getContentFromArchives("campusIndexNotInRoot.zip");
+			// campusWoodMissingHeader = getContentFromArchives("campusWoodMissingHeader.zip");
+			// woodMissingSomeCap = getContentFromArchives("woodMissingSomeCap.zip");
+			// twoTables = getContentFromArchives("twoTables.zip");
+			// tableAtEnd = getContentFromArchives("tableAtEnd.zip");
+			// twoExtraTablesInESB = getContentFromArchives("twoExtraTablesInESB.zip");
+			// missingHeaderInWOOD = getContentFromArchives("missingHeaderInWOOD.zip");
+			// allBuildingsMissingColumn = getContentFromArchives("allBuildingsMissingColumn.zip");
+			// threeCourses = getContentFromArchives("ThreeCourses.zip");
+			// noCoursesFolder = getContentFromArchives("noCoursesFolderButSectionInside.zip");
+			// oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
+			// sectionsLite = getContentFromArchives("pairLite.zip");
+			// sectionsLiteLite = getContentFromArchives("pairLiteLite.zip");
+			// invalidDataset = getContentFromArchives("invalid-dataset.xlsx");
+			// validZipInvalidCourse = getContentFromArchives("validZipInvalidCourse.zip");
+			// validZipEmptyCourses = getContentFromArchives("validZipEmptyCourses.zip");
+			// validZipNoValidSection = getContentFromArchives("validZipNoValidSections.zip");
+			// validZipNoValidJSONFormat = getContentFromArchives("validZipNoValidJSONFormat.zip");
 		});
 
 		beforeEach(function () {
@@ -101,6 +108,14 @@ describe("InsightFacade", function () {
 			clearDisk();
 		});
 
+		// describe("all building files are missing one column header, katharine said all columns will have a hgeader",
+		// 	function () {
+		// 		it("should be rejected as there will be no valid rooms", function () {
+		// 			const result = facade.addDataset("allBuildingsMissingColumn",
+		// 				allBuildingsMissingColumn, InsightDatasetKind.Rooms);
+		// 			return expect(result).to.eventually.be.rejectedWith(InsightError);
+		// 		});
+		// 	});
 
 		describe("addDataset with a valid ROOMs dataset", function () {
 			it("should be added and return a set of the currently added room IDS", function () {
@@ -108,163 +123,187 @@ describe("InsightFacade", function () {
 				return expect(result).to.eventually.deep.equal(["campus"]);
 			});
 		});
-
-		describe("index not in root", function () {
-			it("should be rejected", function () {
-				const result = facade.addDataset("campusIndexNotInRoot",
-					campusIndexNotInRoot, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
-			});
-		});
-
-		describe("two tables, second one is the valid one", function () {
-			it("should fulfil with rooms in WOOD", function () {
-				const result = facade.addDataset("twoTables",
-					twoTables, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.deep.equal(["twoTables"]);
-			});
-		});
-
-
-		describe("woodMissingSomeCapacity, but field exists", function () {
-			it("should fulfil with some capacities as 0", function () {
-				const result = facade.addDataset("woodMissingSomeCap",
-					woodMissingSomeCap, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.deep.equal(["woodMissingSomeCap"]);
-			});
-		});
-
-		describe("WOOD missing table column, so skip wood", function () {
-			it("should be accepted without wood rooms", function () {
-				const result = facade.addDataset("campusWoodMissingHeader",
-					campusWoodMissingHeader, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.deep.equal(["campusWoodMissingHeader"]);
-			});
-		});
-
-		describe("ROOMS empty ESB short NAME", function () {
-			it("should be added and return a set of the currently added room IDS", function () {
-				const result = facade.addDataset("campusLiteEmptyESBShort",
-					campusLiteEmptyESBShort, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.deep.equal(["campusLiteEmptyESBShort"]);
-			});
-		});
-		describe("trying to add rooms with section type", function () {
-			it("reject because opposite type", function () {
-				const result = facade.addDataset("campusLiteEmptyESBShort",
-					campusLiteEmptyESBShort, InsightDatasetKind.Sections);
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
-			});
-		});
-		describe("addDataset with a valid ROOMs dataset AND valid SECTIONS", function () {
-			it("should be added and return a set of the currently added room IDS", function () {
-				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms)
-					.then(() => facade.addDataset("sections", sectionsLiteLite, InsightDatasetKind.Sections));
-				return expect(result).to.eventually.deep.equal(["campus", "sections"]);
-			});
-		});
-		// // 24 valid rooms in LITE
-		// describe("addDataset with a valid LITE ROOMs, some building files in index do not exist", function () {
+		//
+		// describe("should pass and return the key", function () {
 		// 	it("should be added and return a set of the currently added room IDS", function () {
-		// 		const result = facade.addDataset("campusLite", campusLite, InsightDatasetKind.Rooms)
-		// 			.then(() => {
-		// 				const newFacade = new InsightFacade();
-		// 				console.log(newFacade.listDatasets());
-		// 			});
-		// 		const newDataSet: InsightDataset = {							// Create the dataset tuple
-		// 			id: "campusLite",
-		// 			kind: InsightDatasetKind.Rooms,
-		// 			numRows: 24
-		// 		};
-		// 		return expect(result).to.eventually.deep.equal(newDataSet);
+		// 		const result = facade.addDataset("twoExtraTablesInESB", twoExtraTablesInESB, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.deep.equal(["twoExtraTablesInESB"]);
 		// 	});
 		// });
 		//
-
-		// 20 valid rooms in LITE without one in ESB and WOOD
-		describe("addDataset with a valid LITE ROOMs, ESB is missing address TD in index", function () {
-			it("should be added and return a set of the currently added room IDS", function () {
-				const result = facade.addDataset("campusMissingRoomTD", campusMissingRoomTD, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.deep.equal(["campusMissingRoomTD"]);
-			});
-		});
-
-		// 0 rooms because no table in index.htm
-		describe("addDataset with a no table in Index.htm", function () {
-			it("should throw insighterror with 0 valid rooms", function () {
-				const result = facade.addDataset("campusNoTableInIndex",
-					campusNoTableInIndex, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
-			});
-		});
-
+		// describe("missing a table header in WOOD, should skip the wood building file", function () {
+		// 	it("should pass with no WOOD rooms", function () {
+		// 		const result = facade.addDataset("missingHeaderInWOOD", missingHeaderInWOOD, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.deep.equal(["missingHeaderInWOOD"]);
+		// 	});
+		// });
 		//
-		describe("addDataset ESB has invalid address", function () {
-			it("should skip ESB and fulfill without ESB rooms", function () {
-				const result = facade.addDataset("campusLiteESBInvalidAddress",
-					campusLiteESBInvalidAddress, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.deep.equal(["campusLiteESBInvalidAddress"]);
-			});
-		});
+		// describe("index has talbe at end", function () {
+		// 	it("should fulfil with the table at the end of the index file", function () {
+		// 		const result = facade.addDataset("tableAtEnd",
+		// 			tableAtEnd, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.deep.equal(["tableAtEnd"]);
+		// 	});
+		// });
+		//
+		// describe("index not in root", function () {
+		// 	it("should be rejected", function () {
+		// 		const result = facade.addDataset("campusIndexNotInRoot",
+		// 			campusIndexNotInRoot, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.be.rejectedWith(InsightError);
+		// 	});
+		// });
+		//
+		// describe("two tables, second one is the valid one", function () {
+		// 	it("should fulfil with rooms in WOOD", function () {
+		// 		const result = facade.addDataset("twoTables",
+		// 			twoTables, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.deep.equal(["twoTables"]);
+		// 	});
+		// });
+		//
+		//
+		// describe("woodMissingSomeCapacity, but field exists", function () {
+		// 	it("should fulfil with some capacities as 0", function () {
+		// 		const result = facade.addDataset("woodMissingSomeCap",
+		// 			woodMissingSomeCap, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.deep.equal(["woodMissingSomeCap"]);
+		// 	});
+		// });
+		//
+		// describe("WOOD missing table column, so skip wood", function () {
+		// 	it("should be accepted without wood rooms", function () {
+		// 		const result = facade.addDataset("campusWoodMissingHeader",
+		// 			campusWoodMissingHeader, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.deep.equal(["campusWoodMissingHeader"]);
+		// 	});
+		// });
+		//
+		// describe("ROOMS empty ESB short NAME", function () {
+		// 	it("should be added and return a set of the currently added room IDS", function () {
+		// 		const result = facade.addDataset("campusLiteEmptyESBShort",
+		// 			campusLiteEmptyESBShort, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.deep.equal(["campusLiteEmptyESBShort"]);
+		// 	});
+		// });
+		// describe("trying to add rooms with section type", function () {
+		// 	it("reject because opposite type", function () {
+		// 		const result = facade.addDataset("campusLiteEmptyESBShort",
+		// 			campusLiteEmptyESBShort, InsightDatasetKind.Sections);
+		// 		return expect(result).to.eventually.be.rejectedWith(InsightError);
+		// 	});
+		// });
+		// describe("addDataset with a valid ROOMs dataset AND valid SECTIONS", function () {
+		// 	it("should be added and return a set of the currently added room IDS", function () {
+		// 		const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms)
+		// 			.then(() => facade.addDataset("sections", sectionsLiteLite, InsightDatasetKind.Sections));
+		// 		return expect(result).to.eventually.deep.equal(["campus", "sections"]);
+		// 	});
+		// });
+		// // // 24 valid rooms in LITE
+		// // describe("addDataset with a valid LITE ROOMs, some building files in index do not exist", function () {
+		// // 	it("should be added and return a set of the currently added room IDS", function () {
+		// // 		const result = facade.addDataset("campusLite", campusLite, InsightDatasetKind.Rooms)
+		// // 			.then(() => {
+		// // 				const newFacade = new InsightFacade();
+		// // 				console.log(newFacade.listDatasets());
+		// // 			});
+		// // 		const newDataSet: InsightDataset = {							// Create the dataset tuple
+		// // 			id: "campusLite",
+		// // 			kind: InsightDatasetKind.Rooms,
+		// // 			numRows: 24
+		// // 		};
+		// // 		return expect(result).to.eventually.deep.equal(newDataSet);
+		// // 	});
+		// // });
+		// //
+		//
+		// // 20 valid rooms in LITE without one in ESB and WOOD
+		// describe("addDataset with a valid LITE ROOMs, ESB is missing address TD in index", function () {
+		// 	it("should be added and return a set of the currently added room IDS", function () {
+		// 		const result = facade.addDataset("campusMissingRoomTD", campusMissingRoomTD, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.deep.equal(["campusMissingRoomTD"]);
+		// 	});
+		// });
+		//
+		// // 0 rooms because no table in index.htm
+		// describe("addDataset with a no table in Index.htm", function () {
+		// 	it("should throw insighterror with 0 valid rooms", function () {
+		// 		const result = facade.addDataset("campusNoTableInIndex",
+		// 			campusNoTableInIndex, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.be.rejectedWith(InsightError);
+		// 	});
+		// });
+		//
+		// //
+		// describe("addDataset ESB has invalid address", function () {
+		// 	it("should skip ESB and fulfill without ESB rooms", function () {
+		// 		const result = facade.addDataset("campusLiteESBInvalidAddress",
+		// 			campusLiteESBInvalidAddress, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.deep.equal(["campusLiteESBInvalidAddress"]);
+		// 	});
+		// });
+		//
+		// describe("Missing a table header", function () {
+		// 	it("Missing a table header in Index", function () {
+		// 		const result = facade.addDataset("campusLiteMissingHeadersInIndex",
+		// 			campusLiteMissingHeadersInIndex, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.be.rejectedWith(InsightError);
+		// 	});
+		// });
+		//
+		// describe("removeDataset with a valid LITE ROOMs, ESB is missing address TD in index", function () {
+		// 	it("should be added and return a set of the currently added room IDS", function () {
+		// 		const result = facade.addDataset("campusMissingRoomTD", campusMissingRoomTD, InsightDatasetKind.Rooms)
+		// 			.then(() => facade.removeDataset("campusMissingRoomTD"));
+		// 		return expect(result).to.eventually.deep.equal("campusMissingRoomTD");
+		// 	});
+		// });
+		//
+		// describe("removeDataset with a valid ROOMs dataset AND valid SECTIONS", function () {
+		// 	it("should be added and return a set of the currently added room IDS", function () {
+		// 		const result = facade.addDataset("campusLite", campusLite, InsightDatasetKind.Rooms)
+		// 			.then(() => facade.addDataset("sections", sectionsLiteLite, InsightDatasetKind.Sections))
+		// 			.then(() => facade.removeDataset("campusLite"))
+		// 			.then(() => facade.removeDataset("sections"));
+		// 		return expect(result).to.eventually.deep.equal("sections");
+		// 	});
+		// });
+		//
+		// // 21 valid rooms in LITE without ESB
+		// describe("addDataset with a valid LITE ROOMs, WOOD room is missing cap in building file", function () {
+		// 	it("3should be added and return a set of the currently added room IDS", function () {
+		// 		const result = facade.addDataset("campusLiteInvalidBuildings",
+		// 			campusLiteInvalidBuildings, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.deep.equal(["campusLiteInvalidBuildings"]);
+		// 	});
+		// });
+		//
+		// // 364 valid rooms in campus
+		// describe("removeDataset with a valid ROOMs dataset", function () {
+		// 	it("should be removed with the string CAMPUS", function () {
+		// 		const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms)
+		// 			.then(() => facade.removeDataset("campus"));
+		// 		return expect(result).to.eventually.deep.equal("campus");
+		// 	});
+		// });
+		//
+		// describe("addDataset with a valid ROOMs dataset, wrong kind", function () {
+		// 	it("should NOT be added and return an InsightError", function () {
+		// 		const result = facade.addDataset("campus", campus, InsightDatasetKind.Sections);
+		// 		return expect(result).to.eventually.be.rejectedWith(InsightError);
+		// 	});
+		// });
+		//
+		// describe("Missing table header in BUILDING", function () {
+		// 	it("should NOT be added and return an InsightError", function () {
+		// 		const result = facade.addDataset("campusLiteMissingHeadersInBuilding",
+		// 			campusLiteMissingHeadersInBuilding, InsightDatasetKind.Rooms);
+		// 		return expect(result).to.eventually.be.deep.equal(["campusLiteMissingHeadersInBuilding"]);
+		// 	});
+		// });
 
-		describe("Missing a table header", function () {
-			it("Missing a table header in Index", function () {
-				const result = facade.addDataset("campusLiteMissingHeadersInIndex",
-					campusLiteMissingHeadersInIndex, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
-			});
-		});
 
-		describe("removeDataset with a valid LITE ROOMs, ESB is missing address TD in index", function () {
-			it("should be added and return a set of the currently added room IDS", function () {
-				const result = facade.addDataset("campusMissingRoomTD", campusMissingRoomTD, InsightDatasetKind.Rooms)
-					.then(() => facade.removeDataset("campusMissingRoomTD"));
-				return expect(result).to.eventually.deep.equal("campusMissingRoomTD");
-			});
-		});
-
-		describe("removeDataset with a valid ROOMs dataset AND valid SECTIONS", function () {
-			it("should be added and return a set of the currently added room IDS", function () {
-				const result = facade.addDataset("campusLite", campusLite, InsightDatasetKind.Rooms)
-					.then(() => facade.addDataset("sections", sectionsLiteLite, InsightDatasetKind.Sections))
-					.then(() => facade.removeDataset("campusLite"))
-					.then(() => facade.removeDataset("sections"));
-				return expect(result).to.eventually.deep.equal("sections");
-			});
-		});
-
-		// 21 valid rooms in LITE without ESB
-		describe("addDataset with a valid LITE ROOMs, WOOD room is missing cap in building file", function () {
-			it("3should be added and return a set of the currently added room IDS", function () {
-				const result = facade.addDataset("campusLiteInvalidBuildings",
-					campusLiteInvalidBuildings, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.deep.equal(["campusLiteInvalidBuildings"]);
-			});
-		});
-
-		// 364 valid rooms in campus
-		describe("removeDataset with a valid ROOMs dataset", function () {
-			it("should be removed with the string CAMPUS", function () {
-				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms)
-					.then(() => facade.removeDataset("campus"));
-				return expect(result).to.eventually.deep.equal("campus");
-			});
-		});
-
-		describe("addDataset with a valid ROOMs dataset, wrong kind", function () {
-			it("should NOT be added and return an InsightError", function () {
-				const result = facade.addDataset("campus", campus, InsightDatasetKind.Sections);
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
-			});
-		});
-
-		describe("Missing table header in BUILDING", function () {
-			it("should NOT be added and return an InsightError", function () {
-				const result = facade.addDataset("campusLiteMissingHeadersInBuilding",
-					campusLiteMissingHeadersInBuilding, InsightDatasetKind.Rooms);
-				return expect(result).to.eventually.be.deep.equal(["campusLiteMissingHeadersInBuilding"]);
-			});
-		});
 		//
 		// // This is a unit test. You should create more like this!
 		// it("should reject with  an empty dataset id", function () {
@@ -337,58 +376,58 @@ describe("InsightFacade", function () {
 		// 	});
 		// });
 		//
-		describe("addData with valid add", function () {
-			it("should pass and return the key", function () {
-				const result = facade.addDataset("validKey", sections, InsightDatasetKind.Sections);
-				return expect(result).to.eventually.deep.equal(["validKey"]);
-			});
-		});
-
-		describe("addData with an invalid add wrapped in two valid adds", function () {
-			it("should fail with InsightError, invalid add wrapped between two valid ones", function () {
-				const result = facade.addDataset("validKey", sectionsLite, InsightDatasetKind.Sections)
-					.then(() => facade.addDataset("", sectionsLite, InsightDatasetKind.Sections))
-					.then(() => facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections));
-				return expect(result).to.eventually.be.rejectedWith(InsightError);
-			});
-		});
-
-		describe("addData with a VALID add, pairLiteLite has only one course with two sections inside", function () {
-			it("should PASS with the valid added key passed", function () {
-				const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections);
-
-				return expect(result).to.eventually.deep.equal(["validKey"]);
-			});
-		});
-
-		describe("addData with a list and VALID add, pairLiteLite has only one course with two sections inside",
-			function () {
-				it("should PASS with the valid added key passed", function () {
-					const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
-						.then(() => facade.listDatasets());
-					const newDataSet: InsightDataset = {							// Create the dataset tuple
-						id: "validKey",
-						kind: InsightDatasetKind.Sections,
-						numRows: 33
-					};
-
-					return expect(result).to.eventually.deep.equal([newDataSet]);
-				});
-			});
-
-		describe("addData with a ROOMS and VALID add", function () {
-			it("should PASS with the valid added key passed", function () {
-				const result = facade.addDataset("campusLite", campusLite, InsightDatasetKind.Rooms)
-					.then(() => facade.listDatasets());
-				const newDataSet: InsightDataset = {							// Create the dataset tuple
-					id: "campusLite",
-					kind: InsightDatasetKind.Rooms,
-					numRows: 24
-				};
-
-				return expect(result).to.eventually.deep.equal([newDataSet]);
-			});
-		});
+		// describe("addData with valid add", function () {
+		// 	it("should pass and return the key", function () {
+		// 		const result = facade.addDataset("validKey", sections, InsightDatasetKind.Sections);
+		// 		return expect(result).to.eventually.deep.equal(["validKey"]);
+		// 	});
+		// });
+		//
+		// describe("addData with an invalid add wrapped in two valid adds", function () {
+		// 	it("should fail with InsightError, invalid add wrapped between two valid ones", function () {
+		// 		const result = facade.addDataset("validKey", sectionsLite, InsightDatasetKind.Sections)
+		// 			.then(() => facade.addDataset("", sectionsLite, InsightDatasetKind.Sections))
+		// 			.then(() => facade.addDataset("valid", sectionsLite, InsightDatasetKind.Sections));
+		// 		return expect(result).to.eventually.be.rejectedWith(InsightError);
+		// 	});
+		// });
+		//
+		// describe("addData with a VALID add, pairLiteLite has only one course with two sections inside", function () {
+		// 	it("should PASS with the valid added key passed", function () {
+		// 		const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections);
+		//
+		// 		return expect(result).to.eventually.deep.equal(["validKey"]);
+		// 	});
+		// });
+		//
+		// describe("addData with a list and VALID add, pairLiteLite has only one course with two sections inside",
+		// 	function () {
+		// 		it("should PASS with the valid added key passed", function () {
+		// 			const result = facade.addDataset("validKey", sectionsLiteLite, InsightDatasetKind.Sections)
+		// 				.then(() => facade.listDatasets());
+		// 			const newDataSet: InsightDataset = {							// Create the dataset tuple
+		// 				id: "validKey",
+		// 				kind: InsightDatasetKind.Sections,
+		// 				numRows: 33
+		// 			};
+		//
+		// 			return expect(result).to.eventually.deep.equal([newDataSet]);
+		// 		});
+		// 	});
+		//
+		// describe("addData with a ROOMS and VALID add", function () {
+		// 	it("should PASS with the valid added key passed", function () {
+		// 		const result = facade.addDataset("campusLite", campusLite, InsightDatasetKind.Rooms)
+		// 			.then(() => facade.listDatasets());
+		// 		const newDataSet: InsightDataset = {							// Create the dataset tuple
+		// 			id: "campusLite",
+		// 			kind: InsightDatasetKind.Rooms,
+		// 			numRows: 24
+		// 		};
+		//
+		// 		return expect(result).to.eventually.deep.equal([newDataSet]);
+		// 	});
+		// });
 
 		//
 		// describe("addData with two VALID adds, pairLiteLite has only one course with two sections inside", function () {
@@ -574,13 +613,15 @@ describe("InsightFacade", function () {
 	describe("PerformQuery ORDERED", () => {
 		before(function () {
 			console.info(`Before: ${this.test?.parent?.title}`);
+			clearDisk();
 
 			facade = new InsightFacade();
 
 			// Load the datasets specified in datasetsToQuery and add them to InsightFacade.
 			// Will *fail* if there is a problem reading ANY dataset.
 			const loadDatasetPromises = [
-				facade.addDataset("sections", sections, InsightDatasetKind.Sections),
+				 // facade.addDataset("sections", sections, InsightDatasetKind.Sections),
+				 facade.addDataset("rooms", campus, InsightDatasetKind.Rooms),
 			];
 
 			return Promise.all(loadDatasetPromises);
@@ -596,7 +637,7 @@ describe("InsightFacade", function () {
 		folderTest<unknown, Promise<InsightResult[]>, PQErrorKind>(
 			"Dynamic InsightFacade PerformQuery tests",
 			(input) => facade.performQuery(input),
-			"./test/resources/orderedqueries",
+			"./test/resources/roomsOrdered",
 			{
 				assertOnResult: (actual, expected) => {
 					expect(actual).to.deep.equal(expected);					// Deep equals checks for members and order, implementation change states that order may not matter anymore

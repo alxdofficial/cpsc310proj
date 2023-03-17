@@ -102,23 +102,28 @@ export class TraverseBuildingFile extends TableValidity {
 		let b3: boolean = false;
 		let b4: boolean = false;
 		for (let headerText of arr) {
-			if (headerText === "views-field views-field-field-room-number") {
+			if (headerText === "views-field views-field-field-room-number"
+				|| headerText === "views-field-field-room-number views-field") {
 				b0 = true;
 				continue;
 			}
-			if (headerText === "views-field views-field-field-room-capacity") {
+			if (headerText === "views-field views-field-field-room-capacity"
+				|| headerText === "views-field-field-room-capacity views-field") {
 				b1 = true;
 				continue;
 			}
-			if (headerText === "views-field views-field-field-room-furniture") {
+			if (headerText === "views-field views-field-field-room-furniture"
+				|| headerText === "views-field-field-room-furniture views-field") {
 				b2 = true;
 				continue;
 			}
-			if (headerText === "views-field views-field-field-room-type") {
+			if (headerText === "views-field views-field-field-room-type"
+				|| headerText === "views-field-field-room-type views-field") {
 				b3 = true;
 				continue;
 			}
-			if (headerText === "views-field views-field-nothing") {
+			if (headerText === "views-field views-field-nothing"
+				|| headerText === "views-field-nothing views-field") {
 				b4 = true;
 			}
 

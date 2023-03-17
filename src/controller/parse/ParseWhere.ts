@@ -17,7 +17,7 @@ export class ParseWhere {
 				} else {
 					// after all the switch statements execute, if filter is still null, then we reject promise. if we have filter, use it to create InsiightQuery object
 					let key = Object.keys(whereClause)[0];
-					return ParseMultiplex.multiplexInput(key, whereClause[key], parser).then((filter) => {
+					return ParseMultiplex.multiplexInput(key, whereClause[key], parser).then((filter) => { // FIXME can it return, then return resolve? I think it should await for filter, then return resolve filter
 						return resolve(filter);
 					}).catch(function (err) {
 						return reject(err);

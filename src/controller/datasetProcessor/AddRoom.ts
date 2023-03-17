@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import JSZip from "jszip";
 import {parse} from "parse5";
 import {DataProcessor} from "./DataProcessor";
-import {InsightDataset, InsightDatasetKind, InsightError} from "../IInsightFacade";
+import {InsightDataset, InsightError} from "../IInsightFacade";
 import {Dataset} from "./Dataset";
 import {ParseIndexFile} from "./ParseIndexFile";
 import {TableValidity} from "./TableValidity";
@@ -34,12 +34,12 @@ export class AddRoom extends TableValidity implements DataProcessor {
 							kind: dataset.getKind(),
 							numRows: dataset.getRowCount()
 						};
-						dataset.getDatasets().set(newDataSet, dataset.getRoomArr()); 				// Add the insightdataset and section array to the in memory representation of the data
+						dataset.getDatasets().set(newDataSet, dataset.getRoomArr()); 				        // Add the insightdataset and section array to the in memory representation of the data
 						dataset.getDatasetIDs().push(dataset.getID()); 										// on successful add, add the datasetID
 						await dataset.writeDataRooms();
-						// console.log(dataset.getDatasets());
 						dataset.setRowCount(0);												// CLEANUP: reset row count for future add calls
 						dataset.setRoomArr([]);												// CLEANUP: empty the array for sections for future calls
+							// console.log(dataset.getDatasets());
 						return resolve(dataset.getDatasetIDs()); 								// resolve with an array of strings which are the added IDs
 					}
 					)
@@ -189,23 +189,28 @@ export class AddRoom extends TableValidity implements DataProcessor {
 		let b3: boolean = false;
 		let b4: boolean = false;
 		for (let headerText of arr) {
-			if (headerText === "views-field views-field-field-building-image") {
+			if (headerText === "views-field views-field-field-building-image"
+				|| headerText === "views-field-field-building-image views-field") {
 				b0 = true;
 				continue;
 			}
-			if (headerText === "views-field views-field-field-building-code") {
+			if (headerText === "views-field views-field-field-building-code"
+				|| headerText === "views-field-field-building-code views-field") {
 				b1 = true;
 				continue;
 			}
-			if (headerText === "views-field views-field-title") {
+			if (headerText === "views-field views-field-title"
+				|| headerText === "views-field-title views-field") {
 				b2 = true;
 				continue;
 			}
-			if (headerText === "views-field views-field-field-building-address") {
+			if (headerText === "views-field views-field-field-building-address"
+				|| headerText === "views-field-field-building-address views-field") {
 				b3 = true;
 				continue;
 			}
-			if (headerText === "views-field views-field-nothing") {
+			if (headerText === "views-field views-field-nothing"
+				|| headerText === "views-field-nothing views-field") {
 				b4 = true;
 			}
 
