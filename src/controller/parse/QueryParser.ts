@@ -27,10 +27,10 @@ export class QueryParser {
 				return ParseWhere.parseWhere(this.inputJson,this).then((fil) => {
 					filter = fil;
 				}).then(() => {
-					return ParseOption.parseOptions(this.inputJson, this);
+					return ParseOption.parseOptions(this.inputJson, this); // FIXME these should return resolve?
 				}).then((opt) => {
-					option = opt;
-					return ParseTransform.parseTransform(this.inputJson,this, option.columns);
+					option = opt; // FIXME these should return resolve
+					return ParseTransform.parseTransform(this.inputJson,this, option.columns); // FIXME these should return resolve?
 				}).then((transform: Transformation | null) => {
 					// everything parsed successfully, so we just create insight query object and return it
 					return resolve(new InsightQuery(filter,option,transform,this.dataset_id, this.facade));
