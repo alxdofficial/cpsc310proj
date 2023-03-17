@@ -34,6 +34,8 @@ describe("InsightFacade", function () {
 	let woodMissingSomeCap: string;
 	let twoTables: string;
 	let tableAtEnd: string;
+	let twoExtraTablesInESB: string;
+	let missingHeaderInWOOD: string;
 	let oneInvalidSection: string;
 	let threeCourses: string;
 	let noCoursesFolder: string;
@@ -72,6 +74,8 @@ describe("InsightFacade", function () {
 			woodMissingSomeCap = getContentFromArchives("woodMissingSomeCap.zip");
 			twoTables = getContentFromArchives("twoTables.zip");
 			tableAtEnd = getContentFromArchives("tableAtEnd.zip");
+			twoExtraTablesInESB = getContentFromArchives("twoExtraTablesInESB.zip");
+			missingHeaderInWOOD = getContentFromArchives("missingHeaderInWOOD.zip");
 			threeCourses = getContentFromArchives("ThreeCourses.zip");
 			noCoursesFolder = getContentFromArchives("noCoursesFolderButSectionInside.zip");
 			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
@@ -108,6 +112,20 @@ describe("InsightFacade", function () {
 			it("should be added and return a set of the currently added room IDS", function () {
 				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
 				return expect(result).to.eventually.deep.equal(["campus"]);
+			});
+		});
+
+		describe("should pass and return the key", function () {
+			it("should be added and return a set of the currently added room IDS", function () {
+				const result = facade.addDataset("twoExtraTablesInESB", twoExtraTablesInESB, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["twoExtraTablesInESB"]);
+			});
+		});
+
+		describe("missing a table header in WOOD, should skip the wood building file", function () {
+			it("should pass with no WOOD rooms", function () {
+				const result = facade.addDataset("missingHeaderInWOOD", missingHeaderInWOOD, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.deep.equal(["missingHeaderInWOOD"]);
 			});
 		});
 
