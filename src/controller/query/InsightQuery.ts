@@ -30,20 +30,25 @@ export class InsightQuery {
 		return new Promise((resolve, reject) => {
 			return GetDataset.getDataset(this.facade, this.id).then((data) => {
 				let qualifyingResults: Array<Section | Room> = [];
+				let filterPromises = [];
 				for (let entry of data) {
-					this.body.doFilter(entry).then((addPred: boolean) => {
-						if (addPred) {
-							qualifyingResults.push(entry);
-						}
-					}).catch((err: InsightError) => {
-						return reject(err);
-					});
+					filterPromises.push(
+						this.body.doFilter(entry).then((addPred) => {
+							if (addPred) {
+								qualifyingResults.push(entry);
+							}
+							return;
+						}).catch((err: InsightError) => {
+							return reject(err);
+						}));
 				}
 				// check if too many results
 				if (qualifyingResults.length > 5000) {
 					return reject(new ResultTooLargeError());
 				}
-				return resolve(qualifyingResults);
+				return Promise.all(filterPromises).then(() => {
+					resolve(qualifyingResults);
+				});
 			});
 		});
 	}

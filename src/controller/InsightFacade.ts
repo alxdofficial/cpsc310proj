@@ -196,6 +196,7 @@ export default class InsightFacade implements IInsightFacade {
 			parsedQuery = q;
 			return parsedQuery.doQuery();
 		}).then((res) => {
+			// console.log(res);
 			return MakeGroups.makeGroups(res, parsedQuery);
 		}).then((groups) => {
 			// all queries undergo "transformation" even if some dont have a trans specified.
