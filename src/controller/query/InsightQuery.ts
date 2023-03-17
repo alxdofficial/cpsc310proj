@@ -49,8 +49,8 @@ export class InsightQuery {
 				return Promise.all(filterPromises).then(() => {
 					resolve(qualifyingResults);
 				})
-					.catch(() => {
-						return reject(new InsightError());
+					.catch((err) => {
+						return reject(err);
 					});
 			});
 		});
