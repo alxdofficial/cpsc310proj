@@ -12,17 +12,16 @@ import Section from "./Section";
 import Room from "./Room";
 // import {InsightQuery} from "./InsightQuery"; // TODO undome
 
-import {DataProcessor} from "./datasetProcessor/DataProcessor";
-import {Dataset} from "./datasetProcessor/Dataset";
-import {AddRoom} from "./datasetProcessor/AddRoom";
-import {AddSection} from "./datasetProcessor/AddSection";
 import {MakeGroups} from "./output/MakeGroups";
 import {ApplyTransformation} from "./output/ApplyTransformation";
 import {InsightQuery} from "./query/InsightQuery";
 import {QueryOutput} from "./output/QueryOutput";
 import {SortOutput} from "./output/SortOutput";
 import {QueryParser} from "./parse/QueryParser";
-
+import {Dataset} from "./datasetProcessor/Dataset";
+import {DataProcessor} from "./datasetProcessor/DataProcessor";
+import {AddSection} from "./datasetProcessor/AddSection";
+import {AddRoom} from "./datasetProcessor/AddRoom";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -195,21 +194,20 @@ export default class InsightFacade implements IInsightFacade {
 		return parser.getQuery().then((q) => {
 			// console.log("parse success");
 			parsedQuery = q;
-			// console.log(query);
 			return parsedQuery.doQuery();
 		}).then((res) => {
 			return MakeGroups.makeGroups(res, parsedQuery);
 		}).then((groups) => {
 			// all queries undergo "transformation" even if some dont have a trans specified.
-			// console.log(res);
 			return ApplyTransformation.applyTransformation(groups, parsedQuery.transformations,
 				parser, parsedQuery.options.columns);
 		}).then((transformedRes) => {
-			// console.log(res);
+			// console.log(transformedRes);
 			return SortOutput.sort(transformedRes, parsedQuery.options.sort);
 		}).then((map) => {
 			return QueryOutput.makeOutput(map);
 		}).then((insightResults) => {
+			// console.log(insightResults);
 			return Promise.resolve(insightResults);
 		});
 	}
