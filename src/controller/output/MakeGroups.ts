@@ -13,14 +13,15 @@ export class MakeGroups {
 		// check if no transformations are specified, if so, all the results are just 1 big group,
 		// with group key: 'TRIVIALGROUP'
 		if (query.transformations === null) {
-			let map = new Map();
-			let groupKey: string = "TRIVIALGROUP";
-			let outputArray: Array<Section | Room> = [];
-			for (let result of results) {
-				outputArray.push(result);
-			}
-			map.set(groupKey, outputArray);
-			return Promise.resolve(map);
+			// let map = new Map();
+			// let groupKey: string = "TRIVIALGROUP";
+			// let outputArray: Array<Section | Room> = [];
+			// for (let result of results) {
+			// 	outputArray.push(result);
+			// }
+			// map.set(groupKey, outputArray);
+			// return Promise.resolve(map);
+			return this.makeGroupHelper(results, new QueryGroup([]));
 		} else {
 			return this.makeGroupHelper(results, query.transformations.groups);
 		}
@@ -56,7 +57,15 @@ export class MakeGroups {
 			}
 			hash += String(entryVal) + ",";
 		}
+		if (grouping.groupKeys.length < 1) {
+			// we are in the case of no groups, so everything is its own group
+			for (let [key, val] of Object.entries(entry)) {
+				hash += String(val) + ",";
+			}
+		}
 		hash = hash.slice(0, -1);
+
+
 		return hash;
 	}
 }

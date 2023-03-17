@@ -8,6 +8,8 @@ import {GetFieldData} from "../query/GetFieldData";
 import {TransformationHelpers} from "./TransformationHelpers";
 import {ApplyRule, ApplyTokens, Transformation} from "./Transformation";
 import e from "express";
+import {unwatchFile} from "fs";
+import {InsightError} from "../IInsightFacade";
 
 export class MakeMapArray {
 	public static makeMapArray(groupedResults: Map<string,

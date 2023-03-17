@@ -12,7 +12,7 @@ export class ApplyTransformation {
 		Array<Section | Room>>, transformation: Transformation | null, parser: QueryParser, optionColumns: string[]):
 		Promise<Array<Map<string, string | number>>> {
 		if (transformation == null) {
-			return MakeMapArray.makeMapArray(groupedResults,optionColumns,parser,[]);
+			return MakeMapArray.makeMapArray(groupedResults,optionColumns,parser, []);
 		} else {
 			return MakeMapArray.makeMapArray(groupedResults,optionColumns,parser,transformation.applyRuleList);
 		}
