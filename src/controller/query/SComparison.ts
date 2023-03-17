@@ -4,6 +4,7 @@ import {SFields} from "./InsightQuery";
 import Room from "../Room";
 import {GetFieldData} from "./GetFieldData";
 import {InsightFilter} from "./IInsightFilter";
+import {InsightError} from "../IInsightFacade";
 
 export enum WildcardPosition {none,front,end,both}
 export class SComparison implements InsightFilter{
@@ -18,23 +19,20 @@ export class SComparison implements InsightFilter{
 
 	public doFilter(entry: Section | Room): Promise<boolean> {
 		return new Promise((resolve, reject) => {
-			let val: string;
-			GetFieldData.getFieldData(entry, this.sfield).then((res) => {
-				val = String(res);
-			}).then(() => {
-				switch (this.wildcardPosition) {
-					case WildcardPosition.none:
-						return resolve(val === this.value);
-					case WildcardPosition.front:
-						return resolve(val.endsWith(this.value));
-					case WildcardPosition.end:
-						return resolve(val.startsWith(this.value));
-					case WildcardPosition.both:
-						return resolve(val.includes(this.value));
-				}
-			}).catch((err) => {
-				return reject(err);
-			});
+			let val = GetFieldData.getFieldData(entry, this.sfield);
+			if (val == null || typeof val !== "string") {
+				return reject(new InsightError("retrieve data from entry failed in Scomp"));
+			}
+			switch (this.wildcardPosition) {
+				case WildcardPosition.none:
+					return resolve(val === this.value);
+				case WildcardPosition.front:
+					return resolve(val.endsWith(this.value));
+				case WildcardPosition.end:
+					return resolve(val.startsWith(this.value));
+				case WildcardPosition.both:
+					return resolve(val.includes(this.value));
+			}
 		});
 	}
 }

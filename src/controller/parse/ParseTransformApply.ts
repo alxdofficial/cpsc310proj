@@ -6,8 +6,7 @@ import {FieldGetter} from "./FieldGetter";
 import {MFields, SFields} from "../query/InsightQuery";
 
 export class ParseTransformApply {
-	public static parseApply(json: any, parser: QueryParser, alreadyParsedApplyKeys: string[],
-							 fieldsThatExistInOptions: Array<MFields | SFields>): Promise<ApplyRule[]> {
+	public static parseApply(json: any, parser: QueryParser, alreadyParsedApplyKeys: string[]): Promise<ApplyRule[]> {
 		return new Promise((resolve, reject) => {
 			if (json["APPLY"] === undefined) {
 				return reject(new InsightError("APPLY key misisng in query->transform"));
@@ -19,8 +18,7 @@ export class ParseTransformApply {
 				// create array of apply rules
 				let applyRules: ApplyRule[] = [];
 				for (let applyRule of applyClause) {
-					this.parseApplyRule(applyRule, parser,alreadyParsedApplyKeys,
-						fieldsThatExistInOptions).then((rule) => {
+					this.parseApplyRule(applyRule, parser,alreadyParsedApplyKeys).then((rule) => {
 						applyRules.push(rule);
 					}).catch((err) => {
 						return reject(err);
@@ -31,8 +29,8 @@ export class ParseTransformApply {
 		});
 	}
 
-	public static parseApplyRule(applyRule: any, parser: QueryParser, alreadyParsedApplyKeys: string[],
-								 fieldsThatExistInOptions: Array<MFields | SFields>): Promise<ApplyRule> {
+	public static parseApplyRule(applyRule: any, parser: QueryParser,
+								 alreadyParsedApplyKeys: string[]): Promise<ApplyRule> {
 		return new Promise((resolve, reject) => {
 			// check if too many keys in json
 			if (Object.keys(applyRule).length > 1) {
@@ -58,7 +56,7 @@ export class ParseTransformApply {
 			}
 			let applyToken: ApplyTokens = applyTokenOrNull;
 			// check the key
-			return this.getKey(applybody[tokenStr],parser,fieldsThatExistInOptions).then((key) => {
+			return this.getKey(applybody[tokenStr],parser).then((key) => {
 				// all good
 				return resolve(new ApplyRule(applyToken, key, applykey));
 			}).catch((err) => {
@@ -88,23 +86,11 @@ export class ParseTransformApply {
 		}
 	}
 
-	public static getKey(keystr: string, parser: QueryParser,
-						 fieldsThatExistInOptions: Array<MFields | SFields>): Promise<MFields | SFields> {
-		// strip dataset id from key, checks if it references multipke datasets
-		let keySansID: string | null = IDGetter.getID(keystr, parser);
-		if (keySansID == null) {
-			return Promise.reject(new InsightError("references multiple data" +
-				"sets, query->transform->apply[i]->key"));
-		}
-		// check key references valid field in data entry
-		let key: MFields | SFields | null = FieldGetter.getField(keySansID);
+	public static getKey(keystr: string, parser: QueryParser): Promise<MFields | SFields> {
+		let key: MFields | SFields | null = FieldGetter.getOnlyField(keystr,parser);
 		if (key == null) {
 			return Promise.reject(new InsightError("key references invalid data field in " +
 				"query->transform->apply[i]->key"));
-		}
-		// check key exists in option->columns
-		if (!fieldsThatExistInOptions.includes(key)) {
-			return Promise.reject(new InsightError("key not included in option->column"));
 		}
 		return Promise.resolve(key);
 	}

@@ -8,14 +8,20 @@ import {
 } from "./IInsightFacade";
 
 import fs from "fs-extra";
-import JSZip from "jszip";
 import Section from "./Section";
 import Room from "./Room";
 // import {InsightQuery} from "./InsightQuery"; // TODO undome
-import {DataProcessor} from "./datasetProcessor/DataProcessor";
-import {Dataset} from "./datasetProcessor/Dataset";
-import {AddRoom} from "./datasetProcessor/AddRoom";
-import {AddSection} from "./datasetProcessor/AddSection";
+
+import {DataProcessor} from "./DataProcessor";
+import {Dataset} from "./Dataset";
+import {AddRoom} from "./AddRoom";
+import {AddSection} from "./AddSection";
+import {MakeGroups} from "./output/MakeGroups";
+import {ApplyTransformation} from "./output/ApplyTransformation";
+import {InsightQuery} from "./query/InsightQuery";
+import {QueryOutput} from "./output/QueryOutput";
+import {SortOutput} from "./output/SortOutput";
+
 
 
 /**
@@ -184,20 +190,28 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public performQuery(query: unknown): Promise<InsightResult[]> {
-		// return new Promise<InsightResult[]>((resolve, reject) => {
-		// 	const newParser: QueryParser = new QueryParser(query, this);
-		// 	newParser.getQuery().then(function (returnedQuery: InsightQuery) {
-		// 		return returnedQuery.doQuery().then((result) => {
-		// 			return resolve(result);
-		// 		}).catch((err) => {
-		// 			return reject(err);
-		// 		});
-		// 	}).catch((err: InsightError | NotFoundError) => {
-		// 		return reject(err);
-		// 	});
-		// });
-
-		return Promise.reject(new InsightError()); // TODO undo me
+		let parser: QueryParser = new QueryParser(query, this);
+		let parsedQuery: InsightQuery;
+		return parser.getQuery().then((q) => {
+			console.log("parse success");
+			parsedQuery = q;
+			// console.log(query);
+			return parsedQuery.doQuery();
+		}).then((res) => {
+			return MakeGroups.makeGroups(res, parsedQuery);
+		}).then((groups) => {
+			// all queries undergo "transformation" even if some dont have a trans specified.
+			// console.log(res);
+			return ApplyTransformation.applyTransformation(groups, parsedQuery.transformations,
+				parser, parsedQuery.options.columns);
+		}).then((transformedRes) => {
+			// console.log(res);
+			return SortOutput.sort(transformedRes, parsedQuery.options.sort);
+		}).then((map) => {
+			return QueryOutput.makeOutput(map);
+		}).then((insightResults) => {
+			return Promise.resolve(insightResults);
+		});
 	}
 
 	public listDatasets(): Promise<InsightDataset[]> {		// Settling this promise: This promise only fufills, either an empty array or array of current datasets
