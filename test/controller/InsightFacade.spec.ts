@@ -32,6 +32,7 @@ describe("InsightFacade", function () {
 	let campusIndexNotInRoot: string;
 	let campusWoodMissingHeader: string;
 	let woodMissingSomeCap: string;
+	let allBuildingsMissingColumn: string;
 	let twoTables: string;
 	let tableAtEnd: string;
 	let twoExtraTablesInESB: string;
@@ -76,6 +77,7 @@ describe("InsightFacade", function () {
 			tableAtEnd = getContentFromArchives("tableAtEnd.zip");
 			twoExtraTablesInESB = getContentFromArchives("twoExtraTablesInESB.zip");
 			missingHeaderInWOOD = getContentFromArchives("missingHeaderInWOOD.zip");
+			allBuildingsMissingColumn = getContentFromArchives("allBuildingsMissingColumn.zip");
 			threeCourses = getContentFromArchives("ThreeCourses.zip");
 			noCoursesFolder = getContentFromArchives("noCoursesFolderButSectionInside.zip");
 			oneInvalidSection = getContentFromArchives("OneInvalidSection.zip");
@@ -107,6 +109,12 @@ describe("InsightFacade", function () {
 			clearDisk();
 		});
 
+		describe("all building files are missing one column header, katharine said all columns will have a hgeader", function () {
+			it("should be rejected as there will be no valid rooms", function () {
+				const result = facade.addDataset("allBuildingsMissingColumn", allBuildingsMissingColumn, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+		});
 
 		describe("addDataset with a valid ROOMs dataset", function () {
 			it("should be added and return a set of the currently added room IDS", function () {
