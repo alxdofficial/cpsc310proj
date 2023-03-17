@@ -1,4 +1,6 @@
 import {MFields, SFields} from "../query/InsightQuery";
+import {QueryParser} from "./QueryParser";
+import {IDGetter} from "./IDGetter";
 
 export class FieldGetter {
 	// helper that takes a string, gets the id portion, sets the id field of this object if it hasnt been set yet or the gotten id is equal to the current id, and also the field portion. returns null if either is invalid
@@ -68,5 +70,13 @@ export class FieldGetter {
 			column = FieldGetter.MgetField(inputJson);
 		}
 		return column;
+	}
+
+	public static getOnlyField(str: string, parser: QueryParser): MFields | SFields | null {
+		let remainingStr = IDGetter.getID(str, parser);
+		if (remainingStr == null) {
+			return null;
+		}
+		return this.getField(remainingStr);
 	}
 }

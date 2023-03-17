@@ -11,20 +11,12 @@ export class Transformation {
 
 	public getGroupString(): string {
 		let str: string = "";
-		if (this.groups.groupKeys.length > 1) {
-			str += "[";
-		}
 		for (let field of this.groups.groupKeys) {
 			str += String(field) + ",";
 		}
 		str = str.slice(0, str.length - 1); // get rid of extra comma
-		if (this.groups.groupKeys.length > 1) {
-			str += "]";
-		}
 		return str;
 	}
-
-
 }
 
 export class ApplyRule {

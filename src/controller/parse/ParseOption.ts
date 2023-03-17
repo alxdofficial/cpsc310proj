@@ -13,7 +13,7 @@ export class ParseOption {
 			if (json["OPTIONS"] !== undefined) {
 				let optionClause = json["OPTIONS"];
 				// call helpers
-				let columns: Array<MFields | SFields>;
+				let columns: string[];
 				return ParseOptionColumns.parseOptionColumns(optionClause, parser).then((cols) => {
 					columns = cols;
 					return ParseOptionSort.parseOptionOrder(optionClause, cols, parser);
