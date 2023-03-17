@@ -35,27 +35,43 @@ export class ParseTransform {
 
 	private static checkGroupAndApplyColumns(group: QueryGroup, applyRules: ApplyRule[], optionColumns: string[],
 											 parser: QueryParser): boolean {
-		// first check all group keys are included in option columns
+		let columnsToCheck: Set<string> = new Set();
 		for (let field of group.groupKeys) {
-			let fieldStr: string = parser.dataset_id + "_" + String(field);
-			if (optionColumns.includes(fieldStr)) {
-				// check off the corresponding column
-				optionColumns.splice(optionColumns.indexOf(fieldStr), 1);
-			} else {
-				return false;
-			}
- 		}
-		// check all applykeys in APPLY
+			columnsToCheck.add(parser.dataset_id + "_" + String(field));
+		}
 		for (let applyRule of applyRules) {
-			let applyKey: string = applyRule.applyKey;
-			if (optionColumns.includes(applyKey)) {
-				// check off the corresponding column
-				optionColumns.splice(optionColumns.indexOf(applyKey), 1);
+			columnsToCheck.add(applyRule.applyKey);
+		}
+		for (let col of columnsToCheck) {
+			if (optionColumns.includes(col)) {
+				optionColumns.splice(optionColumns.indexOf(col), 1);
 			} else {
 				return false;
 			}
 		}
-		// check if there are left over columns that dont correspond to either a group or apply
 		return optionColumns.length === 0;
+		//
+		// // first check all group keys are included in option columns
+		// for (let field of group.groupKeys) {
+		// 	let fieldStr: string = parser.dataset_id + "_" + String(field);
+		// 	if (optionColumns.includes(fieldStr)) {
+		// 		// check off the corresponding column
+		// 		optionColumns.splice(optionColumns.indexOf(fieldStr), 1);
+		// 	} else {
+		// 		return false;
+		// 	}
+ 		// }
+		// // check all applykeys in APPLY
+		// for (let applyRule of applyRules) {
+		// 	let applyKey: string = applyRule.applyKey;
+		// 	if (optionColumns.includes(applyKey)) {
+		// 		// check off the corresponding column
+		// 		optionColumns.splice(optionColumns.indexOf(applyKey), 1);
+		// 	} else {
+		// 		return false;
+		// 	}
+		// }
+		// // check if there are left over columns that dont correspond to either a group or apply
+		// return optionColumns.length === 0;
 	}
 }
