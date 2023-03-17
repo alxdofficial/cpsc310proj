@@ -42,11 +42,11 @@ export class InsightQuery {
 							return reject(err);
 						}));
 				}
-				// check if too many results
-				if (qualifyingResults.length > 5000) {
-					return reject(new ResultTooLargeError());
-				}
 				return Promise.all(filterPromises).then(() => {
+					// check if too many results
+					if (qualifyingResults.length > 5000) {
+						return reject(new ResultTooLargeError());
+					}
 					resolve(qualifyingResults);
 				})
 					.catch((err) => {

@@ -4,80 +4,89 @@ import {ApplyTokens} from "./Transformation";
 import {GetFieldData} from "../query/GetFieldData";
 import {MFields, SFields} from "../query/InsightQuery";
 import {InsightError} from "../IInsightFacade";
+import Decimal from "decimal.js";
 
 export class TransformationHelpers {
 	public static helper(resultInGroup: Array<Section | Room>, token: ApplyTokens,
 					  field: MFields | SFields): Promise<number> {
-		return new Promise((resolve, reject) => {
-			let val: number | undefined; // passed into helpers to calc min max and sum
-			let count: number = 0; // unique counts of data values in group
-			let alreadyExistingData: Array<string | number> = [];
-			//
-			for (let entry of resultInGroup) {
-				let entryVal = GetFieldData.getFieldData(entry, field);
-				// handle count
-				if (entryVal == null) {
-					return reject(new InsightError("retrieve data from entry failed in apply transformations"));
-				}
-				if (!alreadyExistingData.includes(entryVal)) {
-					count++;
-					alreadyExistingData.push(entryVal);
-				}
-				if (typeof entryVal !== "number" && token !== ApplyTokens.COUNT) {
-					return reject(new InsightError("retrieve data from entry failed in apply transformations"));
-				}
-				// handle min, max, sum, avg
-				val = this.minMaxSumHelper(val, entryVal, token);
-			}
-			if (val === undefined) {
-				return reject(new InsightError("retrieve data from entry failed in apply transformations," +
-					" result is underfined"));
-			}
-			if (token === ApplyTokens.MIN || token === ApplyTokens.MAX) {
-				return resolve(val);
-			} else if (token === ApplyTokens.SUM) {
-				return resolve(Number(val.toFixed(2)));
-			}else if (token === ApplyTokens.AVG) {
-				let avg: number = val / resultInGroup.length;
-				return resolve(Number(avg.toFixed(2)));
-			} else if (token === ApplyTokens.COUNT) {
-				return resolve(count);
-			}
-			return reject(new InsightError("doing transformation for a group failed because an" +
-				" unexpected apply token found"));
-		});
+		switch (token) {
+			case ApplyTokens.MIN:
+				return this.minHelper(resultInGroup, field);
+			case ApplyTokens.MAX:
+				return this.maxHelper(resultInGroup, field);
+			case ApplyTokens.SUM:
+				return this.sumHelper(resultInGroup, field);
+			case ApplyTokens.AVG:
+				return this.avgHelper(resultInGroup, field);
+			case ApplyTokens.COUNT:
+				return this.countHelper(resultInGroup, field);
+		}
 	}
 
-	private static minMaxSumHelper(current: number | undefined, entryVal: number | string,
-								   token: ApplyTokens): number {
-		if (token === ApplyTokens.COUNT) {
-			return 0;
+	private static minHelper(entries: Array<Section | Room>, field: MFields | SFields): Promise<number> {
+		let min: number = Infinity;
+		for (let entry of entries) {
+			let entryVal = GetFieldData.getFieldData(entry, field);
+			if (entryVal == null || typeof entryVal !== "number") {
+				return Promise.reject(new InsightError("expect mfield in transformation but got s field"));
+			}
+			if (entryVal < min) {
+				min = entryVal;
+			}
 		}
-		if (typeof entryVal !== "number") {
-			return 0;
+		return Promise.resolve(min);
+	}
+
+	public static maxHelper(entries: Array<Section | Room>, field: MFields | SFields): Promise<number>{
+		let max: number = -Infinity;
+		for (let entry of entries) {
+			let entryVal = GetFieldData.getFieldData(entry, field);
+			if (entryVal == null || typeof entryVal !== "number") {
+				return Promise.reject(new InsightError("expect mfield in transformation but got s field"));
+			}
+			if (entryVal > max) {
+				max = entryVal;
+			}
 		}
-		if (current === undefined) {
-			return entryVal;
+		return Promise.resolve(max);
+	}
+
+	public static sumHelper(entries: Array<Section | Room>, field: MFields | SFields): Promise<number> {
+		let sum: number = Infinity;
+		for (let entry of entries) {
+			let entryVal = GetFieldData.getFieldData(entry, field);
+			if (entryVal == null || typeof entryVal !== "number") {
+				return Promise.reject(new InsightError("expect mfield in transformation but got s field"));
+			}
+			sum += entryVal;
 		}
-		switch (token) {
-			case ApplyTokens.MAX:
-				if (entryVal > current) {
-					return entryVal;
-				} else {
-					return current;
-				}
-			case ApplyTokens.MIN:
-				if (entryVal < current) {
-					return entryVal;
-				} else {
-					return current;
-				}
-			case ApplyTokens.SUM:
-			case ApplyTokens.AVG:
-				return current + entryVal;
-			default:
-				console.log("unexpected apply token found");
-				return 0;
+		return Promise.resolve(Number(sum.toFixed(2)));
+	}
+
+	public static avgHelper(entries: Array<Section | Room>, field: MFields | SFields): Promise<number> {
+		let sum: Decimal = new Decimal(0);
+		for (let entry of entries) {
+			let entryVal = GetFieldData.getFieldData(entry, field);
+			if (entryVal == null || typeof entryVal !== "number") {
+				return Promise.reject(new InsightError("expect mfield in transformation but got s field"));
+			}
+			let decimal = new Decimal(entryVal);
+			sum = sum.add(decimal);
 		}
+		let avg = sum.toNumber() / entries.length;
+		return Promise.resolve(Number(avg.toFixed(2)));
+	}
+
+	public static countHelper(entries: Array<Section | Room>, field: MFields | SFields): Promise<number> {
+		let existing: Array<string | number | null> = [];
+		let count = 0;
+		for (let entry of entries) {
+			let entryVal = GetFieldData.getFieldData(entry, field);
+			if (!existing.includes(entryVal)) {
+				existing.push(entryVal);
+				count++;
+			}
+		}
+		return Promise.resolve(count);
 	}
 }
