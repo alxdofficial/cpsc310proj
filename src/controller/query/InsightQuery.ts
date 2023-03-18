@@ -47,7 +47,7 @@ export class InsightQuery {
 					if (qualifyingResults.length > 5000) {
 						return reject(new ResultTooLargeError());
 					}
-					resolve(qualifyingResults);
+					return resolve(qualifyingResults);
 				})
 					.catch((err) => {
 						return reject(err);
