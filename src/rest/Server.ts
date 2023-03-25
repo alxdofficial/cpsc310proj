@@ -125,33 +125,45 @@ export default class Server {
 	}
 
 	private static deleteDataset(req: Request, res: Response) {
-		Server.facade.removeDataset(req.params.id)
-			.then((id: string) => {
-				res.status(200).json({result: JSON.parse(id)});
-			})
-			.catch((err) => {
-				res.status(400).json({error: err.toString()});
-			});
+		try {
+			Server.facade.removeDataset(req.params.id)
+				.then((id: string) => {
+					res.status(200).json({result: JSON.parse(id)});
+				})
+				.catch((err) => {
+					res.status(400).json({error: err.toString()});
+				});
+		} catch (err) {
+			res.status(400).json({error: err});
+		}
 	}
 
 	private static query(req: Request, res: Response) {
-		Server.facade.crashRecovery(); // check for persistant data structure on disk
-		Server.facade.performQuery(req.body)
-			.then((arr) => {
-				const jsonObj = JSON.stringify(arr);
-				res.status(200).json({result: JSON.parse(jsonObj)});
-			})
-			.catch((err) => {
-				res.status(400).json({error: err.toString()});
-			});
+		try {
+			Server.facade.crashRecovery(); // check for persistant data structure on disk
+			Server.facade.performQuery(req.body)
+				.then((arr) => {
+					const jsonObj = JSON.stringify(arr);
+					res.status(200).json({result: JSON.parse(jsonObj)});
+				})
+				.catch((err) => {
+					res.status(400).json({error: err.toString()});
+				});
+		} catch (err) {
+			res.status(400).json({error: err});
+		}
 	}
 
 	private static showDatasets(req: Request, res: Response) {
-		Server.facade.listDatasets()
-			.then((arr) => {
-				const jsonObj = JSON.stringify(arr);
-				res.status(200).json({result: JSON.parse(jsonObj)});
-			});
+		try {
+			Server.facade.listDatasets()
+				.then((arr) => {
+					const jsonObj = JSON.stringify(arr);
+					res.status(200).json({result: JSON.parse(jsonObj)});
+				});
+		} catch (err) {
+			res.status(400).json({error: err});
+		}
 	}
 
 
