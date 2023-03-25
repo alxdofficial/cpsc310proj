@@ -92,6 +92,7 @@ export default class Server {
 		this.express.delete("/dataset/:id", Server.deleteDataset);
 		this.express.get("/datasets", Server.showDatasets);
 		// this.express.post("/query", Server.query);
+		// TODO timeout is in POST
 
 	}
 
