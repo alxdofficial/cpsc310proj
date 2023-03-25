@@ -210,7 +210,10 @@ export default class InsightFacade implements IInsightFacade {
 		}).then((insightResults) => {
 			// console.log(insightResults);
 			return Promise.resolve(insightResults);
-		});
+		})
+			.catch((err) => {
+				return Promise.reject(new InsightError("error occurred while querying"));
+			});
 	}
 
 	public listDatasets(): Promise<InsightDataset[]> {		// Settling this promise: This promise only fufills, either an empty array or array of current datasets
