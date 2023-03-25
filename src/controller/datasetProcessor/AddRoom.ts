@@ -39,7 +39,6 @@ export class AddRoom extends TableValidity implements DataProcessor {
 						await dataset.writeDataRooms();
 						dataset.setRowCount(0);												// CLEANUP: reset row count for future add calls
 						dataset.setRoomArr([]);												// CLEANUP: empty the array for sections for future calls
-							// console.log(dataset.getDatasets());
 						return resolve(dataset.getDatasetIDs()); 								// resolve with an array of strings which are the added IDs
 					}
 					)
