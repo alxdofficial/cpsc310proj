@@ -88,7 +88,7 @@ export default class Server {
 	private registerRoutes() {
 		// This is an example endpoint this you can invoke by accessing this URL in your browser:
 		// http://localhost:4321/dataset/hello
-		this.express.put("/dataset/:id/:kind", Server.putDataset);
+		// this.express.put("/dataset/:id/:kind", Server.putDataset);
 		this.express.delete("/dataset/:id", Server.deleteDataset);
 		this.express.get("/datasets", Server.showDatasets);
 		this.express.post("/query", Server.query);
@@ -131,7 +131,11 @@ export default class Server {
 					res.status(200).json({result: JSON.parse(id)});
 				})
 				.catch((err) => {
-					res.status(400).json({error: err.toString()});
+					if (err.toString() === "Error: ID Doesn't exist"){
+						res.status(404).json({error: err.toString()});
+					} else {
+						res.status(400).json({error: err.toString()});
+					}
 				});
 		} catch (err) {
 			res.status(400).json({error: err});
