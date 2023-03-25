@@ -16,9 +16,11 @@ export class AddRoom extends TableValidity implements DataProcessor {
 	public addOnKind(dataset: Dataset): Promise<string[]> {
 		return new Promise((resolve, reject) => {
 			try {
-				fs.mkdir("./data").catch(() => { 									// Create the ./data directory that clearDisk() clears on each run, push dataset representations into this file
-					return Promise.reject(new InsightError("Creating ./data failed!"));
-				});
+				if (!fs.existsSync("./data")) {
+					fs.mkdir("./data").catch((err) => { 									// Create the ./data directory that clearDisk() clears on each run, push dataset representations into this file
+						return Promise.reject(err);
+					});
+				}
 				const JSzip = new JSZip();
 				JSzip.loadAsync(dataset.getContent(), {
 					base64: true,
@@ -39,7 +41,6 @@ export class AddRoom extends TableValidity implements DataProcessor {
 						await dataset.writeDataRooms();
 						dataset.setRowCount(0);												// CLEANUP: reset row count for future add calls
 						dataset.setRoomArr([]);												// CLEANUP: empty the array for sections for future calls
-							// console.log(dataset.getDatasets());
 						return resolve(dataset.getDatasetIDs()); 								// resolve with an array of strings which are the added IDs
 					}
 					)

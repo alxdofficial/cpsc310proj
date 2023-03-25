@@ -10,9 +10,11 @@ export class AddSection implements DataProcessor {
 	public addOnKind(dataset: Dataset): Promise<string[]> {
 		return new Promise((resolve, reject) => {
 			try {
-				fs.mkdir("./data").catch(() => { 									// Create the ./data directory that clearDisk() clears on each run, push dataset representations into this file
-					return Promise.reject(new InsightError("Creating ./data failed!"));
-				});
+				if (!fs.existsSync("./data")) {
+					fs.mkdir("./data").catch((err) => { 									// Create the ./data directory that clearDisk() clears on each run, push dataset representations into this file
+						return Promise.reject(err);
+					});
+				}
 				const JSzip = new JSZip();
 				JSzip.loadAsync(dataset.getContent(), {
 					base64: true,
