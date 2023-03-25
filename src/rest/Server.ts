@@ -88,7 +88,7 @@ export default class Server {
 	private registerRoutes() {
 		// This is an example endpoint this you can invoke by accessing this URL in your browser:
 		// http://localhost:4321/dataset/hello
-		// this.express.put("/dataset/:id/:kind", Server.putDataset);
+		 this.express.put("/dataset/:id/:kind", Server.putDataset);
 		this.express.delete("/dataset/:id", Server.deleteDataset);
 		this.express.get("/datasets", Server.showDatasets);
 		// this.express.post("/query", Server.query);
