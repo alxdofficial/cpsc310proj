@@ -145,7 +145,7 @@ export default class Server {
 
 	private static query(req: Request, res: Response) {
 		try {
-			Server.facade.crashRecovery(); // check for persistent data structure on disk
+			// Server.facade.crashRecovery(); // check for persistent data structure on disk
 			Server.facade.performQuery(req.body)
 				.then((arr) => {
 					const jsonObj = JSON.stringify(arr);
