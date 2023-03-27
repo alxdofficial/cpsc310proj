@@ -192,24 +192,22 @@ export default class InsightFacade implements IInsightFacade {
 		let parser: QueryParser = new QueryParser(query, this);
 		let parsedQuery: InsightQuery;
 		return parser.getQuery().then((q) => {
-			// console.log("parse success");
 			parsedQuery = q;
 			return parsedQuery.doQuery();
 		}).then((res) => {
-			// console.log(res);
 			return MakeGroups.makeGroups(res, parsedQuery);
 		}).then((groups) => {
 			// all queries undergo "transformation" even if some dont have a trans specified.
 			return ApplyTransformation.applyTransformation(groups, parsedQuery.transformations,
 				parser, parsedQuery.options.columns);
 		}).then((transformedRes) => {
-			// console.log(transformedRes);
 			return SortOutput.sort(transformedRes, parsedQuery.options.sort);
 		}).then((map) => {
 			return QueryOutput.makeOutput(map);
 		}).then((insightResults) => {
-			// console.log(insightResults);
 			return Promise.resolve(insightResults);
+		}).catch((err) => {
+			return Promise.reject(new InsightError("error occurred while querying"));
 		});
 	}
 
