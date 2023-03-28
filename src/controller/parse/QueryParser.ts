@@ -20,25 +20,28 @@ export class QueryParser {
 
 	public getQuery(): Promise<InsightQuery> { // any is just a stub for now
 		return new Promise((resolve,reject) => {
-			// first do basic structure check, if good, call helpers.
-			let filter: InsightFilter;
-			let option: InsightOption;
-			if (Object.keys(this.inputJson).length <= 3) {
-				return ParseWhere.parseWhere(this.inputJson,this).then((fil) => {
-					filter = fil;
-				}).then(() => {
-					return ParseOption.parseOptions(this.inputJson, this); // FIXME these should return resolve?
-				}).then((opt) => {
-					option = opt; // FIXME these should return resolve
-					return ParseTransform.parseTransform(this.inputJson,this, option.columns); // FIXME these should return resolve?
-				}).then((transform: Transformation | null) => {
-					// everything parsed successfully, so we just create insight query object and return it
-					return resolve(new InsightQuery(filter,option,transform,this.dataset_id, this.facade));
-				}).catch((err) => {
-					return reject(err);
-				});
-			} else {
-				return reject(new InsightError("wrong number of keys in input"));
+			try {
+				let filter: InsightFilter;
+				let option: InsightOption;
+				if (Object.keys(this.inputJson).length <= 3) {
+					return ParseWhere.parseWhere(this.inputJson, this).then((fil) => {
+						filter = fil;
+					}).then(() => {
+						return ParseOption.parseOptions(this.inputJson, this);
+					}).then((opt) => {
+						option = opt;
+						return ParseTransform.parseTransform(this.inputJson, this, option.columns);
+					}).then((transform: Transformation | null) => {
+						// everything parsed successfully, so we just create insight query object and return it
+						return resolve(new InsightQuery(filter, option, transform, this.dataset_id, this.facade));
+					}).catch((err) => {
+						return reject(err);
+					});
+				} else {
+					return reject(new InsightError("wrong number of keys in input"));
+				}
+			} catch(err) {
+				return reject(new InsightError());
 			}
 		});
 	}

@@ -2,7 +2,7 @@ import express, {Application, Request, Response} from "express";
 import * as http from "http";
 import cors from "cors";
 import InsightFacade from "../controller/InsightFacade";
-import {InsightDatasetKind} from "../controller/IInsightFacade";
+import {InsightDatasetKind, InsightError} from "../controller/IInsightFacade";
 
 export default class Server {
 	private readonly port: number;
@@ -120,19 +120,20 @@ export default class Server {
 	private static getKind(requestKind: string): InsightDatasetKind {
 		if (requestKind.toLowerCase().includes("rooms")) {
 			return InsightDatasetKind.Rooms;
-		} else {
+		} else if (requestKind.toLowerCase().includes("sections")){
 			return InsightDatasetKind.Sections;
 		}
+		throw new InsightError("invalid kind");
 	}
 
 	private static deleteDataset(req: Request, res: Response) {
 		try {
 			Server.facade.removeDataset(req.params.id)
 				.then((id: string) => {
-					res.status(200).json({result: JSON.parse(id)});
+					res.status(200).json({result: id});
 				})
 				.catch((err) => {
-					if (err.toString() === "Error: ID Doesn't exist"){
+					if (err.toString() === "Error: ID Doesn't exist") {
 						res.status(404).json({error: err.toString()});
 					} else {
 						res.status(400).json({error: err.toString()});
@@ -146,7 +147,8 @@ export default class Server {
 	private static query(req: Request, res: Response) {
 		try {
 			Server.facade.crashRecovery(); // check for persistent data structure on disk
-			Server.facade.performQuery(JSON.parse(req.body))
+			const string = JSON.stringify(req.body);
+			Server.facade.performQuery(JSON.parse(string))
 				.then((arr) => {
 					const jsonObj = JSON.stringify(arr);
 					res.status(200).json({result: JSON.parse(jsonObj)});

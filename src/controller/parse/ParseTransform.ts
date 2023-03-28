@@ -18,10 +18,10 @@ export class ParseTransform {
 			return ParseTransformGroup.parseTransformGroup(transformClause, parser).then((res) => {
 				group = res;
 			}).then(() => {
-				return ParseTransformApply.parseApply(transformClause,parser, alreadyParsedApplyKeys); // FIXME resolve or reject here I think
+				return ParseTransformApply.parseApply(transformClause, parser, alreadyParsedApplyKeys);
 			}).then((rules) => {
-				if (this.checkGroupAndApplyColumns(group,rules,optionColumns.slice(), parser)) {
-					return Promise.resolve(new Transformation(group,rules));
+				if (this.checkGroupAndApplyColumns(group, rules, optionColumns.slice(), parser)) {
+					return Promise.resolve(new Transformation(group, rules));
 				}
 				return Promise.reject(new InsightError("some columns in group or some apply keys dont correspond " +
 					"to column in options"));
@@ -60,7 +60,7 @@ export class ParseTransform {
 		// 	} else {
 		// 		return false;
 		// 	}
- 		// }
+		// }
 		// // check all applykeys in APPLY
 		// for (let applyRule of applyRules) {
 		// 	let applyKey: string = applyRule.applyKey;
