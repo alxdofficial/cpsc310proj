@@ -2,7 +2,7 @@ import express, {Application, Request, Response} from "express";
 import * as http from "http";
 import cors from "cors";
 import InsightFacade from "../controller/InsightFacade";
-import {InsightDatasetKind} from "../controller/IInsightFacade";
+import {InsightDatasetKind, InsightError} from "../controller/IInsightFacade";
 
 export default class Server {
 	private readonly port: number;
@@ -120,9 +120,10 @@ export default class Server {
 	private static getKind(requestKind: string): InsightDatasetKind {
 		if (requestKind.toLowerCase().includes("rooms")) {
 			return InsightDatasetKind.Rooms;
-		} else {
+		} else if (requestKind.toLowerCase().includes("sections")){
 			return InsightDatasetKind.Sections;
 		}
+		throw new InsightError("invalid kind");
 	}
 
 	private static deleteDataset(req: Request, res: Response) {
@@ -132,7 +133,7 @@ export default class Server {
 					res.status(200).json({result: id});
 				})
 				.catch((err) => {
-					if (err.toString() === "Error: ID Doesn't exist"){
+					if (err.toString() === "Error: ID Doesn't exist") {
 						res.status(404).json({error: err.toString()});
 					} else {
 						res.status(400).json({error: err.toString()});

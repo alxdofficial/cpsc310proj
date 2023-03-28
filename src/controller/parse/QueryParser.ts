@@ -41,7 +41,6 @@ export class QueryParser {
 					return reject(new InsightError("wrong number of keys in input"));
 				}
 			} catch(err) {
-				console.log("caught and throw");
 				return reject(new InsightError());
 			}
 		});

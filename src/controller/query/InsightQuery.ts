@@ -28,31 +28,38 @@ export class InsightQuery {
 	public async doQuery(): Promise<Array<Section | Room>> {
 		// the query promise
 		return new Promise((resolve, reject) => {
-			return GetDataset.getDataset(this.facade, this.id).then((data) => {
-				let qualifyingResults: Array<Section | Room> = [];
-				let filterPromises = [];
-				for (let entry of data) {
-					filterPromises.push(
-						this.body.doFilter(entry).then((addPred) => {
-							if (addPred) {
-								qualifyingResults.push(entry);
-							}
-							return;
-						}).catch((err: InsightError) => {
-							return reject(err);
-						}));
-				}
-				return Promise.all(filterPromises).then(() => {
-					// check if too many results
-					if (qualifyingResults.length > 5000) {
-						return reject(new ResultTooLargeError());
+			try {
+				return GetDataset.getDataset(this.facade, this.id).then((data) => {
+					let qualifyingResults: Array<Section | Room> = [];
+					let filterPromises = [];
+					for (let entry of data) {
+						filterPromises.push(
+							this.body.doFilter(entry).then((addPred) => {
+								if (addPred) {
+									qualifyingResults.push(entry);
+								}
+								return;
+							}).catch((err: InsightError) => {
+								return reject(err);
+							}));
 					}
-					return resolve(qualifyingResults);
+					return Promise.all(filterPromises).then(() => {
+						// check if too many results
+						if (qualifyingResults.length > 5000) {
+							return reject(new ResultTooLargeError());
+						}
+						return resolve(qualifyingResults);
+					})
+						.catch((err) => {
+							return reject(err);
+						});
 				})
 					.catch((err) => {
-						return reject(err);
+						return reject(new InsightError());
 					});
-			});
+			} catch (err) {
+				return reject(new InsightError());
+			}
 		});
 	}
 }
